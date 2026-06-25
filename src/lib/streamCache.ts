@@ -51,19 +51,15 @@ export async function recordStream(
   episode?: number,
 ) {
   try {
-    await supabase.from("stream_sources").upsert(
-      {
-        tmdb_id: tmdbId,
-        media_type: mediaType,
-        server,
-        url,
-        working,
-        season: season ?? null,
-        episode: episode ?? null,
-        verified_at: new Date().toISOString(),
-      },
-      { onConflict: "tmdb_id,media_type,season,episode,server", ignoreDuplicates: false },
-    );
+    await supabase.rpc("record_stream_source", {
+      p_tmdb_id: tmdbId,
+      p_media_type: mediaType,
+      p_server: server,
+      p_url: url,
+      p_working: working,
+      p_season: season ?? null,
+      p_episode: episode ?? null,
+    });
   } catch {
     /* ignore */
   }
