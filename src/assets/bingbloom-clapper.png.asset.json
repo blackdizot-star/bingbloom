@@ -1,11 +1,11 @@
 {
-  "asset_id": "e6a8b80c-aef6-463d-aa8a-c75d714a67fe",
-  "content_type": "image/jpeg",
-  "created_at": "2026-06-13T19:35:21Z",
+  "version": 1,
+  "asset_id": "3f39585d-a7c2-45c3-948d-898c821369bd",
+  "project_id": "14363884-71e9-4cd5-af8f-cb4d3da05b0f",
+  "url": "/__l5e/assets-v1/3f39585d-a7c2-45c3-948d-898c821369bd/bingbloom-clapper.png",
+  "r2_key": "a/v1/14363884-71e9-4cd5-af8f-cb4d3da05b0f/3f39585d-a7c2-45c3-948d-898c821369bd/bingbloom-clapper.png",
   "original_filename": "bingbloom-clapper.png",
-  "project_id": "3f00dd7f-a3d7-4287-a2e1-75af82bdb350",
-  "r2_key": "a/v1/3f00dd7f-a3d7-4287-a2e1-75af82bdb350/e6a8b80c-aef6-463d-aa8a-c75d714a67fe/bingbloom-clapper.png",
   "size": 29078,
-  "url": "/__l5e/assets-v1/e6a8b80c-aef6-463d-aa8a-c75d714a67fe/bingbloom-clapper.png",
-  "version": 1
+  "content_type": "image/jpeg",
+  "created_at": "2026-06-25T19:12:49Z"
 }
