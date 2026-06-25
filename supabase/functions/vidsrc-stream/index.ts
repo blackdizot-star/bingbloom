@@ -220,6 +220,12 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+      if (!isSafeTarget(target)) {
+        return new Response(JSON.stringify({ error: "url not allowed" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const fwdHeaders: Record<string, string> = {
         "User-Agent": UA,
         Referer: "https://vidsrc.pm/",
