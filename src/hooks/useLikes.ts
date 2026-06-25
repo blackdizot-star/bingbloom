@@ -55,10 +55,11 @@ export function useLikeCount(videoId: string | undefined) {
     const updated = wasLiked ? likedIds.filter((id) => id !== videoId) : [...likedIds, videoId];
     localStorage.setItem("db_liked_ids", JSON.stringify(updated));
 
-    // Upsert in DB
-    const { error } = await supabase
-      .from("likes")
-      .upsert({ video_id: videoId, count: newCount }, { onConflict: "video_id" });
+    // Controlled +/-1 update in DB
+    const { error } = await supabase.rpc("toggle_like", {
+      p_video_id: videoId,
+      p_delta: wasLiked ? -1 : 1,
+    });
 
     if (error) {
       // Revert on error

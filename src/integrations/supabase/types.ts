@@ -130,7 +130,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      record_stream_source: {
+        Args: {
+          p_episode?: number
+          p_media_type: string
+          p_season?: number
+          p_server: string
+          p_tmdb_id: string
+          p_url: string
+          p_working: boolean
+        }
+        Returns: undefined
+      }
+      toggle_like: {
+        Args: { p_delta: number; p_video_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
