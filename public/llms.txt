@@ -1,0 +1,52 @@
+# BingBloom
+
+> Stream and download movies, TV shows, anime, live TV channels, podcasts, music and read novels — all in one corporate-grade cinematic streaming app. Stream. Discover. Bloom.
+
+BingBloom is a free, ad-supported streaming platform aggregating entertainment from across the web: movies and TV from TMDB, anime from AniList/Jikan, 80+ live TV channels from IPTV-org, music from TheAudioDB and Deezer, and public-domain novels from Project Gutenberg and OpenLibrary. The web app is mobile-first and installable, and an Android APK is available for direct download.
+
+## Featured pages
+
+- [Home](https://bingbloom.lovable.app/home): Personalized dashboard — continue-watching, trending rows, top-rated and recommended.
+- [Movies](https://bingbloom.lovable.app/movies): Browse, search and stream movies with full TMDB metadata, cast and crew.
+- [TV Shows](https://bingbloom.lovable.app/tv): Browse TV series with seasons and episode tracking.
+- [Anime](https://bingbloom.lovable.app/anime): Anime catalog with episode lists.
+- [Animation](https://bingbloom.lovable.app/animation): Animated films and series.
+- [Documentary](https://bingbloom.lovable.app/documentary): Documentary films and series.
+- [Live TV](https://bingbloom.lovable.app/live-tv): 80+ live TV channels worldwide.
+- [Novels](https://bingbloom.lovable.app/novels): Read free public-domain novels in the in-app reader.
+- [Podcasts](https://bingbloom.lovable.app/podcasts): Podcast discovery and playback.
+- [Music](https://bingbloom.lovable.app/music): Music browser with persistent player bar.
+- [Search](https://bingbloom.lovable.app/search): Universal search across all sources.
+- [My Downloads](https://bingbloom.lovable.app/my-downloads): Manage saved/offline content.
+- [Install App](https://bingbloom.lovable.app/install): Free Android APK download with install guide.
+- [Follow Us](https://bingbloom.lovable.app/follow-us): Official TikTok, Instagram and WhatsApp channels.
+- [Profile](https://bingbloom.lovable.app/profile): Stats, history and account.
+- [Settings](https://bingbloom.lovable.app/settings): Playback, quality and 20+ preferences.
+
+## Account & support
+
+- [Sign in](https://bingbloom.lovable.app/signin)
+- [Register](https://bingbloom.lovable.app/register)
+- [Contact](https://bingbloom.lovable.app/contact)
+- [Help / Support](https://bingbloom.lovable.app/support)
+- [Privacy Policy](https://bingbloom.lovable.app/privacy)
+
+## Social
+
+- TikTok: https://www.tiktok.com/@bing_bloom
+- Instagram: https://instagram.com/bingbloom.co
+- WhatsApp channel: https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n
+
+## Key images
+
+- Hero / brand: https://image.tmdb.org/t/p/w1280/49WJfeN0moxb9IPfGn8AIqMGskD.jpg
+- Trending backdrops: https://image.tmdb.org/t/p/w780/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg
+- Trending backdrops: https://image.tmdb.org/t/p/w780/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg
+- Movies hero: https://image.tmdb.org/t/p/w780/d5NXSklXo0qyIYkgV94XAgMIckC.jpg
+- TV hero: https://image.tmdb.org/t/p/w780/4EYPN5mVIhKLfxGruy7Dy41dTVn.jpg
+- Anime hero: https://image.tmdb.org/t/p/w780/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg
+- Animation: https://image.tmdb.org/t/p/w780/askg3SMvhqEl4OL52YuvdtY40Yb.jpg
+- Documentary: https://image.tmdb.org/t/p/w780/xJHokMbljvjADYdit5fK5VQsXEG.jpg
+- Music: https://image.tmdb.org/t/p/w780/uOw5JD8IlD546feZ6oxbIjvN66P.jpg
+- Podcasts: https://image.tmdb.org/t/p/w780/zfwEPjB1cASgGCw5ercAh50WiHl.jpg
+- Live TV: https://image.tmdb.org/t/p/w780/qhb1qOilapbapxWQn9jtRCMwXJF.jpg
