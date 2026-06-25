@@ -31,12 +31,12 @@ const OnboardingDone = () => {
         }}
       />
 
-      <div className="relative px-6 mt-4 text-center">
+      <div className="relative px-6 mt-4 md:mt-10 text-center md:max-w-md md:mx-auto">
         <div className="flex justify-center mb-3">
           <BrandLogo size={72} wordmarkSize="md" />
         </div>
-        <h2 className="text-base font-bold mt-2">Welcome to BingBloom</h2>
-        <p className="text-[11px] text-white/55 mt-1 max-w-xs mx-auto">
+        <h2 className="text-base md:text-2xl font-bold mt-2">Welcome to BingBloom</h2>
+        <p className="text-[11px] md:text-sm text-white/55 mt-1 max-w-xs md:max-w-sm mx-auto">
           Your account is ready. Personalized recommendations have been prepared for you.
         </p>
 
@@ -65,7 +65,7 @@ const OnboardingDone = () => {
 
         <button
           onClick={enter}
-          className="w-full max-w-md mx-auto mt-5 h-10 rounded-lg text-white text-xs font-semibold flex items-center justify-center relative"
+          className="w-full max-w-md md:max-w-sm mx-auto mt-5 h-10 md:h-12 rounded-lg text-white text-xs md:text-sm font-semibold flex items-center justify-center relative"
           style={{
             background: "linear-gradient(180deg,#FF1A26 0%,#E50914 100%)",
             boxShadow: "0 4px 14px rgba(229,9,20,0.45)",

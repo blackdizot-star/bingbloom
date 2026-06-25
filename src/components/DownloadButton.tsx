@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Download } from "lucide-react";
-import { saveDownload } from "@/lib/savedDownloads";
-import { toast } from "sonner";
-import DownloadConfirmDialog from "./DownloadConfirmDialog";
+import DownloadSourceSheet from "./DownloadSourceSheet";
 import InAppBrowserSheet from "./InAppBrowserSheet";
 
 interface Props {
   type: "movie" | "tv" | "anime";
   tmdbId: string;
   title: string;
+  year?: string;
   season?: number;
   episode?: number;
   id?: string;
@@ -17,46 +16,44 @@ interface Props {
   size?: "sm" | "md";
 }
 
-const DownloadButton = ({ type, tmdbId, title, season, episode, poster, backdrop, size = "md" }: Props) => {
+const DownloadButton = ({ type, tmdbId, title, year, season, episode, poster, backdrop, size = "md" }: Props) => {
   const padding = size === "sm" ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm";
   const icon = size === "sm" ? "w-3.5 h-3.5" : "w-4 h-4";
   const itemId = `${type}-${tmdbId}${season ? `-s${season}-e${episode ?? 1}` : ""}`;
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sourceOpen, setSourceOpen] = useState(false);
+  const [browserOpen, setBrowserOpen] = useState(false);
 
-  const sourceUrl = `https://videodownloader.site/?q=${encodeURIComponent(title)}`;
-
-  const handleContinue = () => {
-    saveDownload({
-      id: itemId, type, tmdbId, title, poster, backdrop, season, episode,
-      sourceUrl, sizeMB: 1080,
-    });
-    toast.success("Added to your Downloads");
-    setConfirmOpen(false);
-    setSheetOpen(true);
-  };
+  const externalUrl = `https://videodownloader.site/?q=${encodeURIComponent(title)}`;
 
   return (
     <>
       <button
-        onClick={() => setConfirmOpen(true)}
+        onClick={() => setSourceOpen(true)}
         className={`inline-flex items-center gap-2 rounded-lg font-semibold text-white transition-all hover:scale-[1.02] ${padding}`}
         style={{ background: "#E50914" }}
       >
         <Download className={icon} />
         Download
       </button>
-      <DownloadConfirmDialog
-        open={confirmOpen}
-        onOpenChange={setConfirmOpen}
+      <DownloadSourceSheet
+        open={sourceOpen}
+        onOpenChange={setSourceOpen}
+        type={type}
+        tmdbId={tmdbId}
         title={title}
-        url={sourceUrl}
-        onContinue={handleContinue}
+        year={year}
+        season={season}
+        episode={episode}
+        itemId={itemId}
+        poster={poster}
+        backdrop={backdrop}
+        externalUrl={externalUrl}
+        onOpenExternal={() => setBrowserOpen(true)}
       />
       <InAppBrowserSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        url={sourceUrl}
+        open={browserOpen}
+        onOpenChange={setBrowserOpen}
+        url={externalUrl}
         title={title}
       />
     </>
