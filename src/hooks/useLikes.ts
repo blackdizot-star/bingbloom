@@ -55,10 +55,9 @@ export function useLikeCount(videoId: string | undefined) {
     const updated = wasLiked ? likedIds.filter((id) => id !== videoId) : [...likedIds, videoId];
     localStorage.setItem("db_liked_ids", JSON.stringify(updated));
 
-    // Controlled +/-1 update in DB
-    const { error } = await supabase.rpc("toggle_like", {
-      p_video_id: videoId,
-      p_delta: wasLiked ? -1 : 1,
+    // Controlled +/-1 update via secure edge function
+    const { error } = await supabase.functions.invoke("toggle-like", {
+      body: { videoId, delta: wasLiked ? -1 : 1 },
     });
 
     if (error) {

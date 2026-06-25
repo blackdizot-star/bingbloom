@@ -39,7 +39,42 @@ const ALLOWED_HOST_SUFFIXES = [
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
+// Block requests to private / internal / link-local addresses to prevent SSRF
+// (e.g. AWS metadata at 169.254.169.254), even when allowAny is set.
+function isBlockedAddress(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (
+    h === "localhost" ||
+    h === "ip6-localhost" ||
+    h.endsWith(".local") ||
+    h.endsWith(".internal") ||
+    h === "metadata.google.internal"
+  ) {
+    return true;
+  }
+  // IPv6 loopback / link-local / unique-local / IPv4-mapped
+  if (h === "::1" || h.startsWith("fe80:") || h.startsWith("fc") || h.startsWith("fd") || h.startsWith("::ffff:")) {
+    return true;
+  }
+  const m = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (m) {
+    const o = m.slice(1).map(Number);
+    if (o.some((n) => n > 255)) return true;
+    const [a, b] = o;
+    if (a === 0 || a === 127 || a === 10) return true;
+    if (a === 169 && b === 254) return true; // link-local (cloud metadata)
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+    if (a === 192 && b === 0) return true;
+    if (a === 198 && (b === 18 || b === 19)) return true;
+    if (a >= 224) return true; // multicast / reserved
+  }
+  return false;
+}
+
 function isAllowedHost(hostname: string, allowAny: boolean): boolean {
+  if (isBlockedAddress(hostname)) return false;
   if (allowAny) return true;
   return ALLOWED_HOST_SUFFIXES.some((suffix) => hostname.endsWith(suffix));
 }
@@ -137,6 +172,13 @@ Deno.serve(async (req: Request) => {
   } catch {
     return new Response(
       JSON.stringify({ error: "Invalid url" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return new Response(
+      JSON.stringify({ error: "Unsupported protocol" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }

@@ -30,6 +30,51 @@ function isDownloadableUrl(url: string): boolean {
   return clean.endsWith(".mp4") || clean.endsWith(".webm") || clean.endsWith(".mov");
 }
 
+// Block requests to private / internal / link-local addresses to prevent SSRF
+// (e.g. cloud metadata at 169.254.169.254).
+function isBlockedAddress(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (
+    h === "localhost" ||
+    h === "ip6-localhost" ||
+    h.endsWith(".local") ||
+    h.endsWith(".internal") ||
+    h === "metadata.google.internal"
+  ) {
+    return true;
+  }
+  if (h === "::1" || h.startsWith("fe80:") || h.startsWith("fc") || h.startsWith("fd") || h.startsWith("::ffff:")) {
+    return true;
+  }
+  const m = h.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (m) {
+    const o = m.slice(1).map(Number);
+    if (o.some((n) => n > 255)) return true;
+    const [a, b] = o;
+    if (a === 0 || a === 127 || a === 10) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 100 && b >= 64 && b <= 127) return true;
+    if (a === 192 && b === 0) return true;
+    if (a === 198 && (b === 18 || b === 19)) return true;
+    if (a >= 224) return true;
+  }
+  return false;
+}
+
+// Only allow proxying http(s) URLs to non-internal hosts.
+function isSafeTarget(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+    if (!u.hostname) return false;
+    return !isBlockedAddress(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
 function respond(payload: Record<string, unknown>) {
   // Auto-tag downloadable flag based on streamUrl extension. HLS (.m3u8) and
   // iframe embeds are not directly downloadable.
@@ -172,6 +217,12 @@ Deno.serve(async (req) => {
       if (!target) {
         return new Response(JSON.stringify({ error: "missing url" }), {
           status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!isSafeTarget(target)) {
+        return new Response(JSON.stringify({ error: "url not allowed" }), {
+          status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

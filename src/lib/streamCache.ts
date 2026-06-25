@@ -51,14 +51,16 @@ export async function recordStream(
   episode?: number,
 ) {
   try {
-    await supabase.rpc("record_stream_source", {
-      p_tmdb_id: tmdbId,
-      p_media_type: mediaType,
-      p_server: server,
-      p_url: url,
-      p_working: working,
-      p_season: season ?? null,
-      p_episode: episode ?? null,
+    await supabase.functions.invoke("record-stream", {
+      body: {
+        tmdbId,
+        mediaType,
+        server,
+        url,
+        working,
+        season: season ?? null,
+        episode: episode ?? null,
+      },
     });
   } catch {
     /* ignore */
