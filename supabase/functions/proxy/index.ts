@@ -176,6 +176,13 @@ Deno.serve(async (req: Request) => {
     );
   }
 
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    return new Response(
+      JSON.stringify({ error: "Unsupported protocol" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
   if (!isAllowedHost(parsed.hostname, allowAny)) {
     return new Response(
       JSON.stringify({ error: "Domain not allowed", host: parsed.hostname }),
