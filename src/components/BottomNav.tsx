@@ -1,10 +1,10 @@
-import { Clapperboard, Flame, Tv, Drama, Podcast, CloudDownload } from "lucide-react";
+import { Home, Film, Compass, Drama, Podcast, CloudDownload } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const tabs = [
-  { to: "/home", icon: Clapperboard, label: "Home", match: (p: string) => p === "/" || p === "/home" },
-  { to: "/search", icon: Flame, label: "Explore", match: (p: string) => p.startsWith("/search") },
-  { to: "/movies", icon: Tv, label: "Movies", match: (p: string) => p.startsWith("/movies") || p.startsWith("/tv") },
+  { to: "/home", icon: Home, label: "Home", match: (p: string) => p === "/" || p === "/home" },
+  { to: "/search", icon: Compass, label: "Explore", match: (p: string) => p.startsWith("/search") },
+  { to: "/movies", icon: Film, label: "Movies", match: (p: string) => p.startsWith("/movies") || p.startsWith("/tv") },
   { to: "/anime", icon: Drama, label: "Anime", match: (p: string) => p.startsWith("/anime") },
   { to: "/live-tv", icon: Podcast, label: "Live", match: (p: string) => p.startsWith("/live-tv") },
   { to: "/my-downloads", icon: CloudDownload, label: "Downloads", match: (p: string) => p.startsWith("/my-downloads") || p.startsWith("/download") },

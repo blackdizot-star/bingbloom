@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Loader2, AlertCircle, RefreshCw, ChevronRight, Maximize2, Shield } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw, ChevronRight, Maximize2, Shield, WifiOff, CloudDownload } from "lucide-react";
+import { Link } from "react-router-dom";
 import { recordStream, getCachedStream } from "@/lib/streamCache";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { isDownloaded } from "@/lib/offlineDownloads";
 
 export type ServerId = "hd" | "pixaplay";
 
@@ -52,6 +55,16 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
   const [resolvedSrc, setResolvedSrc] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const online = useOnlineStatus();
+  const [savedOffline, setSavedOffline] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    isDownloaded(`${type}-${tmdbId}`).then((d) => {
+      if (active) setSavedOffline(d);
+    });
+    return () => { active = false; };
+  }, [type, tmdbId]);
 
   useEffect(() => {
     if (!serverId) return;
@@ -117,6 +130,31 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
     if (!document.fullscreenElement) el.requestFullscreen?.();
     else document.exitFullscreen?.();
   };
+
+  // Offline + not saved → show a soft, friendly notice instead of a dead iframe.
+  if (!online && !savedOffline) {
+    return (
+      <div className="w-full" style={{ background: "#0A0A0A" }}>
+        <div className="relative w-full aspect-video overflow-hidden flex flex-col items-center justify-center gap-3 px-6 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
+            <WifiOff className="h-6 w-6 text-white/70" />
+          </div>
+          <p className="text-white text-sm font-semibold">You're offline</p>
+          <p className="text-white/55 text-xs max-w-xs leading-relaxed">
+            Connect to the internet to stream this title — or download movies while
+            online to watch them anytime, even offline.
+          </p>
+          <Link
+            to="/my-downloads"
+            className="mt-1 inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[11px] font-semibold text-white"
+            style={{ background: "#E50914" }}
+          >
+            <CloudDownload className="h-3.5 w-3.5" /> Go to Downloads
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full" style={{ background: "#0A0A0A" }}>

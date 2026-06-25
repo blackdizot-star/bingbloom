@@ -1,4 +1,4 @@
-import { User, Heart, Clock, Settings, ChevronRight, Film, Eye } from "lucide-react";
+import { User, Heart, Clock, Settings, ChevronRight, Film, Eye, CloudDownload, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
@@ -28,8 +28,8 @@ const ProfilePage = () => {
   const menuItems = [
     { icon: Heart, label: "My List", desc: `${myList.length} saved`, to: "/my-list" },
     { icon: Heart, label: "Liked Videos", desc: `${likedVideos.length} liked`, to: "/liked" },
-    { icon: Clock, label: "Continue Watching", desc: "Pick up where you left off", to: "/" },
-    
+    { icon: CloudDownload, label: "Downloads", desc: "Watch offline anytime", to: "/my-downloads" },
+    { icon: Clock, label: "Continue Watching", desc: "Pick up where you left off", to: "/home" },
     { icon: Settings, label: "Settings", desc: "Playback, quality & more", to: "/settings" },
   ];
 
@@ -103,6 +103,18 @@ const ProfilePage = () => {
               </Wrapper>
             );
           })}
+
+          <a
+            href="mailto:hello.bingbloom@gmail.com"
+            className="w-full flex items-center gap-3 p-3 bg-card rounded-xl hover:bg-secondary transition-colors border border-border/30"
+          >
+            <Mail className="w-4 h-4 text-primary" />
+            <div className="flex-1 text-left">
+              <p className="text-xs font-medium text-foreground">Contact Us</p>
+              <p className="text-[10px] text-muted-foreground">hello.bingbloom@gmail.com</p>
+            </div>
+            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+          </a>
         </div>
 
         <div className="p-4 bg-gradient-to-r from-primary/10 to-card rounded-xl border border-border/50">

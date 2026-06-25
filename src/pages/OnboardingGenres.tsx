@@ -42,13 +42,13 @@ const OnboardingGenres = () => {
         <BrandLogo size={36} wordmarkSize="sm" />
       </div>
 
-      <div className="px-5 mt-3">
-        <h1 className="text-lg font-bold text-center leading-tight">
+      <div className="px-5 mt-3 md:mt-8">
+        <h1 className="text-lg md:text-3xl font-bold text-center leading-tight">
           What do you enjoy watching?
         </h1>
-        <p className="text-center text-white/55 text-[11px] mt-1.5">Choose at least 5 genres</p>
+        <p className="text-center text-white/55 text-[11px] md:text-sm mt-1.5">Choose at least 5 genres</p>
 
-        <div className="grid grid-cols-3 gap-2 mt-4 max-w-md mx-auto">
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3 mt-4 md:mt-6 max-w-md md:max-w-4xl mx-auto">
           {GENRES.map((g) => {
             const on = picked.includes(g.label);
             return (
@@ -75,7 +75,7 @@ const OnboardingGenres = () => {
         <button
           onClick={submit}
           disabled={picked.length < 5}
-          className="w-full max-w-md mx-auto mt-5 h-10 rounded-lg text-white text-xs font-semibold flex items-center justify-center relative disabled:opacity-50"
+          className="w-full max-w-md md:max-w-sm mx-auto mt-5 md:mt-8 h-10 md:h-12 rounded-lg text-white text-xs md:text-sm font-semibold flex items-center justify-center relative disabled:opacity-50"
           style={{
             background: "linear-gradient(180deg,#FF1A26 0%,#E50914 100%)",
             boxShadow: "0 4px 14px rgba(229,9,20,0.35)",

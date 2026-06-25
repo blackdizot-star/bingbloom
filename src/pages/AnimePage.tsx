@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import TmdbRow from "@/components/TmdbRow";
+import InlineAdRow from "@/components/InlineAdRow";
 import { fetchList, type TmdbItem } from "@/lib/tmdb";
 
 // 20 anime category rows powered by TMDB discover (genre 16 + Japanese origin + keywords).
@@ -60,8 +61,11 @@ const AnimePage = () => (
       <h1 className="text-2xl md:text-3xl font-bold text-foreground">Anime</h1>
       <p className="text-sm text-muted-foreground mt-1">20 hand-picked collections</p>
     </div>
-    {ROWS.map((r) => (
-      <AnimeRow key={r.title} title={r.title} params={r.params} />
+    {ROWS.map((r, i) => (
+      <div key={r.title}>
+        <AnimeRow title={r.title} params={r.params} />
+        {(i === 3 || i === 9 || i === 15) && <InlineAdRow />}
+      </div>
     ))}
   </AppLayout>
 );

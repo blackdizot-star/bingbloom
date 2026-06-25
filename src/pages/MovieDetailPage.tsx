@@ -137,6 +137,7 @@ const MovieDetailPage = () => {
                   type="movie"
                   tmdbId={String(data.id)}
                   title={data.title}
+                  year={(data.release_date || "").slice(0, 4)}
                   poster={img(data.poster_path, "w500")}
                   backdrop={img(data.backdrop_path, "w780")}
                 />

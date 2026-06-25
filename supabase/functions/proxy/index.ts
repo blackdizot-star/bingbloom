@@ -33,7 +33,18 @@ const ALLOWED_HOST_SUFFIXES = [
   "akamaized.net",
   "akamaihd.net",
   "amazonaws.com",
+  // MovieBox / Fast Downloads CDNs (require a videodownloader.site referer)
+  "hakunaymatata.com",
+  "aoneroom.com",
+  "valiw.com",
   // IPTV & HLS hosts (allow all https for IPTV-org, behind a query flag)
+];
+
+// Hosts that only serve media when the request carries a specific Referer.
+const REFERER_OVERRIDES: { suffix: string; referer: string }[] = [
+  { suffix: "hakunaymatata.com", referer: "https://videodownloader.site/" },
+  { suffix: "aoneroom.com", referer: "https://videodownloader.site/" },
+  { suffix: "valiw.com", referer: "https://videodownloader.site/" },
 ];
 
 const UA =
@@ -212,7 +223,13 @@ Deno.serve(async (req: Request) => {
     const range = req.headers.get("Range");
     if (range) fwd.set("Range", range);
     fwd.set("User-Agent", UA);
-    fwd.set("Referer", `${parsed.protocol}//${parsed.host}/`);
+    const override = REFERER_OVERRIDES.find((o) => parsed.hostname.endsWith(o.suffix));
+    if (override) {
+      fwd.set("Referer", override.referer);
+      fwd.set("Origin", override.referer.replace(/\/$/, ""));
+    } else {
+      fwd.set("Referer", `${parsed.protocol}//${parsed.host}/`);
+    }
 
     const upstream = await fetch(target, {
       method: req.method === "HEAD" ? "HEAD" : "GET",

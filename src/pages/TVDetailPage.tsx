@@ -134,7 +134,8 @@ const TVDetailPage = () => {
                   id={`tv-${data.id}-s${activeSeason}-e1`}
                   type="tv"
                   tmdbId={String(data.id)}
-                  title={`${data.name} S${activeSeason}E1`}
+                  title={data.name}
+                  year={(data.first_air_date || "").slice(0, 4)}
                   poster={poster}
                   backdrop={backdrop}
                   season={activeSeason}

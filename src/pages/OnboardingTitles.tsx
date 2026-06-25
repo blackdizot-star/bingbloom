@@ -44,13 +44,13 @@ const OnboardingTitles = () => {
         <BrandLogo size={36} wordmarkSize="sm" />
       </div>
 
-      <div className="px-5 mt-3">
-        <h1 className="text-base font-bold text-center leading-tight">
+      <div className="px-5 mt-3 md:mt-8">
+        <h1 className="text-base md:text-3xl font-bold text-center leading-tight">
           Help us personalize your experience
         </h1>
-        <p className="text-center text-white/55 text-[11px] mt-1">Choose 3–10 titles you love.</p>
+        <p className="text-center text-white/55 text-[11px] md:text-sm mt-1">Choose 3–10 titles you love.</p>
 
-        <div className="grid grid-cols-4 gap-2 mt-4 max-w-md mx-auto">
+        <div className="grid grid-cols-4 md:grid-cols-6 gap-2 md:gap-3 mt-4 md:mt-6 max-w-md md:max-w-4xl mx-auto">
           {TITLES.map((m) => {
             const on = picked.includes(m.t);
             return (
@@ -71,7 +71,7 @@ const OnboardingTitles = () => {
         <button
           onClick={submit}
           disabled={picked.length < 3}
-          className="w-full max-w-md mx-auto h-10 rounded-lg text-white text-xs font-semibold flex items-center justify-center relative disabled:opacity-50"
+          className="w-full max-w-md md:max-w-sm mx-auto h-10 md:h-12 rounded-lg text-white text-xs md:text-sm font-semibold flex items-center justify-center relative disabled:opacity-50"
           style={{ background: "linear-gradient(180deg,#FF1A26 0%,#E50914 100%)", boxShadow: "0 4px 14px rgba(229,9,20,0.35)" }}
         >
           Continue ({picked.length} selected)
