@@ -24,6 +24,8 @@ const PUBLIC_PREFIXES = [
   "/cookie-preferences",
   "/legal-guarantee",
   "/follow-us",
+  "/download-apk",
+  "/install",
 ];
 
 const AuthGuard = ({ children }: { children: ReactNode }) => {

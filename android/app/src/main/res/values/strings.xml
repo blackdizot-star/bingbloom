@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BingBloom</string>
+    <string name="title_activity_main">BingBloom</string>
+    <string name="package_name">com.bingbloom.app</string>
+    <string name="custom_url_scheme">com.bingbloom.app</string>
+</resources>

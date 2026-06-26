@@ -17,6 +17,7 @@ const COLS = [
     links: [
       { label: "Ways to Watch", to: "/ways-to-watch" },
       { label: "Install the App", to: "/install" },
+      { label: "Download APK", to: "/download-apk" },
       { label: "Speed Test", to: "/speed-test" },
       { label: "Follow Us", to: "/follow-us" },
       { label: "Account", to: "/profile" },

@@ -35,6 +35,7 @@ import DocumentaryPage from "./pages/DocumentaryPage";
 import MyDownloadsPage from "./pages/MyDownloadsPage";
 import DownloadPage from "./pages/DownloadPage";
 import InstallAppPage from "./pages/InstallAppPage";
+import DownloadApkPage from "./pages/DownloadApkPage";
 import Welcome from "./pages/Welcome";
 import OnboardingGenres from "./pages/OnboardingGenres";
 import OnboardingTitles from "./pages/OnboardingTitles";
@@ -134,6 +135,7 @@ const App = () => (
             <Route path="/download/:mediaType/:id" element={<DownloadPage />} />
             <Route path="/download/:mediaType/:id/:s/:e" element={<DownloadPage />} />
             <Route path="/install" element={<InstallAppPage />} />
+            <Route path="/download-apk" element={<DownloadApkPage />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/support" element={<Navigate to="/help" replace />} />
 
