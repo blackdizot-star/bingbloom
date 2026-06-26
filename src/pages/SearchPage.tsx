@@ -248,31 +248,27 @@ const SearchPage = () => {
 
         {showExplore ? (
           <>
-            <div className="flex items-center gap-1.5 mb-2">
+            <div className="flex items-center gap-1.5 mb-3">
               <TrendingUp className="w-3.5 h-3.5" style={{ color: "#E50914" }} />
-              <h2 className="text-white text-sm font-bold">Top Searches</h2>
+              <h2 className="text-white text-sm font-bold">Trending now</h2>
             </div>
-            <div className="grid grid-cols-4 md:grid-cols-6 gap-1.5 mb-4">
-              {trending.slice(0, 12).map((m: any) => (
-                <TmdbCard key={`ts-${m._type}-${m.id}`} item={m} type={m._type} fill />
-              ))}
-            </div>
-
-            {/* Sponsored Ad — single placement */}
-            <div className="-mx-5 mb-3">
-              <SponsoredLabel />
-              <InlineAdRow count={4} />
-            </div>
-
-            <h2 className="text-white text-sm font-bold mb-2">Suggestions for you</h2>
-            {isFetching ? (
+            {isFetching && results.length === 0 ? (
               <div className="flex items-center justify-center h-28">
                 <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#E50914" }} />
               </div>
             ) : (
               <div className="space-y-2 pb-4">
-                {(results as ResultItem[]).slice(0, 12).map((m) => (
-                  <ResultRow key={`sg-${m._type}-${m.id}`} item={m} onClick={() => openItem(m)} />
+                {(results as ResultItem[]).slice(0, 24).map((m, i) => (
+                  <div key={`sg-${m._type}-${m.id}`}>
+                    <ResultRow item={m} onClick={() => openItem(m)} />
+                    {/* 4 native ad rows interspersed every ~5 items */}
+                    {(i === 4 || i === 9 || i === 14 || i === 19) && (
+                      <div className="-mx-5 my-3">
+                        <SponsoredLabel />
+                        <InlineAdRow count={4} />
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
