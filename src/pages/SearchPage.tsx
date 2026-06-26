@@ -4,7 +4,7 @@ import { Search, ArrowLeft, Loader2, TrendingUp, Star, Play } from "lucide-react
 import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
-import TmdbCard from "@/components/TmdbCard";
+
 import InlineAdRow from "@/components/InlineAdRow";
 
 import {
