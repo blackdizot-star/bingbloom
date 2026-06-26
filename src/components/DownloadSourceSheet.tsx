@@ -138,14 +138,9 @@ const DownloadSourceSheet = ({
 
   const startExternalDownload = (d: MovieboxDownload) => {
     const url = movieboxProxyUrl(d.url);
-    const fileBase = isSeries
-      ? `${resolvedTitle} S${String(season ?? 1).padStart(2, "0")}E${String(episode ?? 1).padStart(2, "0")}`
-      : resolvedTitle;
-    const filename = `${fileBase} [${resolutionLabel(d.resolution)}].${(d.format || "mp4").toLowerCase()}`;
     try {
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename;
       a.rel = "noopener noreferrer";
       a.target = "_blank";
       document.body.appendChild(a);
