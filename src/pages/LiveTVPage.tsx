@@ -291,10 +291,18 @@ const LiveTVPage = () => {
                 {pageChannels.map((c) => {
                   const isFav = favorites.includes(c.url);
                   return (
-                    <button
+                    <div
                       key={`${c.url}-${c.number}`}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setActiveChannel(c)}
-                      className="group w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition hover:bg-white/[0.04]"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setActiveChannel(c);
+                        }
+                      }}
+                      className="group w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition hover:bg-white/[0.04] cursor-pointer"
                       style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
                     >
                       <div className="relative w-12 h-12 rounded-lg overflow-hidden grid place-items-center bg-black/40 flex-shrink-0">
@@ -321,7 +329,7 @@ const LiveTVPage = () => {
                       >
                         <Star className={`w-4 h-4 ${isFav ? "fill-yellow-400 text-yellow-400" : "text-white/35"}`} />
                       </button>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
