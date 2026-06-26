@@ -251,19 +251,17 @@ const LiveTVPage = () => {
         )}
 
         {iptv.isLoading && (
-          <div className="grid grid-cols-3 gap-2.5">
-            {Array.from({ length: 50 }).map((_, i) => (
+          <div className="space-y-2">
+            {Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={i}
-                className="rounded-xl overflow-hidden animate-pulse"
+                className="flex items-center gap-3 p-2.5 rounded-xl animate-pulse"
                 style={{ background: "#1F1F1F", border: "1px solid rgba(255,255,255,0.06)" }}
               >
-                <div className="aspect-video bg-gradient-to-br from-white/[0.04] to-white/[0.10] relative">
-                  <span className="absolute top-1 left-1 px-1 py-[1px] rounded text-[7px] font-bold uppercase text-white animate-pulse" style={{ background: "#E50914" }}>Live</span>
-                </div>
-                <div className="px-2 py-1.5 space-y-1">
-                  <div className="h-2.5 rounded bg-white/10 w-3/4" />
-                  <div className="h-2 rounded bg-white/5 w-1/2" />
+                <div className="w-12 h-12 rounded-lg bg-white/5 flex-shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3 rounded bg-white/10 w-2/3" />
+                  <div className="h-2 rounded bg-white/5 w-1/3" />
                 </div>
               </div>
             ))}
@@ -275,7 +273,7 @@ const LiveTVPage = () => {
           </p>
         )}
 
-        {/* 3-column channel grid */}
+        {/* List of channels */}
         {!iptv.isLoading && (() => {
           const totalPages = Math.max(1, Math.ceil(visibleChannels.length / PAGE_SIZE));
           const safePage = Math.min(page, totalPages);
@@ -289,33 +287,45 @@ const LiveTVPage = () => {
           for (let p = firstBtn; p <= lastBtn; p++) pages.push(p);
           return (
             <>
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="space-y-2">
                 {pageChannels.map((c) => {
                   const isFav = favorites.includes(c.url);
                   return (
                     <button
                       key={`${c.url}-${c.number}`}
                       onClick={() => setActiveChannel(c)}
-                      className="group relative rounded-xl overflow-hidden text-left transition-transform hover:-translate-y-0.5"
-                      style={{ background: "#1F1F1F", border: "1px solid rgba(255,255,255,0.06)" }}
+                      className="group w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition hover:bg-white/[0.04]"
+                      style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
                     >
-                      <div className="aspect-video grid place-items-center p-3 bg-black/30 relative">
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden grid place-items-center bg-black/40 flex-shrink-0">
                         {c.logo ? (
-                          <img src={c.logo} alt={c.name} loading="lazy" className="max-w-full max-h-full object-contain" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                          <img src={c.logo} alt={c.name} loading="lazy" className="max-w-full max-h-full object-contain p-1" onError={(e) => { e.currentTarget.style.display = "none"; }} />
                         ) : (
-                          <Tv className="w-6 h-6 text-white/40" />
+                          <Tv className="w-5 h-5 text-white/40" />
                         )}
-                        <span className="absolute top-1 left-1 px-1 py-[1px] rounded text-[7px] font-bold uppercase tracking-wider text-white animate-pulse" style={{ background: "#E50914" }}>Live</span>
-                        {isFav && <Star className="absolute top-1 right-1 w-3 h-3 fill-yellow-400 text-yellow-400" />}
                       </div>
-                      <div className="px-2 py-1.5">
-                        <p className="text-[10.5px] font-bold text-white truncate leading-tight">{c.name}</p>
-                        <p className="text-[9px] text-white/45 truncate mt-0.5">{c.group || "Live"}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-1 py-[1px] rounded text-[8px] font-bold uppercase tracking-wider text-white animate-pulse" style={{ background: "#E50914" }}>Live</span>
+                          <p className="text-[13px] font-bold text-white truncate">{c.name}</p>
+                        </div>
+                        <p className="text-[10.5px] text-white/50 truncate mt-0.5">
+                          {c.group || "Live"}{c.country ? ` · ${c.country}` : ""} · #{c.number}
+                        </p>
                       </div>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); toggleFav(c.url); }}
+                        className="w-8 h-8 grid place-items-center rounded-full hover:bg-white/5 flex-shrink-0"
+                        aria-label="Favorite"
+                      >
+                        <Star className={`w-4 h-4 ${isFav ? "fill-yellow-400 text-yellow-400" : "text-white/35"}`} />
+                      </button>
                     </button>
                   );
                 })}
               </div>
+
 
               {visibleChannels.length === 0 && (
                 <p className="text-center text-xs text-white/50 py-10">No channels match.</p>
