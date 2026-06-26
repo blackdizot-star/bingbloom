@@ -155,7 +155,11 @@ export async function fetchIptvChannels(): Promise<IptvChannel[]> {
   );
   const candidates = (curated.length > 0 ? curated : preferred).slice(0, MAX_CANDIDATES);
   const verified = await validateChannels(candidates);
-  return verified.length > 0 ? verified : VERIFIED_FALLBACK_CHANNELS;
+  const base = verified.length > 0 ? verified : VERIFIED_FALLBACK_CHANNELS;
+  // Prepend curated sports channels (deduped by URL) so the page always has a sports lineup.
+  const seenUrls = new Set(base.map((c) => c.url));
+  const sports = CURATED_SPORTS_CHANNELS.filter((c) => !seenUrls.has(c.url));
+  return [...sports, ...base];
 }
 
 // thetvapp.to passive embed channel directory
