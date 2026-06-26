@@ -79,7 +79,7 @@ interface NumberedChannel extends IptvChannel {
 
 const FAV_KEY = "livetv:favorites";
 
-const PAGE_SIZE = 9; // 3 cards per row × 3 rows
+const PAGE_SIZE = 18; // list rows per page
 
 const LiveTVPage = () => {
   const [activeChannel, setActiveChannel] = useState<NumberedChannel | null>(null);
