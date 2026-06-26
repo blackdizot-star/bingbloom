@@ -1,9 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Check, ChevronRight } from "lucide-react";
 import StepProgress from "@/components/StepProgress";
 import BrandLogo from "@/components/BrandLogo";
 import SEO from "@/components/SEO";
 import { setOnboarded } from "@/lib/onboarding";
+import { toast } from "sonner";
 
 const FEATURES = [
   "Personalized Recommendations",
@@ -15,7 +17,12 @@ const FEATURES = [
 
 const OnboardingDone = () => {
   const navigate = useNavigate();
+  const [agreed, setAgreed] = useState(false);
   const enter = () => {
+    if (!agreed) {
+      toast.error("Please agree to the Terms & Conditions to continue.");
+      return;
+    }
     setOnboarded();
     navigate("/home", { replace: true });
   };
