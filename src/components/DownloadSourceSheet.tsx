@@ -69,8 +69,13 @@ const DownloadSourceSheet = ({
 
   const resolve = async (chosen: Source) => {
     setSource(chosen);
-    setStep("loading");
     setErrorMsg("");
+    if (chosen === "external") {
+      // External downloader doesn't need resolution picking — just confirm redirect.
+      setStep("redirect");
+      return;
+    }
+    setStep("loading");
     const res = await resolveMovieboxDownloads({
       title,
       year,
@@ -86,6 +91,14 @@ const DownloadSourceSheet = ({
     setResolvedTitle(res.title || title);
     setDownloads(res.downloads);
     setStep("list");
+  };
+
+  // Open external downloader with title pre-filled (title only — no season/episode).
+  const continueToExternal = () => {
+    const url = `${EXTERNAL_DOWNLOADER_URL}?q=${encodeURIComponent(title)}&title=${encodeURIComponent(title)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    toast.success("Opening external downloader…");
+    close(false);
   };
 
   // Reset to chooser whenever sheet (re)opens.
