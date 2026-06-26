@@ -12,6 +12,7 @@ import {
   Loader2,
   Download,
   AlertTriangle,
+  ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -23,7 +24,8 @@ import {
 } from "@/lib/moviebox";
 import { startDownload } from "@/lib/offlineDownloads";
 
-type Step = "loading" | "list" | "error";
+type Source = "fast" | "external";
+type Step = "choose" | "loading" | "list" | "error";
 
 interface Props {
   open: boolean;
@@ -52,7 +54,8 @@ const DownloadSourceSheet = ({
   poster,
   backdrop,
 }: Props) => {
-  const [step, setStep] = useState<Step>("loading");
+  const [step, setStep] = useState<Step>("choose");
+  const [source, setSource] = useState<Source>("fast");
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [resolvedTitle, setResolvedTitle] = useState(title);
@@ -62,7 +65,8 @@ const DownloadSourceSheet = ({
 
   const close = (v: boolean) => onOpenChange(v);
 
-  const resolve = async () => {
+  const resolve = async (chosen: Source) => {
+    setSource(chosen);
     setStep("loading");
     setErrorMsg("");
     const res = await resolveMovieboxDownloads({
@@ -82,9 +86,14 @@ const DownloadSourceSheet = ({
     setStep("list");
   };
 
-  // Auto-resolve whenever the sheet opens.
+  // Reset to chooser whenever sheet (re)opens.
   useEffect(() => {
-    if (open) void resolve();
+    if (open) {
+      setStep("choose");
+      setErrorMsg("");
+      setDownloads([]);
+      setResolvedTitle(title);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, itemId]);
 
@@ -93,7 +102,6 @@ const DownloadSourceSheet = ({
     const displayTitle = isSeries
       ? `${resolvedTitle} · S${season ?? 1}E${episode ?? 1}`
       : resolvedTitle;
-    // Fire-and-forget chunked download into IndexedDB for offline playback.
     void startDownload({
       id: itemId,
       type,
@@ -113,17 +121,89 @@ const DownloadSourceSheet = ({
     close(false);
   };
 
+  const startExternalDownload = (d: MovieboxDownload) => {
+    const url = movieboxProxyUrl(d.url);
+    const fileBase = isSeries
+      ? `${resolvedTitle} S${String(season ?? 1).padStart(2, "0")}E${String(episode ?? 1).padStart(2, "0")}`
+      : resolvedTitle;
+    const filename = `${fileBase} [${resolutionLabel(d.resolution)}].${(d.format || "mp4").toLowerCase()}`;
+    try {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.rel = "noopener noreferrer";
+      a.target = "_blank";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast.success("Opening in your downloader…");
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+    close(false);
+  };
+
+  const onPick = (d: MovieboxDownload) =>
+    source === "fast" ? startFastDownload(d) : startExternalDownload(d);
+
   return (
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="max-w-sm bg-[#0f0f10] border-white/10 text-white p-0 overflow-hidden">
+        {/* ---- Choose source ---- */}
+        {step === "choose" && (
+          <div className="p-4">
+            <DialogHeader>
+              <DialogTitle className="text-sm font-bold">Choose download source</DialogTitle>
+              <DialogDescription className="text-[11px] text-white/55">
+                {title}
+                {isSeries ? ` · ${episodeLabel}` : year ? ` · ${year}` : ""}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-3 space-y-2">
+              <button
+                onClick={() => void resolve("fast")}
+                className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-left transition"
+              >
+                <span className="w-9 h-9 grid place-items-center rounded-lg bg-amber-400/15 text-amber-400">
+                  <Zap className="w-4 h-4" />
+                </span>
+                <span className="flex-1">
+                  <span className="block text-[12.5px] font-bold text-white">Fast Download</span>
+                  <span className="block text-[10.5px] text-white/55">
+                    Save in-app for offline viewing
+                  </span>
+                </span>
+                <ChevronRight className="w-4 h-4 text-white/40" />
+              </button>
+              <button
+                onClick={() => void resolve("external")}
+                className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-left transition"
+              >
+                <span className="w-9 h-9 grid place-items-center rounded-lg bg-sky-400/15 text-sky-400">
+                  <ExternalLink className="w-4 h-4" />
+                </span>
+                <span className="flex-1">
+                  <span className="block text-[12.5px] font-bold text-white">
+                    External Downloader
+                  </span>
+                  <span className="block text-[10.5px] text-white/55">
+                    Open the file in your browser or download manager
+                  </span>
+                </span>
+                <ChevronRight className="w-4 h-4 text-white/40" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ---- Resolving ---- */}
         {step === "loading" && (
           <div className="p-8 flex flex-col items-center justify-center text-center">
             <span className="w-11 h-11 grid place-items-center rounded-xl bg-amber-400/15 text-amber-400 mb-3">
-              <Zap className="w-5 h-5" />
+              {source === "fast" ? <Zap className="w-5 h-5" /> : <ExternalLink className="w-5 h-5" />}
             </span>
             <Loader2 className="w-6 h-6 text-[#E50914] animate-spin" />
-            <p className="mt-3 text-[12px] font-semibold text-white">Finding fast download…</p>
+            <p className="mt-3 text-[12px] font-semibold text-white">Finding download…</p>
             <p className="mt-1 text-[10.5px] text-white/50">
               Checking quality options for “{title}” {isSeries ? `· ${episodeLabel}` : ""}.
             </p>
@@ -135,18 +215,29 @@ const DownloadSourceSheet = ({
           <div className="p-4">
             <DialogHeader>
               <DialogTitle className="text-sm font-bold flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-amber-400" /> Fast Download
+                {source === "fast" ? (
+                  <>
+                    <Zap className="w-4 h-4 text-amber-400" /> Fast Download
+                  </>
+                ) : (
+                  <>
+                    <ExternalLink className="w-4 h-4 text-sky-400" /> External Downloader
+                  </>
+                )}
               </DialogTitle>
               <DialogDescription className="text-[11px] text-white/55">
                 {resolvedTitle}
-                {isSeries ? ` · ${episodeLabel}` : ""} — saves to your device for offline viewing.
+                {isSeries ? ` · ${episodeLabel}` : ""} —{" "}
+                {source === "fast"
+                  ? "saves to your device for offline viewing."
+                  : "opens the file with your browser or download manager."}
               </DialogDescription>
             </DialogHeader>
             <div className="mt-3 space-y-2 max-h-[46vh] overflow-y-auto scrollbar-hide">
               {downloads.map((d, i) => (
                 <button
                   key={`${d.resolution}-${i}`}
-                  onClick={() => startFastDownload(d)}
+                  onClick={() => onPick(d)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-left transition"
                 >
                   <span className="w-9 h-9 grid place-items-center rounded-lg bg-[#E50914]/15 text-[#E50914]">
@@ -164,6 +255,12 @@ const DownloadSourceSheet = ({
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => setStep("choose")}
+              className="mt-3 w-full px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/5 text-white/70 hover:bg-white/10"
+            >
+              ← Change source
+            </button>
           </div>
         )}
 
@@ -181,13 +278,13 @@ const DownloadSourceSheet = ({
             </DialogHeader>
             <div className="mt-4 flex gap-2">
               <button
-                onClick={() => close(false)}
+                onClick={() => setStep("choose")}
                 className="flex-1 px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/10 text-white hover:bg-white/15"
               >
-                Close
+                Back
               </button>
               <button
-                onClick={() => void resolve()}
+                onClick={() => void resolve(source)}
                 className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold text-white hover:opacity-90"
                 style={{ background: "#E50914" }}
               >
