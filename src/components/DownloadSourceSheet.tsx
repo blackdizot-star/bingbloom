@@ -25,7 +25,9 @@ import {
 import { startDownload } from "@/lib/offlineDownloads";
 
 type Source = "fast" | "external";
-type Step = "choose" | "loading" | "list" | "error";
+type Step = "choose" | "loading" | "list" | "error" | "redirect";
+
+const EXTERNAL_DOWNLOADER_URL = "https://videodownloader.site/";
 
 interface Props {
   open: boolean;
