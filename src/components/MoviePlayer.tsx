@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { recordStream, getCachedStream } from "@/lib/streamCache";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
+import DownloadButton from "@/components/DownloadButton";
 
 export type ServerId = "hd" | "pixaplay";
 
@@ -39,6 +40,10 @@ interface Props {
   episode?: number;
   serverId?: ServerId;
   onServerChange?: (id: ServerId) => void;
+  title?: string;
+  year?: string;
+  poster?: string | null;
+  backdrop?: string | null;
 }
 
 // When ad-block is ON: omit allow-top-navigation & allow-popups → blocks redirects
@@ -46,7 +51,7 @@ interface Props {
 const SANDBOX_BLOCKED = "allow-same-origin allow-scripts allow-forms allow-presentation";
 const SANDBOX_FULL = "allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation";
 
-const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId, onServerChange }: Props) => {
+const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId, onServerChange, title, year, poster, backdrop }: Props) => {
   const initialIdx = Math.max(0, PLAYER_SERVERS.findIndex((s) => s.id === serverId));
   const [serverIdx, setServerIdx] = useState(initialIdx === -1 ? 0 : initialIdx);
   const [loading, setLoading] = useState(true);
@@ -234,6 +239,24 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
           Next <ChevronRight className="w-3 h-3" />
         </button>
       </div>
+
+      {title && (
+        <div className="flex items-center gap-2 px-3 py-2" style={{ background: "#0A0A0A", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          <CloudDownload className="w-3.5 h-3.5 text-amber-400" />
+          <span className="text-[10.5px] text-white/55 flex-1">Save this {type === "tv" ? "episode" : "movie"} for offline viewing</span>
+          <DownloadButton
+            size="sm"
+            type={type}
+            tmdbId={tmdbId}
+            title={title}
+            year={year}
+            poster={poster}
+            backdrop={backdrop}
+            season={type === "tv" ? season : undefined}
+            episode={type === "tv" ? episode : undefined}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -1,9 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Check, ChevronRight } from "lucide-react";
 import StepProgress from "@/components/StepProgress";
 import BrandLogo from "@/components/BrandLogo";
 import SEO from "@/components/SEO";
 import { setOnboarded } from "@/lib/onboarding";
+import { toast } from "sonner";
 
 const FEATURES = [
   "Personalized Recommendations",
@@ -15,7 +17,12 @@ const FEATURES = [
 
 const OnboardingDone = () => {
   const navigate = useNavigate();
+  const [agreed, setAgreed] = useState(false);
   const enter = () => {
+    if (!agreed) {
+      toast.error("Please agree to the Terms & Conditions to continue.");
+      return;
+    }
     setOnboarded();
     navigate("/home", { replace: true });
   };
@@ -63,9 +70,28 @@ const OnboardingDone = () => {
           ))}
         </div>
 
+        {/* Terms & Conditions agreement */}
+        <label className="mt-4 max-w-sm mx-auto flex items-start gap-2.5 text-left rounded-lg bg-white/[0.03] border border-white/10 p-3 cursor-pointer">
+          <button
+            type="button"
+            onClick={() => setAgreed((v) => !v)}
+            aria-pressed={agreed}
+            className={`mt-0.5 w-4 h-4 rounded grid place-items-center flex-shrink-0 transition-colors ${agreed ? "bg-[#E50914] border-[#E50914]" : "border border-white/30"}`}
+          >
+            {agreed && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+          </button>
+          <span className="text-[10.5px] leading-relaxed text-white/70" onClick={() => setAgreed((v) => !v)}>
+            I agree to the{" "}
+            <Link to="/terms" onClick={(e) => e.stopPropagation()} className="text-[#E50914] font-semibold hover:underline">Terms &amp; Conditions</Link>{" "}
+            and{" "}
+            <Link to="/privacy" onClick={(e) => e.stopPropagation()} className="text-[#E50914] font-semibold hover:underline">Privacy Policy</Link>.
+          </span>
+        </label>
+
         <button
           onClick={enter}
-          className="w-full max-w-md md:max-w-sm mx-auto mt-5 h-10 md:h-12 rounded-lg text-white text-xs md:text-sm font-semibold flex items-center justify-center relative"
+          disabled={!agreed}
+          className="w-full max-w-md md:max-w-sm mx-auto mt-5 h-10 md:h-12 rounded-lg text-white text-xs md:text-sm font-semibold flex items-center justify-center relative disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             background: "linear-gradient(180deg,#FF1A26 0%,#E50914 100%)",
             boxShadow: "0 4px 14px rgba(229,9,20,0.45)",

@@ -7,10 +7,13 @@ const STORE_META = "videos";     // metadata + completed blob
 const STORE_CHUNKS = "chunks";   // per-video temp chunks during download
 
 export interface OfflineVideo {
-  id: string;                  // `${type}-${tmdbId}` (or anime-id)
+  id: string;                  // `${type}-${tmdbId}` (or per-episode for tv)
   type: "movie" | "tv" | "anime";
   tmdbId: string;
-  title: string;
+  title: string;               // per-episode title shown in UI
+  seriesTitle?: string;        // folder name for grouped series episodes
+  season?: number;
+  episode?: number;
   poster?: string | null;
   backdrop?: string | null;
   sourceUrl: string;
@@ -151,6 +154,9 @@ interface StartArgs {
   type: OfflineVideo["type"];
   tmdbId: string;
   title: string;
+  seriesTitle?: string;
+  season?: number;
+  episode?: number;
   poster?: string | null;
   backdrop?: string | null;
   sourceUrl: string;
@@ -174,6 +180,9 @@ export async function startDownload(args: StartArgs): Promise<OfflineVideo> {
       type: args.type,
       tmdbId: args.tmdbId,
       title: args.title,
+      seriesTitle: args.seriesTitle,
+      season: args.season,
+      episode: args.episode,
       poster: args.poster ?? null,
       backdrop: args.backdrop ?? null,
       sourceUrl,

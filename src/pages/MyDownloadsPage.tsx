@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2 } from "lucide-react";
+import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
-import { listSavedDownloads, removeSavedDownload, type SavedDownload } from "@/lib/savedDownloads";
 import { getAllDownloads, deleteDownload, getDownloadBlobUrl, pauseDownload, type OfflineVideo } from "@/lib/offlineDownloads";
 import { toast } from "sonner";
 
@@ -14,12 +13,20 @@ function fmtMB(bytes: number) {
   return `${mb.toFixed(0)} MB`;
 }
 
+interface SeriesFolder {
+  key: string;
+  tmdbId: string;
+  title: string;
+  poster?: string | null;
+  episodes: OfflineVideo[];
+}
+
 const MyDownloadsPage = () => {
-  const [saved, setSaved] = useState<SavedDownload[]>([]);
   const [offline, setOffline] = useState<OfflineVideo[]>([]);
   const [query, setQuery] = useState("");
   const [playUrl, setPlayUrl] = useState<string | null>(null);
   const [playTitle, setPlayTitle] = useState("");
+  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
 
   const playOffline = async (v: OfflineVideo) => {
@@ -35,7 +42,6 @@ const MyDownloadsPage = () => {
   };
 
   const refresh = async () => {
-    setSaved(listSavedDownloads());
     try { setOffline(await getAllDownloads()); } catch { setOffline([]); }
   };
 
@@ -45,26 +51,108 @@ const MyDownloadsPage = () => {
     return () => clearInterval(i);
   }, []);
 
-  const removeOne = async (id: string, isOffline = false) => {
-    if (isOffline) await deleteDownload(id);
-    else removeSavedDownload(id);
+  const removeOne = async (id: string) => {
+    await deleteDownload(id);
     toast.success("Removed");
     refresh();
   };
 
-  const goWatch = (d: SavedDownload) => {
-    if (d.type === "tv") navigate(`/watch/tv/${d.tmdbId}/${d.season ?? 1}/${d.episode ?? 1}`);
-    else navigate(`/watch/movie/${d.tmdbId}`);
+  const removeFolder = async (folder: SeriesFolder) => {
+    await Promise.all(folder.episodes.map((e) => deleteDownload(e.id)));
+    toast.success("Series removed");
+    refresh();
   };
 
-  const filtered = saved.filter((v) =>
-    !query.trim() ? true : v.title.toLowerCase().includes(query.toLowerCase()),
-  );
+  // Split offline downloads into single movies and grouped series folders.
+  const { movies, folders } = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const match = (s: string) => (!q ? true : s.toLowerCase().includes(q));
+    const movieList: OfflineVideo[] = [];
+    const folderMap = new Map<string, SeriesFolder>();
 
-  const empty = filtered.length === 0 && offline.length === 0;
+    for (const v of offline) {
+      if (v.type === "tv") {
+        const key = `tv-${v.tmdbId}`;
+        const name = v.seriesTitle || v.title;
+        if (!match(name) && !match(v.title)) continue;
+        let f = folderMap.get(key);
+        if (!f) {
+          f = { key, tmdbId: v.tmdbId, title: name, poster: v.poster, episodes: [] };
+          folderMap.set(key, f);
+        }
+        if (!f.poster && v.poster) f.poster = v.poster;
+        f.episodes.push(v);
+      } else {
+        if (match(v.title)) movieList.push(v);
+      }
+    }
+
+    const folderList = Array.from(folderMap.values());
+    folderList.forEach((f) =>
+      f.episodes.sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0)),
+    );
+    return { movies: movieList, folders: folderList };
+  }, [offline, query]);
+
+  const empty = movies.length === 0 && folders.length === 0;
+
+  const renderRow = (v: OfflineVideo, indent = false) => {
+    const pct = v.size > 0 ? Math.min(100, Math.round((v.downloaded / v.size) * 100)) : 0;
+    const ready = v.status === "ready";
+    const downloading = v.status === "downloading" || v.status === "queued";
+    return (
+      <li key={v.id} className={`flex items-center gap-3 p-2 rounded-xl ${indent ? "ml-3" : ""}`} style={{ background: "#141414" }}>
+        <button
+          onClick={() => ready && playOffline(v)}
+          className="relative w-[58px] h-[78px] rounded-lg overflow-hidden bg-black flex-shrink-0 group"
+        >
+          {v.poster && <img src={v.poster} alt={v.title} loading="lazy" className="w-full h-full object-cover" />}
+          {ready && (
+            <span className="absolute inset-0 grid place-items-center bg-black/30">
+              <Play className="w-5 h-5 text-white fill-white" />
+            </span>
+          )}
+          {downloading && (
+            <span className="absolute inset-0 grid place-items-center bg-black/50">
+              <Loader2 className="w-4 h-4 text-white animate-spin" />
+            </span>
+          )}
+        </button>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xs font-bold text-white truncate">
+            {indent && v.episode ? `Episode ${v.episode}` : v.title}
+          </h3>
+          {ready ? (
+            <p className="text-[10px] text-emerald-400 mt-0.5">Available offline · {fmtMB(v.size)}</p>
+          ) : v.status === "error" ? (
+            <p className="text-[10px] text-[#E50914] mt-0.5">Download failed</p>
+          ) : v.status === "paused" ? (
+            <p className="text-[10px] text-white/55 mt-0.5">Paused · {pct}%</p>
+          ) : (
+            <p className="text-[10px] text-white/55 mt-0.5">
+              Downloading · {pct}% {v.size ? `of ${fmtMB(v.size)}` : ""}
+            </p>
+          )}
+          {!ready && v.status !== "error" && (
+            <div className="mt-1.5 h-1 w-full rounded-full bg-white/10 overflow-hidden">
+              <div className="h-full rounded-full bg-[#E50914] transition-all" style={{ width: `${pct}%` }} />
+            </div>
+          )}
+        </div>
+        {downloading && (
+          <button onClick={() => pauseDownload(v.id)} className="p-2 text-white/55 hover:text-white" aria-label="Pause">
+            <Pause className="w-4 h-4" />
+          </button>
+        )}
+        <button onClick={() => removeOne(v.id)} className="p-2 text-white/55 hover:text-[#E50914]" aria-label="Delete">
+          <Trash2 className="w-4 h-4" />
+        </button>
+      </li>
+    );
+  };
 
   return (
-    <AppLayout>
+    <AppLayout hideFooter>
       <SEO title="My Downloads – BingBloom" description="Watch your downloaded movies offline anytime on BingBloom." />
       <div className="px-4 pt-3 pb-8 max-w-2xl mx-auto" style={{ background: "#0A0A0A" }}>
         <header className="flex items-center justify-between mb-4 pt-1">
@@ -98,97 +186,63 @@ const MyDownloadsPage = () => {
           </div>
         ) : (
           <>
-            {offline.length > 0 && (
-              <p className="text-[10px] uppercase tracking-widest text-white/45 mb-2">Available offline</p>
-            )}
-            <ul className="space-y-2 mb-4">
-              {offline.map((v) => {
-                const pct = v.size > 0 ? Math.min(100, Math.round((v.downloaded / v.size) * 100)) : 0;
-                const ready = v.status === "ready";
-                const downloading = v.status === "downloading" || v.status === "queued";
-                return (
-                  <li key={v.id} className="flex items-center gap-3 p-2 rounded-xl" style={{ background: "#141414" }}>
-                    <button
-                      onClick={() => ready && playOffline(v)}
-                      className="relative w-[58px] h-[78px] rounded-lg overflow-hidden bg-black flex-shrink-0 group"
-                    >
-                      {v.poster && <img src={v.poster} alt={v.title} loading="lazy" className="w-full h-full object-cover" />}
-                      {ready && (
-                        <span className="absolute inset-0 grid place-items-center bg-black/30">
-                          <Play className="w-5 h-5 text-white fill-white" />
-                        </span>
-                      )}
-                      {downloading && (
-                        <span className="absolute inset-0 grid place-items-center bg-black/50">
-                          <Loader2 className="w-4 h-4 text-white animate-spin" />
-                        </span>
-                      )}
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xs font-bold text-white truncate">{v.title}</h3>
-                      {ready ? (
-                        <p className="text-[10px] text-emerald-400 mt-0.5">Available offline · {fmtMB(v.size)}</p>
-                      ) : v.status === "error" ? (
-                        <p className="text-[10px] text-[#E50914] mt-0.5">Download failed</p>
-                      ) : v.status === "paused" ? (
-                        <p className="text-[10px] text-white/55 mt-0.5">Paused · {pct}%</p>
-                      ) : (
-                        <p className="text-[10px] text-white/55 mt-0.5">
-                          Downloading · {pct}% {v.size ? `of ${fmtMB(v.size)}` : ""}
-                        </p>
-                      )}
-                      {!ready && v.status !== "error" && (
-                        <div className="mt-1.5 h-1 w-full rounded-full bg-white/10 overflow-hidden">
-                          <div className="h-full rounded-full bg-[#E50914] transition-all" style={{ width: `${pct}%` }} />
+            {folders.length > 0 && (
+              <>
+                <p className="text-[10px] uppercase tracking-widest text-white/45 mb-2">Series</p>
+                <ul className="space-y-2 mb-4">
+                  {folders.map((f) => {
+                    const isOpen = openFolders[f.key];
+                    const readyCount = f.episodes.filter((e) => e.status === "ready").length;
+                    return (
+                      <li key={f.key} className="rounded-xl overflow-hidden" style={{ background: "#141414" }}>
+                        <div className="flex items-center gap-3 p-2">
+                          <button
+                            onClick={() => setOpenFolders((s) => ({ ...s, [f.key]: !s[f.key] }))}
+                            className="relative w-[58px] h-[78px] rounded-lg overflow-hidden bg-black flex-shrink-0"
+                          >
+                            {f.poster ? (
+                              <img src={f.poster} alt={f.title} loading="lazy" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full grid place-items-center text-white/30"><Folder className="w-5 h-5" /></div>
+                            )}
+                            <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-black/70">
+                              <Folder className="w-3 h-3 text-white" />
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => setOpenFolders((s) => ({ ...s, [f.key]: !s[f.key] }))}
+                            className="flex-1 min-w-0 text-left"
+                          >
+                            <h3 className="text-xs font-bold text-white truncate">{f.title}</h3>
+                            <p className="text-[10px] text-white/55 mt-0.5">
+                              {f.episodes.length} episode{f.episodes.length !== 1 ? "s" : ""} · {readyCount} ready offline
+                            </p>
+                          </button>
+                          <button onClick={() => removeFolder(f)} className="p-2 text-white/55 hover:text-[#E50914]" aria-label="Delete series">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                          <ChevronDown className={`w-4 h-4 text-white/45 transition-transform ${isOpen ? "rotate-180" : ""}`} />
                         </div>
-                      )}
-                    </div>
-                    {downloading && (
-                      <button onClick={() => pauseDownload(v.id)} className="p-2 text-white/55 hover:text-white" aria-label="Pause">
-                        <Pause className="w-4 h-4" />
-                      </button>
-                    )}
-                    <button onClick={() => removeOne(v.id, true)} className="p-2 text-white/55 hover:text-[#E50914]" aria-label="Delete">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-
-            {filtered.length > 0 && (
-              <p className="text-[10px] uppercase tracking-widest text-white/45 mb-2">Saved for download</p>
+                        {isOpen && (
+                          <ul className="space-y-2 px-2 pb-2">
+                            {f.episodes.map((e) => renderRow(e, true))}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
             )}
-            <ul className="space-y-2">
-              {filtered.map((v) => (
-                <li key={v.id} className="flex items-center gap-3 p-2 rounded-xl" style={{ background: "#141414" }}>
-                  <button onClick={() => goWatch(v)} className="relative w-[58px] h-[78px] rounded-lg overflow-hidden bg-black flex-shrink-0 group">
-                    {v.poster ? (
-                      <img src={v.poster} alt={v.title} loading="lazy" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full grid place-items-center text-white/30 text-[9px]">No art</div>
-                    )}
-                    <span className="absolute inset-0 grid place-items-center bg-black/0 group-hover:bg-black/40 transition">
-                      <Play className="w-5 h-5 text-white fill-white opacity-0 group-hover:opacity-100" />
-                    </span>
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-xs font-bold text-white truncate">{v.title}</h3>
-                    <p className="text-[10px] text-white/55 mt-0.5">
-                      {v.type === "tv" ? `S${v.season ?? 1} E${v.episode ?? 1}` : "Movie"} · {new Date(v.savedAt).toLocaleDateString()}
-                    </p>
-                    <div className="mt-1.5 flex items-center gap-2">
-                      <a href={v.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-semibold text-[#E50914] hover:underline">Open download</a>
-                      <span className="text-[10px] text-white/35">{v.sizeMB ? `${v.sizeMB} MB` : ""}</span>
-                    </div>
-                  </div>
-                  <button onClick={() => removeOne(v.id)} className="p-2 text-white/55 hover:text-[#E50914]" aria-label="Remove">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
+
+            {movies.length > 0 && (
+              <>
+                <p className="text-[10px] uppercase tracking-widest text-white/45 mb-2">Movies</p>
+                <ul className="space-y-2">
+                  {movies.map((v) => renderRow(v))}
+                </ul>
+              </>
+            )}
           </>
         )}
       </div>
@@ -202,7 +256,7 @@ const MyDownloadsPage = () => {
             </button>
           </div>
           <div className="flex-1 grid place-items-center px-2 pb-4" onClick={(e) => e.stopPropagation()}>
-            <video src={playUrl} controls autoPlay playsInline className="w-full max-h-full rounded-lg bg-black" />
+            <video src={playUrl} controls autoPlay playsInline className="w-full md:max-w-3xl max-h-full rounded-lg bg-black" />
           </div>
         </div>
       )}

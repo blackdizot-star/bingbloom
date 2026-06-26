@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Star, Play, ArrowLeft, Calendar, Tv, Download, Check } from "lucide-react";
+import { Star, Play, ArrowLeft, Calendar, Tv, Check } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import TmdbRow from "@/components/TmdbRow";
@@ -189,14 +189,19 @@ const TVDetailPage = () => {
                             <span className={`absolute ${isPlaying ? "bottom-1.5 left-1.5" : "top-1.5 left-1.5"} px-1.5 py-0.5 rounded bg-black/70 text-[10px] font-extrabold text-white`}>
                               E{ep.episode_number}
                             </span>
-                            <button
-                              type="button"
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                              className="absolute top-1.5 right-1.5 w-6 h-6 grid place-items-center rounded-full bg-black/70 hover:bg-[#E50914] transition-colors"
-                              aria-label="Download episode"
-                            >
-                              <Download className={`w-3 h-3 ${isPlaying ? "text-[#E50914]" : "text-white"}`} strokeWidth={2.5} />
-                            </button>
+                            <span className="absolute top-1.5 right-1.5 z-10">
+                              <DownloadButton
+                                size="icon"
+                                type="tv"
+                                tmdbId={String(data.id)}
+                                title={data.name}
+                                year={(data.first_air_date || "").slice(0, 4)}
+                                poster={poster}
+                                backdrop={backdrop}
+                                season={activeSeason}
+                                episode={ep.episode_number}
+                              />
+                            </span>
                           </Link>
                           <div className="mt-1.5 flex items-start gap-1.5">
                             <span className={`mt-0.5 w-3.5 h-3.5 rounded-full grid place-items-center flex-shrink-0 ${isPlaying ? "bg-[#E50914]" : "bg-white/15"}`}>

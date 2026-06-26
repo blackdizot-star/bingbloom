@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, ArrowLeft, Loader2, Download, AlertCircle, TrendingUp } from "lucide-react";
+import { Search, ArrowLeft, Loader2, TrendingUp, Star, Play } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
@@ -49,6 +49,44 @@ const useDebounced = <T,>(value: T, delay = 250) => {
   return v;
 };
 
+const ResultRow = ({ item, onClick }: { item: ResultItem; onClick: () => void }) => {
+  const title = (item as any).title || (item as any).name || "Untitled";
+  const date = (item as any).release_date || (item as any).first_air_date || "";
+  const poster = item.poster_path || item.backdrop_path;
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-3 p-2 rounded-xl text-left hover:bg-white/5 transition-colors"
+      style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
+    >
+      <div className="relative w-[58px] h-[82px] rounded-lg overflow-hidden bg-black flex-shrink-0">
+        {poster ? (
+          <img src={img(poster, "w200")} alt={title} loading="lazy" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full grid place-items-center text-white/25 text-[9px]">No art</div>
+        )}
+        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+          <Play className="w-2.5 h-2.5 text-white fill-white" />
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-[13px] font-bold text-white truncate">{title}</h3>
+        <p className="text-[10.5px] text-white/55 mt-0.5">
+          {item._type === "tv" ? "Series" : "Movie"}{date ? ` · ${date.slice(0, 4)}` : ""}
+        </p>
+        {!!item.vote_average && (
+          <p className="text-[10.5px] text-amber-400 mt-0.5 flex items-center gap-1">
+            <Star className="w-3 h-3 fill-amber-400" /> {item.vote_average.toFixed(1)}
+          </p>
+        )}
+        {item.overview && (
+          <p className="text-[10px] text-white/40 mt-1 line-clamp-2">{item.overview}</p>
+        )}
+      </div>
+    </button>
+  );
+};
+
 const SearchPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -56,14 +94,10 @@ const SearchPage = () => {
   const [query, setQuery] = useState(initialQ);
   const [searchQuery, setSearchQuery] = useState(initialQ);
   const [filter, setFilter] = useState<FilterKey>("all");
-  const [noResultDialog, setNoResultDialog] = useState(false);
-  const [downloadsDialog, setDownloadsDialog] = useState(false);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const debouncedQuery = useDebounced(query, 220);
-
-  const goToDownloads = () => navigate("/my-downloads");
 
   // Live suggestions (YouTube-style) while typing
   const { data: liveSuggest = [] } = useQuery({
@@ -129,6 +163,9 @@ const SearchPage = () => {
     setSuggestOpen(false);
   };
 
+  const openItem = (item: ResultItem) =>
+    navigate(item._type === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`);
+
   const pickSuggestion = (item: any) => {
     const t = item.media_type === "tv" ? "tv" : "movie";
     navigate(t === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`);
@@ -154,7 +191,7 @@ const SearchPage = () => {
       />
       <div className="px-5 pt-4" style={{ background: "#000" }}>
         {/* Search bar */}
-        <div ref={wrapRef} className="relative flex items-center gap-2 mb-2">
+        <div ref={wrapRef} className="relative flex items-center gap-2 mb-4">
           <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-white/5">
             <ArrowLeft className="w-4 h-4 text-white" />
           </button>
@@ -209,16 +246,6 @@ const SearchPage = () => {
           )}
         </div>
 
-        {/* Downloads CTA — opens guidance dialog */}
-        <button
-          onClick={() => setDownloadsDialog(true)}
-          className="w-full mb-4 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-semibold text-white"
-          style={{ background: "rgba(229,9,20,0.12)", border: "1px solid rgba(229,9,20,0.45)" }}
-        >
-          <Download className="w-3 h-3" />
-          Can't find it? Go to Downloads
-        </button>
-
         {showExplore ? (
           <>
             <div className="flex items-center gap-1.5 mb-2">
@@ -243,9 +270,9 @@ const SearchPage = () => {
                 <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#E50914" }} />
               </div>
             ) : (
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-1.5 mb-4">
-                {results.slice(0, 12).map((m) => (
-                  <TmdbCard key={`sg-${m._type}-${m.id}`} item={m} type={m._type} fill />
+              <div className="space-y-2 pb-4">
+                {(results as ResultItem[]).slice(0, 12).map((m) => (
+                  <ResultRow key={`sg-${m._type}-${m.id}`} item={m} onClick={() => openItem(m)} />
                 ))}
               </div>
             )}
@@ -271,21 +298,18 @@ const SearchPage = () => {
                 <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#E50914" }} />
               </div>
             ) : filtered.length === 0 ? (
-              <div className="py-6 text-center">
-                <p className="text-xs text-white/60 mb-3">No matches for "{searchQuery}".</p>
-                <button
-                  onClick={() => setNoResultDialog(true)}
-                  className="px-4 py-2 rounded-xl text-white font-semibold text-xs"
-                  style={{ background: "#E50914" }}
-                >
-                  Try the Download page →
-                </button>
+              <div className="py-6">
+                <p className="text-xs text-white/60 mb-4 text-center">No matches for "{searchQuery}".</p>
                 {trending.length > 0 && (
-                  <div className="mt-6 text-left">
+                  <div className="text-left">
                     <h3 className="text-[11px] font-semibold text-white/80 mb-2">You might like</h3>
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {trending.slice(0, 8).map((m: any) => (
-                        <TmdbCard key={`sgg-${m._type}-${m.id}`} item={m} type={m._type} fill />
+                    <div className="space-y-2">
+                      {(trending as any[]).slice(0, 8).map((m: any) => (
+                        <ResultRow
+                          key={`sgg-${m._type}-${m.id}`}
+                          item={{ ...m, _bucket: "all" }}
+                          onClick={() => navigate(m._type === "tv" ? `/tv/${m.id}` : `/movie/${m.id}`)}
+                        />
                       ))}
                     </div>
                   </div>
@@ -296,17 +320,17 @@ const SearchPage = () => {
                 <p className="text-[10px] text-white/50 mb-2">
                   {filtered.length} result{filtered.length === 1 ? "" : "s"} for "{searchQuery}"
                 </p>
-                <div className="grid grid-cols-4 md:grid-cols-6 gap-1.5 pb-4">
+                <div className="space-y-2 pb-4">
                   {filtered.map((item, i) => (
-                    <Fragment key={`${item._type}-${item.id}`}>
-                      <TmdbCard item={item} type={item._type} fill />
-                      {(i + 1) % 8 === 0 && i < filtered.length - 1 && (
-                        <div className="col-span-4 md:col-span-6 -mx-5 my-1">
+                    <div key={`${item._type}-${item.id}`}>
+                      <ResultRow item={item} onClick={() => openItem(item)} />
+                      {(i + 1) % 6 === 0 && i < filtered.length - 1 && (
+                        <div className="-mx-5 my-2">
                           <SponsoredLabel />
                           <InlineAdRow count={4} />
                         </div>
                       )}
-                    </Fragment>
+                    </div>
                   ))}
                 </div>
               </>
@@ -314,46 +338,6 @@ const SearchPage = () => {
           </>
         )}
       </div>
-
-      {downloadsDialog && (
-        <div className="fixed inset-0 z-[250] grid place-items-center bg-black/75 p-4" onClick={() => setDownloadsDialog(false)}>
-          <div className="w-full max-w-xs rounded-2xl p-5 text-white" style={{ background: "#0f0f10", border: "1px solid rgba(229,9,20,0.4)" }} onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-2 mb-2">
-              <Download className="w-4 h-4" style={{ color: "#E50914" }} />
-              <h3 className="text-sm font-bold">Check Downloads</h3>
-            </div>
-            <p className="text-[11px] text-white/65 mb-3">
-              Open your Downloads tab to see if the movie or show you're looking for is already saved on your device.
-            </p>
-            <div className="flex gap-2">
-              <button onClick={() => setDownloadsDialog(false)} className="flex-1 px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/10">Cancel</button>
-              <button onClick={() => { setDownloadsDialog(false); goToDownloads(); }} className="flex-1 px-3 py-2 rounded-lg text-[11px] font-bold text-white" style={{ background: "#E50914" }}>
-                Go to Downloads
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {noResultDialog && (
-        <div className="fixed inset-0 z-[250] grid place-items-center bg-black/75 p-4" onClick={() => setNoResultDialog(false)}>
-          <div className="w-full max-w-xs rounded-2xl p-5 text-white" style={{ background: "#0f0f10", border: "1px solid rgba(229,9,20,0.4)" }} onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-2 mb-2">
-              <AlertCircle className="w-4 h-4" style={{ color: "#E50914" }} />
-              <h3 className="text-sm font-bold">No results found</h3>
-            </div>
-            <p className="text-[11px] text-white/65 mb-3">
-              We couldn't find "{searchQuery}". Try our external download page.
-            </p>
-            <div className="flex gap-2">
-              <button onClick={() => setNoResultDialog(false)} className="flex-1 px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/10">Close</button>
-              <button onClick={() => { setNoResultDialog(false); goToDownloads(); }} className="flex-1 px-3 py-2 rounded-lg text-[11px] font-bold text-white" style={{ background: "#E50914" }}>
-                Go to Downloads
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </AppLayout>
   );
 };

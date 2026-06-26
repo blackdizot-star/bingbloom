@@ -54,7 +54,20 @@ const TvWatchPage = () => {
           </h1>
         </header>
 
-        <MoviePlayer tmdbId={tmdbId || ""} type="tv" season={seasonNum} episode={episodeNum} serverId={server} onServerChange={setServer} />
+        <div className="w-full md:max-w-2xl lg:max-w-3xl md:mx-auto">
+          <MoviePlayer
+            tmdbId={tmdbId || ""}
+            type="tv"
+            season={seasonNum}
+            episode={episodeNum}
+            serverId={server}
+            onServerChange={setServer}
+            title={data?.name}
+            year={(data?.first_air_date || "").slice(0, 4)}
+            poster={data?.poster_path ? img(data.poster_path, "w500") : null}
+            backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
+          />
+        </div>
 
         {data && (
           <div className="px-4 pb-4">

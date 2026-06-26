@@ -8,6 +8,7 @@ import InlineAdRow from "./InlineAdRow";
 interface AppLayoutProps {
   children: ReactNode;
   hideNav?: boolean;
+  hideFooter?: boolean;
 }
 
 const NO_END_AD = [
@@ -19,7 +20,7 @@ const NO_END_AD = [
   "/install", "/search",
 ];
 
-const AppLayout = ({ children, hideNav }: AppLayoutProps) => {
+const AppLayout = ({ children, hideNav, hideFooter }: AppLayoutProps) => {
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const AppLayout = ({ children, hideNav }: AppLayoutProps) => {
           </section>
         )}
       </main>
-      <Footer />
+      {!hideFooter && <Footer />}
       <BottomNav />
     </div>
   );
