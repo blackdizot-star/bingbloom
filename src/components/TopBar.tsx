@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate, NavLink } from "react-router-dom";
 import { Search, X, Menu, Home, Film, Tv, Clapperboard, Radio, Palette, Camera, User, Mic2, Bookmark, Heart, Settings, Shield, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
-import logoAsset from "@/assets/bing-logo.png.asset.json";
+import logoAsset from "@/assets/bingbloom-logo-v3.png.asset.json";
 
 const primaryNav = [
   { to: "/home", label: "Home", icon: Home },
