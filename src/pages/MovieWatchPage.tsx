@@ -57,7 +57,18 @@ const MovieWatchPage = () => {
           <h1 className="text-[13px] font-semibold text-white truncate">{data?.title || "Watch"}</h1>
         </header>
 
-        <MoviePlayer tmdbId={tmdbId || ""} type="movie" serverId={server} onServerChange={setServer} />
+        <div className="w-full md:max-w-2xl lg:max-w-3xl md:mx-auto">
+          <MoviePlayer
+            tmdbId={tmdbId || ""}
+            type="movie"
+            serverId={server}
+            onServerChange={setServer}
+            title={data?.title}
+            year={year}
+            poster={data?.poster_path ? img(data.poster_path, "w500") : null}
+            backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
+          />
+        </div>
 
         {data && (
           <div className="px-4 pb-4">
