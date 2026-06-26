@@ -25,7 +25,9 @@ import {
 import { startDownload } from "@/lib/offlineDownloads";
 
 type Source = "fast" | "external";
-type Step = "choose" | "loading" | "list" | "error";
+type Step = "choose" | "loading" | "list" | "error" | "redirect";
+
+const EXTERNAL_DOWNLOADER_URL = "https://videodownloader.site/";
 
 interface Props {
   open: boolean;
@@ -67,8 +69,13 @@ const DownloadSourceSheet = ({
 
   const resolve = async (chosen: Source) => {
     setSource(chosen);
-    setStep("loading");
     setErrorMsg("");
+    if (chosen === "external") {
+      // External downloader doesn't need resolution picking — just confirm redirect.
+      setStep("redirect");
+      return;
+    }
+    setStep("loading");
     const res = await resolveMovieboxDownloads({
       title,
       year,
@@ -84,6 +91,14 @@ const DownloadSourceSheet = ({
     setResolvedTitle(res.title || title);
     setDownloads(res.downloads);
     setStep("list");
+  };
+
+  // Open external downloader with title pre-filled (title only — no season/episode).
+  const continueToExternal = () => {
+    const url = `${EXTERNAL_DOWNLOADER_URL}?q=${encodeURIComponent(title)}&title=${encodeURIComponent(title)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+    toast.success("Opening external downloader…");
+    close(false);
   };
 
   // Reset to chooser whenever sheet (re)opens.
@@ -123,14 +138,9 @@ const DownloadSourceSheet = ({
 
   const startExternalDownload = (d: MovieboxDownload) => {
     const url = movieboxProxyUrl(d.url);
-    const fileBase = isSeries
-      ? `${resolvedTitle} S${String(season ?? 1).padStart(2, "0")}E${String(episode ?? 1).padStart(2, "0")}`
-      : resolvedTitle;
-    const filename = `${fileBase} [${resolutionLabel(d.resolution)}].${(d.format || "mp4").toLowerCase()}`;
     try {
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename;
       a.rel = "noopener noreferrer";
       a.target = "_blank";
       document.body.appendChild(a);
@@ -207,6 +217,40 @@ const DownloadSourceSheet = ({
             <p className="mt-1 text-[10.5px] text-white/50">
               Checking quality options for “{title}” {isSeries ? `· ${episodeLabel}` : ""}.
             </p>
+          </div>
+        )}
+
+        {/* ---- External redirect confirm ---- */}
+        {step === "redirect" && (
+          <div className="p-5 text-center">
+            <DialogHeader>
+              <div className="mx-auto w-12 h-12 grid place-items-center rounded-xl bg-sky-400/15 text-sky-400 mb-3">
+                <ExternalLink className="w-5 h-5" />
+              </div>
+              <DialogTitle className="text-sm font-bold">You're being redirected</DialogTitle>
+              <DialogDescription className="text-[11px] text-white/65 leading-relaxed mt-1">
+                We'll open <span className="text-white font-semibold">videodownloader.site</span> in a new tab with the title pre-filled. Tap continue to proceed.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 p-3 rounded-lg bg-white/5 border border-white/10 text-left">
+              <p className="text-[9.5px] uppercase tracking-wider text-white/40 font-semibold">Title</p>
+              <p className="text-[12px] font-bold text-white mt-0.5 truncate">{title}</p>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => setStep("choose")}
+                className="flex-1 px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/10 text-white hover:bg-white/15"
+              >
+                Back
+              </button>
+              <button
+                onClick={continueToExternal}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold text-white hover:opacity-90"
+                style={{ background: "#E50914" }}
+              >
+                Continue <ExternalLink className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         )}
 
