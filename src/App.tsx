@@ -1,13 +1,14 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient } from "@tanstack/react-query";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import OfflineBanner from "@/components/OfflineBanner";
 import AppSplashScreen from "@/components/AppSplashScreen";
-import AppUpdateNotice from "@/components/AppUpdateNotice";
 import HomePage from "./pages/HomePage";
 import FollowUsPage from "./pages/FollowUsPage";
 import MoviesPage from "./pages/MoviesPage";
@@ -82,13 +83,49 @@ const persister = createSyncStoragePersister({
   throttleTime: 1000,
 });
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    const sendNativeUpdateNotice = async () => {
+      const dismissed = window.localStorage.getItem("bingbloom-native-notice-sent");
+      if (dismissed) return;
+
+      try {
+        await LocalNotifications.createChannel({
+          id: "bingbloom-updates",
+          name: "BingBloom updates",
+          importance: 5,
+          visibility: 1,
+        });
+
+        const permission = await LocalNotifications.requestPermissions();
+        if (permission.display === "granted") {
+          await LocalNotifications.schedule({
+            notifications: [
+              {
+                id: Date.now(),
+                title: "BingBloom update ready",
+                body: "Your app now uses the BingBloom brand everywhere and is ready to open.",
+                schedule: { at: new Date(Date.now() + 1000) },
+                extra: { source: "native-update" },
+              },
+            ],
+          });
+          window.localStorage.setItem("bingbloom-native-notice-sent", "true");
+        }
+      } catch {
+        window.localStorage.setItem("bingbloom-native-notice-sent", "true");
+      }
+    };
+
+    void sendNativeUpdateNotice();
+  }, []);
+
+  return (
   <PersistQueryClientProvider
     client={queryClient}
     persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7 }}
   >
     <AppSplashScreen />
-    <AppUpdateNotice />
     <OfflineBanner />
     <TooltipProvider>
       <Toaster />
@@ -167,6 +204,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </PersistQueryClientProvider>
-);
+  );
+};
 
 export default App;
