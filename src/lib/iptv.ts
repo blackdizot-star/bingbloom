@@ -43,6 +43,23 @@ const VERIFIED_FALLBACK_CHANNELS: IptvChannel[] = [
   { name: "People Are Awesome", url: "https://jukin-peopleareawesome-2-it.samsung.wurl.tv/playlist.m3u8", logo: "https://i.imgur.com/xwz9zKk.jpeg", group: "Entertainment", country: "US" },
 ];
 
+// Curated extra sports channels prepended to the live TV directory so the page
+// always has a strong sports lineup regardless of community playlist drift.
+export const CURATED_SPORTS_CHANNELS: IptvChannel[] = [
+  { name: "Red Bull TV", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Red_Bull_TV_logo.svg/512px-Red_Bull_TV_logo.svg.png", group: "Sports", country: "AT" },
+  { name: "Stadium", url: "https://stadiumlive-amg.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Stadium_logo.svg/512px-Stadium_logo.svg.png", group: "Sports", country: "US" },
+  { name: "Fubo Sports Network", url: "https://fubo-fubosportsnetwork-1-eu.rakuten.wurl.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Fubo_Sports_Network_logo.svg/512px-Fubo_Sports_Network_logo.svg.png", group: "Sports", country: "US" },
+  { name: "World Poker Tour", url: "https://wpt-amg.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/World_Poker_Tour_logo.svg/512px-World_Poker_Tour_logo.svg.png", group: "Sports", country: "US" },
+  { name: "Outside TV", url: "https://outside-amg.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Outside_TV_logo.svg/512px-Outside_TV_logo.svg.png", group: "Sports", country: "US" },
+  { name: "Glory Kickboxing", url: "https://glorykickboxing-amg.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/GLORY_World_Series_logo.svg/512px-GLORY_World_Series_logo.svg.png", group: "Sports", country: "NL" },
+  { name: "Impact Wrestling", url: "https://impactwrestling-amg.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Impact_Wrestling_logo.svg/512px-Impact_Wrestling_logo.svg.png", group: "Sports", country: "US" },
+  { name: "Bundesliga Stream", url: "https://bundesliga-amg.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Bundesliga_logo_%282017%29.svg/512px-Bundesliga_logo_%282017%29.svg.png", group: "Sports", country: "DE" },
+  { name: "MAVTV Select", url: "https://mavtv-amg.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/MAVTV_logo.svg/512px-MAVTV_logo.svg.png", group: "Sports", country: "US" },
+  { name: "Surf Now", url: "https://surfnow-amg.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Surfing_pictogram.svg/512px-Surfing_pictogram.svg.png", group: "Sports", country: "US" },
+  { name: "Sport TV1 KE", url: "https://5cb2ab09b9d7a.streamlock.net/sporttv1/sporttv1/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Football_pictogram.svg/512px-Football_pictogram.svg.png", group: "Sports", country: "KE" },
+  { name: "beIN SPORTS XTRA", url: "https://bein-bein-sports-xtra-en-us-plex.amagi.tv/playlist.m3u8", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/BeIN_Sports_logo_%282017%29.svg/512px-BeIN_Sports_logo_%282017%29.svg.png", group: "Sports", country: "QA" },
+];
+
 const proxiedStreamUrl = (url: string) => {
   const ref = import.meta.env.VITE_SUPABASE_PROJECT_ID;
   return `https://${ref}.supabase.co/functions/v1/proxy?any=1&url=${encodeURIComponent(url)}`;
