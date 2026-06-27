@@ -16,7 +16,9 @@
     "cap:sync": "npx cap sync android",
     "cap:copy": "npx cap copy android",
     "cap:open": "npx cap open android",
-    "apk:build": "cd android && ./gradlew assembleRelease"
+    "apk:build": "cd android && ./gradlew assembleRelease",
+    "aab:build": "cd android && ./gradlew bundleRelease",
+    "android:build": "npm run build && npx cap sync android && npm run apk:build && npm run aab:build"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.1",
