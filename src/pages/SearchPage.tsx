@@ -40,6 +40,31 @@ const SponsoredLabel = () => (
   </p>
 );
 
+const SkeletonRow = () => (
+  <div
+    className="w-full flex items-center gap-3 p-2 rounded-xl animate-pulse"
+    style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
+  >
+    <div className="w-[58px] h-[82px] rounded-lg bg-white/5 flex-shrink-0" />
+    <div className="flex-1 space-y-2">
+      <div className="h-3 w-3/4 rounded bg-white/10" />
+      <div className="h-2.5 w-1/3 rounded bg-white/10" />
+      <div className="h-2.5 w-1/4 rounded bg-white/10" />
+    </div>
+  </div>
+);
+
+const BrandedLoadingState = ({ label = "Loading…" }: { label?: string }) => (
+  <div className="space-y-2 pb-4">
+    <div className="flex flex-col items-center justify-center gap-2 py-4">
+      <img src="/logo-compact.png" alt="BingBloom" className="h-12 w-12 animate-pulse rounded-xl" />
+      <p className="text-[11px] uppercase tracking-[0.25em] text-white/50 font-semibold">{label}</p>
+    </div>
+    {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+  </div>
+);
+
+
 const useDebounced = <T,>(value: T, delay = 250) => {
   const [v, setV] = useState(value);
   useEffect(() => {
