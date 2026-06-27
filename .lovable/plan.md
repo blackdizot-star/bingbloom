@@ -1,31 +1,37 @@
-# BingBloom: Bundled Assets + Capacitor APK Readiness
-
-Goal: make every brand image part of the bundled app (so APK builds work fully offline), add an empty/loading state on Explore, and finalize Capacitor config.
+# BingBloom: AAB build, footer cleanup, 250-page sitemap, APK polish
 
 ## Tasks
 
-1. **Audit current image references** — find every place we use the CDN `.asset.json` logo (splash, header, footer, onboarding, install page, 404, brand logo component) and the install/onboarding hero images.
+1. **Footer cleanup** — In `src/components/AppLayout.tsx`, restrict `<Footer />` to only render on `/` (home) and `/settings`. Hide it on `/search` (explore), `/movies`, `/live-tv`, and everywhere else. The footer's content stays unchanged so home + settings still show full footer info.
 
-2. **Bundle brand images locally** — copy the official BingBloom logo into `public/` as `logo-compact.png`, `icon-192.png`, `icon-512.png`, `splash.png`, and `favicon.png` so they ship with the APK (no CDN dependency at runtime).
+2. **Expand sitemap to 250 entries** — In `scripts/generate-sitemap.ts`, programmatically add entries to reach 250 URLs total: keep all current static + corporate pages, then add genre permutations (`/genre/<id>` for movies & TV), expanded TMDB sample IDs (popular movies + TV — generate ~150 from a curated id list), anime detail pages (`/anime/<id>` from a curated AniList/MAL id list), and live-tv channel pages. Each entry keeps `<changefreq>` + `<priority>`. Verify count == 250 via `console.log`.
 
-3. **Update `BrandLogo`, `AppSplashScreen`, `NotFound`, `Footer`** to use `/logo-compact.png` instead of CDN `.asset.json` pointers, keeping the existing wordmark styling.
+3. **Android icons + splash verification** — Confirm `public/icon-192.png`, `public/icon-512.png`, `public/splash.png`, and all `android/app/src/main/res/mipmap-*` launcher icons exist (already done in prior turn). Re-copy `public/splash.png` → `android/app/src/main/res/drawable/splash.png` to guarantee it ships in the APK.
 
-4. **Onboarding + Install pages** — switch any CDN logo refs in `Welcome`, `OnboardingDone`, `OnboardingGenres`, `OnboardingTitles`, `InstallAppPage`, `DownloadApkPage` to local `/logo-compact.png`.
+4. **Android manifest permissions** — Audit `android/app/src/main/AndroidManifest.xml`. Current set already has INTERNET, NETWORK_STATE, storage, downloads, notifications. Add `WAKE_LOCK` (for video playback) and `FOREGROUND_SERVICE` if missing.
 
-5. **TopBar (next to the three dashes/hamburger)** — ensure the compact logo from `/logo-compact.png` renders next to the menu icon.
+5. **Capacitor config completeness** — `capacitor.config.ts` already has appId, SplashScreen plugin, allowMixedContent. No changes needed unless we add StatusBar plugin config (`StatusBar: { style: "DARK", backgroundColor: "#0A0A0A" }`).
 
-6. **Explore page empty/loading state** — in `SearchPage.tsx`, when results are loading show a branded skeleton list (pulsing logo + shimmer rows); when query has no results show an empty state with the logo and "No results found" copy.
+6. **Gradle: enable AAB build task** — Add a custom Gradle task or document the existing `bundleRelease` target. Add `apk:build` and `aab:build` npm scripts to `package.json`:
+   - `"apk:build": "cd android && ./gradlew assembleRelease"`
+   - `"aab:build": "cd android && ./gradlew bundleRelease"`
+   - `"android:build": "npm run build && npx cap sync android && npm run apk:build && npm run aab:build"`
 
-7. **`index.html` head** — point favicon + apple-touch-icon at the new local `/icon-192.png` and `/favicon.png`, keep theme-color `#0A0A0A`.
+7. **README build instructions** — Add a short "Build APK + AAB" section to `README.md` with the exact command sequence the user runs locally after pulling the repo:
+   ```
+   npm install
+   npm run build
+   npx cap sync android
+   cd android && ./gradlew assembleRelease bundleRelease
+   ```
+   Outputs:
+   - APK: `android/app/build/outputs/apk/release/app-release.apk`
+   - AAB: `android/app/build/outputs/bundle/release/app-release.aab`
 
-8. **`public/manifest.json`** — update icon paths to `/icon-192.png` and `/icon-512.png` with `any maskable` purpose, app name BingBloom, theme/background `#0A0A0A`.
-
-9. **Capacitor config** — replace `capacitor.config.json` with a `capacitor.config.ts` containing appId `com.bingbloom.app`, SplashScreen plugin (2000ms, bg `#0A0A0A`, resource `splash`), `allowMixedContent`, and add cap scripts (`cap:sync`, `cap:copy`, `apk:build`) to `package.json`. Add Android `colors.xml` (`splash_background`) and a `drawable/splash.xml` layer-list referencing `@drawable/splash`. Drop a `splash.png` into `android/app/src/main/res/drawable/`.
-
-10. **Verify build** — run `bun run build` to confirm no broken imports, assets resolve, and the bundle includes the new public images.
+8. **Verify build** — Run `bun run build` to confirm sitemap generates with 250 entries and no broken imports.
 
 ## Technical notes
 
-- Keep existing CDN `.asset.json` files in place (used elsewhere) but stop referencing them from brand UI. The new `public/*.png` are the canonical local copies for APK packaging.
-- `public/*` files are copied verbatim by Vite into `dist/` and packaged into the Capacitor `webDir`, so they're available offline in the APK.
-- Do not touch keystore, signing config, or push native gradle changes beyond splash drawable + colors.
+- Lovable's sandbox cannot run `./gradlew` (no Android SDK). The APK/AAB must be built on the user's local machine after `git pull`. Everything else (icons, splash, manifest, config, web bundle) is pre-wired so the local build is one command.
+- Sitemap inflation uses static curated TMDB ids — no runtime API calls during build.
+- Footer continues to render its full content on home + settings; only its mount points are restricted.
