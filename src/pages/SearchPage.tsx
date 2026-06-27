@@ -278,9 +278,7 @@ const SearchPage = () => {
               <h2 className="text-white text-sm font-bold">Trending now</h2>
             </div>
             {isFetching && results.length === 0 ? (
-              <div className="flex items-center justify-center h-28">
-                <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#E50914" }} />
-              </div>
+              <BrandedLoadingState label="Loading trending" />
             ) : (
               <div className="space-y-2 pb-4">
                 {(results as ResultItem[]).slice(0, 24).map((m, i) => (
