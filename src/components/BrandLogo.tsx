@@ -1,4 +1,3 @@
-import logoAsset from "@/assets/bingbloom-logo-v3.png.asset.json";
 
 interface Props {
   size?: number;
@@ -17,7 +16,7 @@ const BrandLogo = ({ size = 56, withWordmark = true, wordmarkSize = "md", classN
   return (
     <div className={`flex flex-col items-center ${className}`}>
       <img
-        src={logoAsset.url}
+        src={"/logo-compact.png"}
         alt="BingBloom"
         style={{ width: size, height: size, objectFit: "contain" }}
       />

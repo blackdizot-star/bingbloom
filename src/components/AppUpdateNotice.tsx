@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { BellRing, X } from "lucide-react";
-import logoAsset from "@/assets/bingbloom-logo-v3.png.asset.json";
 
 const UPDATE_URL = "https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n";
 
@@ -23,7 +22,7 @@ const AppUpdateNotice = () => {
     if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
       new Notification("BingBloom update", {
         body: "Join our WhatsApp channel for the latest APK and app news.",
-        icon: logoAsset.url,
+        icon: "/logo-compact.png",
       });
     }
   };

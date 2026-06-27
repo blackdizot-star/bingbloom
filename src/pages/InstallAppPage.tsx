@@ -4,7 +4,6 @@ import { ChevronLeft, Download, Star, Share2, Shield, Smartphone, Check, Chevron
 import { Link } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
-import logoAsset from "@/assets/bingbloom-logo-v3.png.asset.json";
 import apkAsset from "@/assets/bingbloom-app.apk.asset.json";
 
 const SCREENSHOTS = [
@@ -51,7 +50,7 @@ const InstallAppPage = () => {
         </Link>
 
         <div className="flex items-start gap-3 mb-4">
-          <img src={logoAsset.url} alt="BingBloom" className="w-14 h-14 rounded-2xl flex-shrink-0 shadow-lg" style={{ filter: "drop-shadow(0 0 14px rgba(229,9,20,0.45))" }} />
+          <img src={"/logo-compact.png"} alt="BingBloom" className="w-14 h-14 rounded-2xl flex-shrink-0 shadow-lg" style={{ filter: "drop-shadow(0 0 14px rgba(229,9,20,0.45))" }} />
           <div className="flex-1 min-w-0">
             <h1 className="text-base font-bold text-foreground leading-tight">BingBloom</h1>
             <p className="text-[11px] text-primary font-medium">Bing Bloom Studios</p>
