@@ -1,58 +1,31 @@
-# BingBloom — Downloads, MovieBox, Offline & UI Overhaul
+# BingBloom: Bundled Assets + Capacitor APK Readiness
 
-## Key technical note (important)
-The `moviebox-api` you uploaded is a **Python** library. Lovable apps are client-side React + Vite and **cannot host a persistent Python/FastAPI server**, so the README's FastAPI approach won't run here. The good news: I reverse-engineered the library and confirmed it just calls MovieBox's REST API. I tested the full flow live and it works:
+Goal: make every brand image part of the bundled app (so APK builds work fully offline), add an empty/loading state on Explore, and finalize Capacitor config.
 
-```text
-1. POST  /wefeed-h5api-bff/subject/search-suggest   (referer moviebox.ph)   -> Bearer token + cookies
-2. POST  /wefeed-h5api-bff/subject/search           (bearer)                -> subjectId + detailPath
-3. GET   /wefeed-h5api-bff/subject/download         (referer videodownloader.site) -> real MP4 URLs (360/480/720/1080) + subtitles
-```
+## Tasks
 
-I'll reimplement this in a **Supabase Edge Function** (Deno/TypeScript) so "Fast Downloads" works fully inside the app — no external server for you to run.
+1. **Audit current image references** — find every place we use the CDN `.asset.json` logo (splash, header, footer, onboarding, install page, 404, brand logo component) and the install/onboarding hero images.
 
-## Task list
+2. **Bundle brand images locally** — copy the official BingBloom logo into `public/` as `logo-compact.png`, `icon-192.png`, `icon-512.png`, `splash.png`, and `favicon.png` so they ship with the APK (no CDN dependency at runtime).
 
-**1. MovieBox edge function (`moviebox-resolve`)**
-Reimplement the 3-step flow above in Deno. Input: `{ title, year?, mediaType, season?, episode? }`. Output: ranked resolutions with direct MP4 URLs + subtitle tracks. Add input validation, the SSRF-safe fetch pattern already used in the repo, and CORS.
+3. **Update `BrandLogo`, `AppSplashScreen`, `NotFound`, `Footer`** to use `/logo-compact.png` instead of CDN `.asset.json` pointers, keeping the existing wordmark styling.
 
-**2. Download-source selection step**
-New `DownloadSourceSheet` shown when the Download button is tapped. Two cards:
-- **BingBloom** — "current/fast", keeps existing `videodownloader.site` in-app flow.
-- **Fast Downloads** — powered by MovieBox edge function.
-Flow: choose source → **Next** → source-specific options (resolution for MovieBox) → **Continue**. Wire into `DownloadButton`, the movie/TV/anime detail pages, and the explore (search) results.
+4. **Onboarding + Install pages** — switch any CDN logo refs in `Welcome`, `OnboardingDone`, `OnboardingGenres`, `OnboardingTitles`, `InstallAppPage`, `DownloadApkPage` to local `/logo-compact.png`.
 
-**3. In-app downloads + offline playback**
-For "Fast Downloads": fetch the chosen MP4 (streamed through the existing `proxy` edge function for CORS), store the blob in IndexedDB via the existing `offlineDownloads.ts`, save metadata via `savedDownloads.ts`. Rebuild `MyDownloadsPage` to list items with progress, play stored blobs inline (`URL.createObjectURL`), and delete. Keep the BingBloom external path as-is.
+5. **TopBar (next to the three dashes/hamburger)** — ensure the compact logo from `/logo-compact.png` renders next to the menu icon.
 
-**4. Explore page download entry**
-On `/search` results, add a Download action that opens the same source-selection flow and (for MovieBox) shows the external/source check so users can verify availability before downloading.
+6. **Explore page empty/loading state** — in `SearchPage.tsx`, when results are loading show a branded skeleton list (pulsing logo + shimmer rows); when query has no results show an empty state with the logo and "No results found" copy.
 
-**5. New Profile page**
-Rebuild `ProfilePage` from scratch with a clean layout (avatar/name, quick links to Downloads, My List, Liked, Settings, Contact). Remove the old/stale routes and links that no longer exist. Only the profile page changes.
+7. **`index.html` head** — point favicon + apple-touch-icon at the new local `/icon-192.png` and `/favicon.png`, keep theme-color `#0A0A0A`.
 
-**6. Ads in Movies & Anime pages**
-Insert 3 ad placements between content rows on `MoviesPage` and `AnimePage` using the existing `AdSlot`/`InlineAdRow`/`NativeAd` components, spaced naturally so they don't disrupt browsing.
+8. **`public/manifest.json`** — update icon paths to `/icon-192.png` and `/icon-512.png` with `any maskable` purpose, app name BingBloom, theme/background `#0A0A0A`.
 
-**7. Offline app support**
-Cache TMDB metadata/listings (React Query persist + IndexedDB) so the app shell and browsing work offline. When a user taps play while offline on a title that isn't downloaded, show a smooth soft popup: "You're offline — connect to the internet to stream this." Downloaded titles still play offline. Verify the existing PWA service worker follows Lovable preview-safety rules.
+9. **Capacitor config** — replace `capacitor.config.json` with a `capacitor.config.ts` containing appId `com.bingbloom.app`, SplashScreen plugin (2000ms, bg `#0A0A0A`, resource `splash`), `allowMixedContent`, and add cap scripts (`cap:sync`, `cap:copy`, `apk:build`) to `package.json`. Add Android `colors.xml` (`splash_background`) and a `drawable/splash.xml` layer-list referencing `@drawable/splash`. Drop a `splash.png` into `android/app/src/main/res/drawable/`.
 
-**8. Desktop onboarding layout**
-Give Welcome + onboarding (genres/titles/done) a polished desktop layout (centered split/二-column, larger artwork) while keeping the exact same content and step flow. Mobile layout stays untouched via responsive classes.
+10. **Verify build** — run `bun run build` to confirm no broken imports, assets resolve, and the bundle includes the new public images.
 
-**9. Email + contact**
-Replace contact email everywhere (Contact page, Footer, Profile) with `hello.bingbloom@gmail.com` as a `mailto:` link that opens the user's email app.
+## Technical notes
 
-**10. Icons + final QA**
-Change the bottom-nav **Home** icon to a standard house icon and the **Movies** icon to a film/clapper icon (currently Home=Clapperboard, Movies=Tv — confusing). Then full pass: typecheck, build, click through download flow, profile, ads, offline popup, and onboarding on desktop + mobile; fix any bugs found.
-
-## Technical details
-- Edge function: `supabase/functions/moviebox-resolve/index.ts`, deployed automatically. Token is fetched per-request from the `x-user` header (no secret needed); referer differs per step (the critical detail that makes downloads return real URLs).
-- Large video blobs: IndexedDB only (never localStorage). Metadata stays in `savedDownloads.ts`.
-- CORS for MP4 fetch: route through existing `proxy` function; respect its existing SSRF blocklist by allowlisting the MovieBox CDN host.
-- No database schema changes required. No new secrets required.
-- All new colors/styles use existing semantic tokens; no hardcoded palette changes.
-
-## Out of scope / honest limits
-- True native external-storage saving needs Capacitor (separate path); IndexedDB is used for PWA offline playback, as your notes suggested.
-- MovieBox availability depends on their CDN; some titles legitimately return no downloadable resource — the UI will show a clear "not available from this source, try BingBloom" message.
+- Keep existing CDN `.asset.json` files in place (used elsewhere) but stop referencing them from brand UI. The new `public/*.png` are the canonical local copies for APK packaging.
+- `public/*` files are copied verbatim by Vite into `dist/` and packaged into the Capacitor `webDir`, so they're available offline in the APK.
+- Do not touch keystore, signing config, or push native gradle changes beyond splash drawable + colors.
