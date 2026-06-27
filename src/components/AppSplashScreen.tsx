@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import logoAsset from "@/assets/bingbloom-logo-v3.png.asset.json";
 
 const AppSplashScreen = () => {
   const [visible, setVisible] = useState(true);
@@ -34,7 +33,7 @@ const AppSplashScreen = () => {
     >
       <div className="flex flex-col items-center gap-3">
         <img
-          src={logoAsset.url}
+          src={"/logo-compact.png"}
           alt="BingBloom"
           className="h-16 w-16 animate-[bounce_1s_ease-in-out_infinite] rounded-2xl object-contain shadow-[0_0_22px_rgba(229,9,20,0.3)]"
         />

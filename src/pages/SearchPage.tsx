@@ -40,6 +40,31 @@ const SponsoredLabel = () => (
   </p>
 );
 
+const SkeletonRow = () => (
+  <div
+    className="w-full flex items-center gap-3 p-2 rounded-xl animate-pulse"
+    style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
+  >
+    <div className="w-[58px] h-[82px] rounded-lg bg-white/5 flex-shrink-0" />
+    <div className="flex-1 space-y-2">
+      <div className="h-3 w-3/4 rounded bg-white/10" />
+      <div className="h-2.5 w-1/3 rounded bg-white/10" />
+      <div className="h-2.5 w-1/4 rounded bg-white/10" />
+    </div>
+  </div>
+);
+
+const BrandedLoadingState = ({ label = "Loading…" }: { label?: string }) => (
+  <div className="space-y-2 pb-4">
+    <div className="flex flex-col items-center justify-center gap-2 py-4">
+      <img src="/logo-compact.png" alt="BingBloom" className="h-12 w-12 animate-pulse rounded-xl" />
+      <p className="text-[11px] uppercase tracking-[0.25em] text-white/50 font-semibold">{label}</p>
+    </div>
+    {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
+  </div>
+);
+
+
 const useDebounced = <T,>(value: T, delay = 250) => {
   const [v, setV] = useState(value);
   useEffect(() => {
@@ -253,9 +278,7 @@ const SearchPage = () => {
               <h2 className="text-white text-sm font-bold">Trending now</h2>
             </div>
             {isFetching && results.length === 0 ? (
-              <div className="flex items-center justify-center h-28">
-                <Loader2 className="w-4 h-4 animate-spin" style={{ color: "#E50914" }} />
-              </div>
+              <BrandedLoadingState label="Loading trending" />
             ) : (
               <div className="space-y-2 pb-4">
                 {(results as ResultItem[]).slice(0, 24).map((m, i) => (
@@ -290,14 +313,14 @@ const SearchPage = () => {
             </div>
 
             {isFetching ? (
-              <div className="flex items-center justify-center h-32">
-                <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#E50914" }} />
-              </div>
+              <BrandedLoadingState label="Searching" />
             ) : filtered.length === 0 ? (
-              <div className="py-6">
-                <p className="text-xs text-white/60 mb-4 text-center">No matches for "{searchQuery}".</p>
+              <div className="py-8 flex flex-col items-center text-center">
+                <img src="/logo-compact.png" alt="" className="h-14 w-14 mb-3 rounded-xl opacity-90" />
+                <p className="text-sm font-semibold text-white">No results found</p>
+                <p className="text-xs text-white/55 mt-1 mb-5">Nothing matches "{searchQuery}". Try another title.</p>
                 {trending.length > 0 && (
-                  <div className="text-left">
+                  <div className="text-left w-full">
                     <h3 className="text-[11px] font-semibold text-white/80 mb-2">You might like</h3>
                     <div className="space-y-2">
                       {(trending as any[]).slice(0, 8).map((m: any) => (
