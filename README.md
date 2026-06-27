@@ -71,3 +71,22 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Build the Android APK and AAB
+
+After cloning/pulling, run:
+
+```bash
+npm install
+npm run build
+npx cap sync android
+cd android && ./gradlew assembleRelease bundleRelease
+```
+
+Outputs:
+- APK: `android/app/build/outputs/apk/release/app-release.apk`
+- AAB: `android/app/build/outputs/bundle/release/app-release.aab`
+
+Or use the shortcut: `npm run android:build`.
+
+App icon, splash screen, and all permissions are pre-configured.
