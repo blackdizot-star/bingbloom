@@ -313,14 +313,14 @@ const SearchPage = () => {
             </div>
 
             {isFetching ? (
-              <div className="flex items-center justify-center h-32">
-                <Loader2 className="w-5 h-5 animate-spin" style={{ color: "#E50914" }} />
-              </div>
+              <BrandedLoadingState label="Searching" />
             ) : filtered.length === 0 ? (
-              <div className="py-6">
-                <p className="text-xs text-white/60 mb-4 text-center">No matches for "{searchQuery}".</p>
+              <div className="py-8 flex flex-col items-center text-center">
+                <img src="/logo-compact.png" alt="" className="h-14 w-14 mb-3 rounded-xl opacity-90" />
+                <p className="text-sm font-semibold text-white">No results found</p>
+                <p className="text-xs text-white/55 mt-1 mb-5">Nothing matches "{searchQuery}". Try another title.</p>
                 {trending.length > 0 && (
-                  <div className="text-left">
+                  <div className="text-left w-full">
                     <h3 className="text-[11px] font-semibold text-white/80 mb-2">You might like</h3>
                     <div className="space-y-2">
                       {(trending as any[]).slice(0, 8).map((m: any) => (
