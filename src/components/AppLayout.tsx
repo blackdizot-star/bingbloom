@@ -30,6 +30,8 @@ const AppLayout = ({ children, hideNav, hideFooter }: AppLayoutProps) => {
   if (hideNav) return <>{children}</>;
 
   const showEndAd = !NO_END_AD.some((p) => pathname.startsWith(p));
+  const FOOTER_ROUTES = ["/", "/home", "/settings"];
+  const showFooter = !hideFooter && FOOTER_ROUTES.includes(pathname);
 
   return (
     <div className="min-h-screen bg-bingbloom-app">
@@ -43,7 +45,7 @@ const AppLayout = ({ children, hideNav, hideFooter }: AppLayoutProps) => {
           </section>
         )}
       </main>
-      {!hideFooter && <Footer />}
+      {showFooter && <Footer />}
       <BottomNav />
     </div>
   );
