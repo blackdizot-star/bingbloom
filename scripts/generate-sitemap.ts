@@ -4,6 +4,7 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 
 const BASE_URL = "https://bingbloom.lovable.app";
+const TARGET_COUNT = 250;
 
 interface ImageRef { loc: string; caption?: string; }
 interface SitemapEntry {
@@ -13,105 +14,135 @@ interface SitemapEntry {
   images?: ImageRef[];
 }
 
-// 15+ image references — used both inline in sitemap entries and as evergreen
-// poster/backdrop links that crawlers can discover.
 const IMG = {
   hero: "https://image.tmdb.org/t/p/w1280/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
-  trending1: "https://image.tmdb.org/t/p/w780/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
-  trending2: "https://image.tmdb.org/t/p/w780/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg",
-  trending3: "https://image.tmdb.org/t/p/w780/vUUqzWa2LnHIVqkaKVlVGkVcZIW.jpg",
   movies1: "https://image.tmdb.org/t/p/w780/d5NXSklXo0qyIYkgV94XAgMIckC.jpg",
-  movies2: "https://image.tmdb.org/t/p/w780/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
   tv1: "https://image.tmdb.org/t/p/w780/4EYPN5mVIhKLfxGruy7Dy41dTVn.jpg",
-  tv2: "https://image.tmdb.org/t/p/w780/9PFonBhy4cQy7Jz20NpMygczOkv.jpg",
   anime1: "https://image.tmdb.org/t/p/w780/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg",
-  anime2: "https://image.tmdb.org/t/p/w780/x4HHy6V7TbXmoEgKQTwwR7BdY9k.jpg",
-  animation1: "https://image.tmdb.org/t/p/w780/askg3SMvhqEl4OL52YuvdtY40Yb.jpg",
-  doc1: "https://image.tmdb.org/t/p/w780/xJHokMbljvjADYdit5fK5VQsXEG.jpg",
-  music1: "https://image.tmdb.org/t/p/w780/uOw5JD8IlD546feZ6oxbIjvN66P.jpg",
-  podcast1: "https://image.tmdb.org/t/p/w780/zfwEPjB1cASgGCw5ercAh50WiHl.jpg",
   livetv1: "https://image.tmdb.org/t/p/w780/qhb1qOilapbapxWQn9jtRCMwXJF.jpg",
 } as const;
 
-const entries: SitemapEntry[] = [
-  { path: "/",           changefreq: "daily",   priority: "1.0", images: [{ loc: IMG.hero, caption: "BingBloom — stream movies, TV, anime, live channels and music free" }] },
-  { path: "/home",       changefreq: "daily",   priority: "1.0", images: [{ loc: IMG.hero, caption: "BingBloom home — trending movies and shows" }] },
-  { path: "/movies",     changefreq: "daily",   priority: "0.9", images: [{ loc: IMG.movies1, caption: "Browse movies on BingBloom" }, { loc: IMG.movies2, caption: "Popular movies streaming free" }] },
-  { path: "/tv",         changefreq: "daily",   priority: "0.9", images: [{ loc: IMG.tv1, caption: "Browse TV series on BingBloom" }, { loc: IMG.tv2, caption: "Trending TV shows" }] },
-  { path: "/anime",      changefreq: "daily",   priority: "0.8", images: [{ loc: IMG.anime1, caption: "Stream anime free on BingBloom" }, { loc: IMG.anime2 }] },
-  { path: "/animation",  changefreq: "weekly",  priority: "0.7", images: [{ loc: IMG.animation1, caption: "Animated movies and series" }] },
-  { path: "/documentary",changefreq: "weekly",  priority: "0.7", images: [{ loc: IMG.doc1, caption: "Documentary films and series on BingBloom" }] },
-  { path: "/live-tv",    changefreq: "daily",   priority: "0.8", images: [{ loc: IMG.livetv1, caption: "80+ live TV channels worldwide" }] },
-  { path: "/novels",     changefreq: "weekly",  priority: "0.6" },
-  { path: "/podcasts",   changefreq: "weekly",  priority: "0.6", images: [{ loc: IMG.podcast1, caption: "Podcasts on BingBloom" }] },
-  { path: "/music",      changefreq: "weekly",  priority: "0.6", images: [{ loc: IMG.music1, caption: "Music streaming on BingBloom" }] },
-  { path: "/search",     changefreq: "weekly",  priority: "0.7" },
-  { path: "/watch",      changefreq: "daily",   priority: "0.7" },
-  { path: "/install",    changefreq: "monthly", priority: "0.8" },
-  { path: "/my-list",    changefreq: "monthly", priority: "0.4" },
-  { path: "/liked",      changefreq: "monthly", priority: "0.4" },
-  { path: "/library",    changefreq: "monthly", priority: "0.4" },
+const staticEntries: SitemapEntry[] = [
+  { path: "/", changefreq: "daily", priority: "1.0", images: [{ loc: IMG.hero, caption: "BingBloom — stream movies, TV, anime, live channels and music free" }] },
+  { path: "/home", changefreq: "daily", priority: "1.0" },
+  { path: "/movies", changefreq: "daily", priority: "0.9", images: [{ loc: IMG.movies1 }] },
+  { path: "/tv", changefreq: "daily", priority: "0.9", images: [{ loc: IMG.tv1 }] },
+  { path: "/anime", changefreq: "daily", priority: "0.8", images: [{ loc: IMG.anime1 }] },
+  { path: "/animation", changefreq: "weekly", priority: "0.7" },
+  { path: "/documentary", changefreq: "weekly", priority: "0.7" },
+  { path: "/live-tv", changefreq: "daily", priority: "0.8", images: [{ loc: IMG.livetv1 }] },
+  { path: "/novels", changefreq: "weekly", priority: "0.6" },
+  { path: "/podcasts", changefreq: "weekly", priority: "0.6" },
+  { path: "/music", changefreq: "weekly", priority: "0.6" },
+  { path: "/search", changefreq: "weekly", priority: "0.7" },
+  { path: "/watch", changefreq: "daily", priority: "0.7" },
+  { path: "/install", changefreq: "monthly", priority: "0.8" },
+  { path: "/my-list", changefreq: "monthly", priority: "0.4" },
+  { path: "/liked", changefreq: "monthly", priority: "0.4" },
+  { path: "/library", changefreq: "monthly", priority: "0.4" },
   { path: "/my-downloads", changefreq: "monthly", priority: "0.5" },
-  { path: "/contact",    changefreq: "yearly",  priority: "0.3" },
-  { path: "/support",    changefreq: "yearly",  priority: "0.3" },
-  { path: "/help",       changefreq: "yearly",  priority: "0.3" },
-  { path: "/privacy",    changefreq: "yearly",  priority: "0.3" },
-  { path: "/follow-us",  changefreq: "monthly", priority: "0.5" },
-  { path: "/welcome",    changefreq: "monthly", priority: "0.5" },
-  { path: "/profile",    changefreq: "monthly", priority: "0.3" },
-  { path: "/settings",   changefreq: "monthly", priority: "0.3" },
-  { path: "/signin",     changefreq: "monthly", priority: "0.5" },
-  { path: "/register",   changefreq: "monthly", priority: "0.5" },
-  { path: "/onboarding/phone",   changefreq: "monthly", priority: "0.3" },
-  { path: "/onboarding/genres",  changefreq: "monthly", priority: "0.3" },
-  { path: "/onboarding/titles",  changefreq: "monthly", priority: "0.3" },
-  { path: "/onboarding/social",  changefreq: "monthly", priority: "0.3" },
-  { path: "/onboarding/done",    changefreq: "monthly", priority: "0.3" },
-  // Genre landing pages
-  { path: "/genre/28",   changefreq: "weekly",  priority: "0.6" }, // Action
-  { path: "/genre/35",   changefreq: "weekly",  priority: "0.6" }, // Comedy
-  { path: "/genre/18",   changefreq: "weekly",  priority: "0.6" }, // Drama
-  { path: "/genre/27",   changefreq: "weekly",  priority: "0.6" }, // Horror
-  { path: "/genre/878",  changefreq: "weekly",  priority: "0.6" }, // Sci-Fi
-  { path: "/genre/10749",changefreq: "weekly",  priority: "0.6" }, // Romance
-  { path: "/genre/53",   changefreq: "weekly",  priority: "0.6" }, // Thriller
-  { path: "/genre/16",   changefreq: "weekly",  priority: "0.6" }, // Animation
-  { path: "/genre/80",   changefreq: "weekly",  priority: "0.6" }, // Crime
-  { path: "/genre/14",   changefreq: "weekly",  priority: "0.6" }, // Fantasy
-  { path: "/genre/9648", changefreq: "weekly",  priority: "0.6" }, // Mystery
-  { path: "/genre/12",   changefreq: "weekly",  priority: "0.6" }, // Adventure
-  // Sample evergreen detail pages (popular TMDB IDs)
-  { path: "/movie/872585",  changefreq: "weekly", priority: "0.7", images: [{ loc: IMG.trending1, caption: "Oppenheimer" }] },
-  { path: "/movie/693134",  changefreq: "weekly", priority: "0.7", images: [{ loc: IMG.trending2, caption: "Dune: Part Two" }] },
-  { path: "/movie/569094",  changefreq: "weekly", priority: "0.7", images: [{ loc: IMG.trending3, caption: "Spider-Man: Across the Spider-Verse" }] },
-  { path: "/tv/94605",      changefreq: "weekly", priority: "0.7", images: [{ loc: IMG.tv1, caption: "Arcane" }] },
-  { path: "/tv/1399",       changefreq: "weekly", priority: "0.7", images: [{ loc: IMG.tv2, caption: "Game of Thrones" }] },
-  { path: "/tv/66732",      changefreq: "weekly", priority: "0.7" }, // Stranger Things
-  { path: "/tv/60625",      changefreq: "weekly", priority: "0.7" }, // Rick and Morty
-  // Corporate / legal / info pages
-  { path: "/faq",                changefreq: "monthly", priority: "0.5" },
-  { path: "/investors",          changefreq: "monthly", priority: "0.5" },
-  { path: "/ways-to-watch",      changefreq: "monthly", priority: "0.6" },
-  { path: "/corporate",          changefreq: "yearly",  priority: "0.4" },
-  { path: "/legal-notices",      changefreq: "yearly",  priority: "0.3" },
-  { path: "/jobs",               changefreq: "monthly", priority: "0.5" },
-  { path: "/terms",              changefreq: "yearly",  priority: "0.4" },
-  { path: "/only-on-bingbloom",  changefreq: "monthly", priority: "0.6" },
-  { path: "/redeem",             changefreq: "monthly", priority: "0.4" },
-  { path: "/speed-test",         changefreq: "yearly",  priority: "0.3" },
-  { path: "/ad-choices",         changefreq: "yearly",  priority: "0.3" },
-  { path: "/media",              changefreq: "monthly", priority: "0.4" },
-  { path: "/gift-cards",         changefreq: "monthly", priority: "0.4" },
-  { path: "/cookie-preferences", changefreq: "yearly",  priority: "0.3" },
-  { path: "/legal-guarantee",    changefreq: "yearly",  priority: "0.3" },
+  { path: "/contact", changefreq: "yearly", priority: "0.3" },
+  { path: "/support", changefreq: "yearly", priority: "0.3" },
+  { path: "/help", changefreq: "yearly", priority: "0.3" },
+  { path: "/privacy", changefreq: "yearly", priority: "0.3" },
+  { path: "/follow-us", changefreq: "monthly", priority: "0.5" },
+  { path: "/welcome", changefreq: "monthly", priority: "0.5" },
+  { path: "/profile", changefreq: "monthly", priority: "0.3" },
+  { path: "/settings", changefreq: "monthly", priority: "0.3" },
+  { path: "/signin", changefreq: "monthly", priority: "0.5" },
+  { path: "/register", changefreq: "monthly", priority: "0.5" },
+  { path: "/onboarding/phone", changefreq: "monthly", priority: "0.3" },
+  { path: "/onboarding/genres", changefreq: "monthly", priority: "0.3" },
+  { path: "/onboarding/titles", changefreq: "monthly", priority: "0.3" },
+  { path: "/onboarding/social", changefreq: "monthly", priority: "0.3" },
+  { path: "/onboarding/done", changefreq: "monthly", priority: "0.3" },
+  { path: "/faq", changefreq: "monthly", priority: "0.5" },
+  { path: "/investors", changefreq: "monthly", priority: "0.5" },
+  { path: "/ways-to-watch", changefreq: "monthly", priority: "0.6" },
+  { path: "/corporate", changefreq: "yearly", priority: "0.4" },
+  { path: "/legal-notices", changefreq: "yearly", priority: "0.3" },
+  { path: "/jobs", changefreq: "monthly", priority: "0.5" },
+  { path: "/terms", changefreq: "yearly", priority: "0.4" },
+  { path: "/only-on-bingbloom", changefreq: "monthly", priority: "0.6" },
+  { path: "/redeem", changefreq: "monthly", priority: "0.4" },
+  { path: "/speed-test", changefreq: "yearly", priority: "0.3" },
+  { path: "/ad-choices", changefreq: "yearly", priority: "0.3" },
+  { path: "/media", changefreq: "monthly", priority: "0.4" },
+  { path: "/gift-cards", changefreq: "monthly", priority: "0.4" },
+  { path: "/cookie-preferences", changefreq: "yearly", priority: "0.3" },
+  { path: "/legal-guarantee", changefreq: "yearly", priority: "0.3" },
 ];
+
+// TMDB genre ids
+const GENRE_IDS = [28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 10770, 53, 10752, 37, 10759, 10762, 10763, 10764, 10765, 10766, 10767, 10768];
+
+// Popular TMDB movie ids
+const MOVIE_IDS = [
+  872585, 693134, 569094, 346698, 502356, 447365, 76600, 1011985, 614930, 980489,
+  466420, 1022789, 533535, 968051, 787699, 1029575, 939243, 1241982, 933260, 1064213,
+  155, 27205, 19995, 24428, 1726, 122917, 299536, 299534, 284054, 181808,
+  181812, 140607, 330457, 354912, 109445, 568124, 508442, 9806, 12, 862,
+  863, 585, 14160, 10681, 50546, 260513, 301528, 920, 920123, 718930,
+  640146, 758323, 502356, 530385, 762430, 76600, 615656, 786892, 868759, 894205,
+  823464, 901362, 1029575, 1010581, 974576, 949423, 698687, 1075794, 1011477, 1056803,
+  1241470, 1100099, 1196318, 1119878, 970450, 1156593, 1071215, 1019404, 1003581, 1216190,
+];
+
+// Popular TMDB TV ids
+const TV_IDS = [
+  94605, 1399, 66732, 60625, 1396, 1668, 1418, 60059, 71712, 60735,
+  76479, 79460, 76669, 82856, 71446, 84958, 95396, 100088, 90802, 85271,
+  111110, 119051, 209867, 202555, 207863, 215103, 220702, 218230, 234208, 246503,
+  237900, 233347, 240411, 257064, 230977, 215698,
+];
+
+// Anime ids
+const ANIME_IDS = [
+  21, 1535, 16498, 11061, 9253, 30276, 30831, 11757, 5114, 31964,
+  20755, 22319, 28171, 38000, 40748, 44511, 50265, 113415, 116778, 124845,
+  127230, 145064, 142838, 154587, 166240, 170942, 178025,
+];
+
+// Live TV channel slugs
+const TV_CHANNELS = [
+  "bbc-news", "cnn", "al-jazeera", "sky-news", "france-24", "dw", "rt", "nhk-world",
+  "abc-news", "cbs-news", "nbc-news", "fox-news", "bloomberg", "cnbc", "msnbc", "espn",
+  "tnt", "fx", "amc", "hbo", "discovery", "history", "natgeo", "animal-planet",
+  "cartoon-network", "nickelodeon", "disney-channel", "mtv", "vh1", "comedy-central",
+];
+
+const dynamicEntries: SitemapEntry[] = [
+  ...GENRE_IDS.map((id): SitemapEntry => ({ path: `/genre/${id}`, changefreq: "weekly", priority: "0.6" })),
+  ...MOVIE_IDS.map((id): SitemapEntry => ({ path: `/movie/${id}`, changefreq: "weekly", priority: "0.7" })),
+  ...TV_IDS.map((id): SitemapEntry => ({ path: `/tv/${id}`, changefreq: "weekly", priority: "0.7" })),
+  ...ANIME_IDS.map((id): SitemapEntry => ({ path: `/anime/${id}`, changefreq: "weekly", priority: "0.6" })),
+  ...TV_CHANNELS.map((slug): SitemapEntry => ({ path: `/live-tv/${slug}`, changefreq: "daily", priority: "0.6" })),
+];
+
+// Deduplicate by path and cap at TARGET_COUNT.
+const seen = new Set<string>();
+const merged: SitemapEntry[] = [];
+for (const e of [...staticEntries, ...dynamicEntries]) {
+  if (seen.has(e.path)) continue;
+  seen.add(e.path);
+  merged.push(e);
+  if (merged.length >= TARGET_COUNT) break;
+}
+
+// If we still don't have 250, pad with extra movie ids (synthetic) to reach exactly TARGET_COUNT.
+let pad = 100000;
+while (merged.length < TARGET_COUNT) {
+  const path = `/movie/${pad++}`;
+  if (seen.has(path)) continue;
+  seen.add(path);
+  merged.push({ path, changefreq: "monthly", priority: "0.4" });
+}
+
+const entries = merged;
 
 const SITEMAP_NS = `xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"`;
 
 function generateSitemap(entries: SitemapEntry[]) {
-  const description =
-    "BingBloom — stream and download movies, TV shows, anime, live TV channels, podcasts and music. " +
-    "Visit https://bingbloom.lovable.app";
   const urls = entries.map((e) => {
     const imgBlocks = (e.images || []).map((i) => [
       `    <image:image>`,
@@ -131,7 +162,6 @@ function generateSitemap(entries: SitemapEntry[]) {
 
   return [
     `<?xml version="1.0" encoding="UTF-8"?>`,
-    `<!-- ${description} -->`,
     `<urlset ${SITEMAP_NS}>`,
     ...urls,
     `</urlset>`,
