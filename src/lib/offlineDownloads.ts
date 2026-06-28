@@ -149,6 +149,26 @@ export function isPaused(id: string) {
   return pauseFlags.get(id) === true;
 }
 
+/** Resume a paused download. Re-invokes startDownload with the stored args. */
+export async function resumeDownload(id: string): Promise<OfflineVideo | null> {
+  const meta = await getDownload(id);
+  if (!meta) return null;
+  if (meta.status === "ready") return meta;
+  return startDownload({
+    id: meta.id,
+    type: meta.type,
+    tmdbId: meta.tmdbId,
+    title: meta.title,
+    seriesTitle: meta.seriesTitle,
+    season: meta.season,
+    episode: meta.episode,
+    poster: meta.poster,
+    backdrop: meta.backdrop,
+    sourceUrl: meta.sourceUrl,
+    mime: meta.mime,
+  });
+}
+
 interface StartArgs {
   id: string;
   type: OfflineVideo["type"];

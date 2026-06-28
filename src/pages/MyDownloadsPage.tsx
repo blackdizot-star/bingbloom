@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown } from "lucide-react";
+import { Play, ChevronLeft, Search, Trash2, CloudDownload, X, Pause, Loader2, Folder, ChevronDown, PlayCircle } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
-import { getAllDownloads, deleteDownload, getDownloadBlobUrl, pauseDownload, type OfflineVideo } from "@/lib/offlineDownloads";
+import { getAllDownloads, deleteDownload, getDownloadBlobUrl, pauseDownload, resumeDownload, type OfflineVideo } from "@/lib/offlineDownloads";
 import { toast } from "sonner";
 
 function fmtMB(bytes: number) {
@@ -142,6 +142,24 @@ const MyDownloadsPage = () => {
         {downloading && (
           <button onClick={() => pauseDownload(v.id)} className="p-2 text-white/55 hover:text-white" aria-label="Pause">
             <Pause className="w-4 h-4" />
+          </button>
+        )}
+        {v.status === "paused" && (
+          <button
+            onClick={() => { resumeDownload(v.id); toast.success("Resuming download"); }}
+            className="p-2 text-white/55 hover:text-white"
+            aria-label="Resume"
+          >
+            <PlayCircle className="w-4 h-4" />
+          </button>
+        )}
+        {v.status === "error" && (
+          <button
+            onClick={() => { resumeDownload(v.id); toast.success("Retrying"); }}
+            className="p-2 text-white/55 hover:text-white"
+            aria-label="Retry"
+          >
+            <PlayCircle className="w-4 h-4" />
           </button>
         )}
         <button onClick={() => removeOne(v.id)} className="p-2 text-white/55 hover:text-[#E50914]" aria-label="Delete">

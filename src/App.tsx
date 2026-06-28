@@ -64,6 +64,9 @@ import MediaCenter from "./pages/MediaCenter";
 import GiftCards from "./pages/GiftCards";
 import CookiePreferences from "./pages/CookiePreferences";
 import LegalGuarantee from "./pages/LegalGuarantee";
+import MovieFAQ from "./pages/MovieFAQ";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -197,6 +200,9 @@ const App = () => {
             <Route path="/gift-cards" element={<GiftCards />} />
             <Route path="/cookie-preferences" element={<CookiePreferences />} />
             <Route path="/legal-guarantee" element={<LegalGuarantee />} />
+            <Route path="/movie-faq" element={<MovieFAQ />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>

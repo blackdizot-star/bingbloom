@@ -8,6 +8,8 @@ import TrailerModal from "@/components/TrailerModal";
 import { useMovieDetail, useMovieSimilar, useMovieRecommendations, useTrendingMovies, usePopularMovies, useTopRatedMovies } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
 import DownloadButton from "@/components/DownloadButton";
+import QuickAnswers from "@/components/QuickAnswers";
+import { movieSchema } from "@/lib/seoSchemas";
 
 const MovieDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,27 +65,27 @@ const MovieDetailPage = () => {
   const trailer = (data.videos?.results || []).find((v: any) => v.type === "Trailer" && v.site === "YouTube") ||
     (data.videos?.results || []).find((v: any) => v.site === "YouTube");
   const runtime = data.runtime ? `${Math.floor(data.runtime / 60)}h ${data.runtime % 60}m` : null;
+  const year = (data.release_date || "").slice(0, 4);
+  const director = (data.credits?.crew || []).find((c: any) => c.job === "Director")?.name;
+  const actorNames = cast.slice(0, 6).map((c: any) => c.name);
 
   return (
     <AppLayout>
       <SEO
-        title={`${data.title} – Watch on BingBloom`}
-        description={(data.overview || `Watch ${data.title} streaming on BingBloom. Cast, reviews, trailers and more.`).slice(0, 160)}
+        title={`${data.title}${year ? ` (${year})` : ""} | Watch Free on BingBloom`}
+        description={(data.overview || `Watch ${data.title} streaming free on BingBloom. Cast, reviews, trailers and more.`).slice(0, 160)}
         type="video.movie"
         image={img(data.backdrop_path, "w780") || undefined}
-        jsonLd={{
-          "@type": "Movie",
-          name: data.title,
-          description: data.overview || `Watch ${data.title} on BingBloom.`,
+        jsonLd={movieSchema({
+          title: data.title,
+          description: data.overview,
           image: poster || undefined,
-          datePublished: data.release_date || undefined,
-          aggregateRating: data.vote_average > 0 ? {
-            "@type": "AggregateRating",
-            ratingValue: data.vote_average,
-            bestRating: 10,
-          } : undefined,
-          genre: (data.genres || []).map((g: any) => g.name),
-        }}
+          datePublished: data.release_date,
+          rating: data.vote_average,
+          genres: (data.genres || []).map((g: any) => g.name),
+          director,
+          actors: actorNames,
+        })}
       />
       <div className="relative">
         <div className="relative w-full h-[55vh] md:h-[70vh]">
@@ -167,6 +169,8 @@ const MovieDetailPage = () => {
               </div>
             </section>
           )}
+
+          <QuickAnswers title={data.title} year={year} runtime={runtime} rating={data.vote_average} cast={actorNames} />
 
           {recs.length > 0 && (
             <div className="mt-10 -mx-[5%]">

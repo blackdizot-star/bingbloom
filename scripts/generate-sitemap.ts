@@ -71,6 +71,13 @@ const staticEntries: SitemapEntry[] = [
   { path: "/gift-cards", changefreq: "monthly", priority: "0.4" },
   { path: "/cookie-preferences", changefreq: "yearly", priority: "0.3" },
   { path: "/legal-guarantee", changefreq: "yearly", priority: "0.3" },
+  { path: "/movie-faq", changefreq: "monthly", priority: "0.8" },
+  { path: "/blog", changefreq: "weekly", priority: "0.8" },
+  { path: "/blog/best-free-streaming-apps-2026", changefreq: "monthly", priority: "0.7" },
+  { path: "/blog/how-to-download-movies-for-offline-viewing", changefreq: "monthly", priority: "0.7" },
+  { path: "/blog/anime-streaming-guide-2026", changefreq: "monthly", priority: "0.7" },
+  { path: "/blog/live-tv-without-cable", changefreq: "monthly", priority: "0.7" },
+  { path: "/blog/what-to-watch-this-weekend", changefreq: "weekly", priority: "0.7" },
 ];
 
 // TMDB genre ids
