@@ -257,6 +257,41 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://bingbloom.lovable.app/movie-faq</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bingbloom.lovable.app/blog</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://bingbloom.lovable.app/blog/best-free-streaming-apps-2026</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bingbloom.lovable.app/blog/how-to-download-movies-for-offline-viewing</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bingbloom.lovable.app/blog/anime-streaming-guide-2026</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bingbloom.lovable.app/blog/live-tv-without-cable</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://bingbloom.lovable.app/blog/what-to-watch-this-weekend</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://bingbloom.lovable.app/genre/28</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -1230,40 +1265,5 @@
     <loc>https://bingbloom.lovable.app/live-tv/mtv</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://bingbloom.lovable.app/live-tv/vh1</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://bingbloom.lovable.app/live-tv/comedy-central</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://bingbloom.lovable.app/movie/100000</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://bingbloom.lovable.app/movie/100001</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://bingbloom.lovable.app/movie/100002</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://bingbloom.lovable.app/movie/100003</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://bingbloom.lovable.app/movie/100004</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
   </url>
 </urlset>
