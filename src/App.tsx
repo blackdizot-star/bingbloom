@@ -39,14 +39,9 @@ import MyDownloadsPage from "./pages/MyDownloadsPage";
 import DownloadPage from "./pages/DownloadPage";
 import InstallAppPage from "./pages/InstallAppPage";
 import DownloadApkPage from "./pages/DownloadApkPage";
-import Welcome from "./pages/Welcome";
-import OnboardingGenres from "./pages/OnboardingGenres";
-import OnboardingTitles from "./pages/OnboardingTitles";
-
-import OnboardingDone from "./pages/OnboardingDone";
 import Contact from "./pages/Contact";
-import AuthGuard from "./components/AuthGuard";
 import NotFound from "./pages/NotFound";
+
 
 import FAQ from "./pages/FAQ";
 import Investors from "./pages/Investors";
