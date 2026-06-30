@@ -22,6 +22,23 @@ export const organizationSchema = () => ({
   logo: `${SITE_URL}/icon-512.png`,
 });
 
+export const SOCIAL_LINKS = {
+  twitter: "https://twitter.com/bingbloom",
+  instagram: "https://instagram.com/bingbloom",
+  tiktok: "https://tiktok.com/@bingbloom",
+  reddit: "https://reddit.com/r/bingbloom",
+  telegram: "https://t.me/bingbloom",
+  discord: "https://discord.gg/bingbloom",
+} as const;
+
+export const organizationWithSocialsSchema = () => ({
+  "@type": "Organization",
+  name: "BingBloom",
+  url: SITE_URL,
+  logo: `${SITE_URL}/icon-512.png`,
+  sameAs: Object.values(SOCIAL_LINKS),
+});
+
 export const softwareApplicationSchema = () => ({
   "@type": "SoftwareApplication",
   name: "BingBloom",

@@ -9,6 +9,7 @@ import { useMovieDetail, useMovieSimilar, useMovieRecommendations, useTrendingMo
 import { img } from "@/lib/tmdb";
 import DownloadButton from "@/components/DownloadButton";
 import QuickAnswers from "@/components/QuickAnswers";
+import LazyNativeAd from "@/components/LazyNativeAd";
 import { movieSchema } from "@/lib/seoSchemas";
 
 const MovieDetailPage = () => {
@@ -126,6 +127,7 @@ const MovieDetailPage = () => {
                 ))}
               </div>
               <p className="text-xs md:text-sm text-foreground/80 leading-relaxed mb-5 max-w-3xl">{data.overview}</p>
+              <LazyNativeAd placement="movie-details" className="mb-4" />
               <div className="flex flex-wrap gap-3">
                 <Link
                   to={`/watch/movie/${data.id}`}
@@ -169,6 +171,8 @@ const MovieDetailPage = () => {
               </div>
             </section>
           )}
+
+          <LazyNativeAd placement="movie-cast" className="my-4" />
 
           <QuickAnswers title={data.title} year={year} runtime={runtime} rating={data.vote_average} cast={actorNames} />
 
