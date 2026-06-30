@@ -81,6 +81,9 @@ const HomePage = () => {
       <TmdbRow title="Popular Movies" items={popular.data} isLoading={popular.isLoading} type="movie" viewAll="/movies" />
       <TmdbRow title="Trending Movies" items={trendingMovies.data} isLoading={trendingMovies.isLoading} type="movie" viewAll="/movies" ranked />
 
+      {/* Native ad — placement="home-row-1" (after 2nd row) */}
+      <LazyNativeAd placement="home-row-1" className="px-[5%] my-3" />
+
       {/* Ad #2 */}
       <InlineAdRow count={4} />
 
@@ -94,6 +97,9 @@ const HomePage = () => {
       <TmdbRow title="Upcoming Releases" items={upcoming.data} isLoading={upcoming.isLoading} type="movie" />
       <TmdbRow title="Top Rated Movies" items={topRated.data} isLoading={topRated.isLoading} type="movie" />
       <TmdbRow title="Popular TV Shows" items={popularTv.data} isLoading={popularTv.isLoading} type="tv" />
+
+      {/* Native ad — placement="home-row-2" (after 4th row block) */}
+      <LazyNativeAd placement="home-row-2" className="px-[5%] my-3" />
 
       {/* Ad #4 */}
       <InlineAdRow count={4} />
