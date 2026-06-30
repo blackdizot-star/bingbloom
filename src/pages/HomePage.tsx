@@ -6,6 +6,7 @@ import TmdbContinueRow from "@/components/TmdbContinueRow";
 import LiveTvRow from "@/components/LiveTvRow";
 import CategoryChips from "@/components/CategoryChips";
 import InlineAdRow from "@/components/InlineAdRow";
+import LazyNativeAd from "@/components/LazyNativeAd";
 import {
   useTrendingMovies,
   useTrendingTv,
