@@ -1,0 +1,66 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build React app
+      run: npm run build
+
+    - name: Setup Cocoapods
+      run: |
+        sudo gem install cocoapods
+        cd ios/App && pod install && cd ../..
+
+    - name: Sync Capacitor
+      run: npx cap sync ios
+
+    - name: Build iOS app
+      run: |
+        cd ios/App
+        xcodebuild -workspace App.xcworkspace \
+          -scheme App \
+          -configuration Release \
+          -derivedDataPath build \
+          -archivePath build/App.xcarchive \
+          archive
+
+    - name: Export IPA
+      run: |
+        cd ios/App
+        xcodebuild -exportArchive \
+          -archivePath build/App.xcarchive \
+          -exportOptionsPlist ExportOptions.plist \
+          -exportPath build/ipa
+
+    - name: Upload IPA to GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: ios/App/build/ipa/App.ipa
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload IPA as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: iOS-app
+        path: ios/App/build/ipa/App.ipa
+        retention-days: 30
