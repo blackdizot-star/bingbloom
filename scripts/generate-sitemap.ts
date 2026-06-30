@@ -280,6 +280,24 @@ staticEntries.forEach(pushUnique);
 MOVIES.forEach((m) => pushUnique(entryFromMovie(m)));
 TV_SHOWS.forEach((t) => pushUnique(entryFromTv(t)));
 
+// --- Anime + Genre + Channel fillers --------------------------------------
+const ANIME_IDS = [
+  21, 1535, 16498, 11061, 9253, 30276, 30831, 11757, 5114, 31964,
+  20755, 22319, 28171, 38000, 40748, 44511, 50265, 113415, 116778, 124845,
+  127230, 145064, 142838, 154587, 166240, 170942, 178025,
+];
+const GENRE_IDS = [28, 12, 16, 35, 80, 99, 18, 10751, 14, 36, 27, 10402, 9648, 10749, 878, 53, 10752, 37, 10759, 10762, 10763, 10764, 10765, 10766, 10767, 10768];
+const TV_CHANNELS = [
+  "bbc-news", "cnn", "al-jazeera", "sky-news", "france-24", "dw", "nhk-world",
+  "abc-news", "cbs-news", "nbc-news", "fox-news", "bloomberg", "cnbc", "espn",
+  "tnt", "fx", "amc", "hbo", "discovery", "history", "natgeo", "animal-planet",
+  "cartoon-network", "nickelodeon", "disney-channel", "mtv", "comedy-central",
+];
+
+ANIME_IDS.forEach((id) => pushUnique({ path: `/anime/${id}`, changefreq: "weekly", priority: "0.6" }));
+GENRE_IDS.forEach((id) => pushUnique({ path: `/genre/${id}`, changefreq: "weekly", priority: "0.6" }));
+TV_CHANNELS.forEach((slug) => pushUnique({ path: `/live-tv/${slug}`, changefreq: "daily", priority: "0.6" }));
+
 // Cap at TARGET_COUNT (250).
 const capped = merged.slice(0, TARGET_COUNT);
 
