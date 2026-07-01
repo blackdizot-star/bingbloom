@@ -336,3 +336,86 @@ function generateSitemap(entries: SitemapEntry[]) {
 
 writeFileSync(resolve("public/sitemap.xml"), generateSitemap(capped));
 console.log(`sitemap.xml written (${capped.length} entries)`);
+
+// ============================================================================
+// VIDEO SITEMAP — 150 movie+TV entries with <video:video> for Google Video
+// ============================================================================
+const videoEntries = [
+  ...MOVIES.slice(0, 100).map((m) => ({
+    loc: `${BASE_URL}/movie/${m.id}`,
+    player: `${BASE_URL}/watch/movie/${m.id}`,
+    thumb: POSTER(m.poster),
+    title: m.title,
+    description: `Watch ${m.title} free in HD on BingBloom — no subscription, no sign-up.`,
+  })),
+  ...TV_SHOWS.slice(0, 50).map((t) => ({
+    loc: `${BASE_URL}/tv/${t.id}`,
+    player: `${BASE_URL}/watch/tv/${t.id}/1/1`,
+    thumb: POSTER(t.poster),
+    title: t.title,
+    description: `Stream ${t.title} free on BingBloom in HD.`,
+  })),
+];
+
+const videoXml = [
+  `<?xml version="1.0" encoding="UTF-8"?>`,
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">`,
+  ...videoEntries.map((v) =>
+    [
+      `  <url>`,
+      `    <loc>${escape(v.loc)}</loc>`,
+      `    <video:video>`,
+      `      <video:thumbnail_loc>${escape(v.thumb)}</video:thumbnail_loc>`,
+      `      <video:title>${escape(v.title)}</video:title>`,
+      `      <video:description>${escape(v.description)}</video:description>`,
+      `      <video:player_loc allow_embed="yes" autoplay="autoplay=1">${escape(v.player)}</video:player_loc>`,
+      `      <video:family_friendly>yes</video:family_friendly>`,
+      `      <video:live>no</video:live>`,
+      `      <video:publication_date>${TODAY}T00:00:00+00:00</video:publication_date>`,
+      `      <video:requires_subscription>no</video:requires_subscription>`,
+      `    </video:video>`,
+      `  </url>`,
+    ].join("\n"),
+  ),
+  `</urlset>`,
+].join("\n");
+writeFileSync(resolve("public/video-sitemap.xml"), videoXml);
+console.log(`video-sitemap.xml written (${videoEntries.length} videos)`);
+
+// ============================================================================
+// FAQ SITEMAP — 30 top question fragments
+// ============================================================================
+const faqXml = [
+  `<?xml version="1.0" encoding="UTF-8"?>`,
+  `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+  ...Array.from({ length: 30 }).map((_, i) =>
+    [
+      `  <url>`,
+      `    <loc>${BASE_URL}/faqs#q-${i + 1}</loc>`,
+      `    <lastmod>${TODAY}</lastmod>`,
+      `    <changefreq>monthly</changefreq>`,
+      `    <priority>0.6</priority>`,
+      `  </url>`,
+    ].join("\n"),
+  ),
+  `  <url><loc>${BASE_URL}/faqs</loc><lastmod>${TODAY}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>`,
+  `  <url><loc>${BASE_URL}/movie-faq</loc><lastmod>${TODAY}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+  `</urlset>`,
+].join("\n");
+writeFileSync(resolve("public/faq-sitemap.xml"), faqXml);
+console.log(`faq-sitemap.xml written`);
+
+// ============================================================================
+// SITEMAP INDEX
+// ============================================================================
+const indexXml = [
+  `<?xml version="1.0" encoding="UTF-8"?>`,
+  `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+  `  <sitemap><loc>${BASE_URL}/sitemap.xml</loc><lastmod>${TODAY}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/video-sitemap.xml</loc><lastmod>${TODAY}</lastmod></sitemap>`,
+  `  <sitemap><loc>${BASE_URL}/faq-sitemap.xml</loc><lastmod>${TODAY}</lastmod></sitemap>`,
+  `</sitemapindex>`,
+].join("\n");
+writeFileSync(resolve("public/sitemap-index.xml"), indexXml);
+console.log(`sitemap-index.xml written`);
+

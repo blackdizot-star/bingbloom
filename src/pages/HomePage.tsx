@@ -6,7 +6,6 @@ import TmdbContinueRow from "@/components/TmdbContinueRow";
 import LiveTvRow from "@/components/LiveTvRow";
 import CategoryChips from "@/components/CategoryChips";
 import InlineAdRow from "@/components/InlineAdRow";
-import LazyNativeAd from "@/components/LazyNativeAd";
 import {
   useTrendingMovies,
   useTrendingTv,
@@ -73,7 +72,7 @@ const HomePage = () => {
 
       <CategoryChips />
 
-      {/* Ad #1 — visible above the fold so each session sees one ad */}
+      {/* Ad #1 */}
       <InlineAdRow count={4} />
 
       <TmdbContinueRow />
@@ -81,41 +80,27 @@ const HomePage = () => {
       <TmdbRow title="Popular Movies" items={popular.data} isLoading={popular.isLoading} type="movie" viewAll="/movies" />
       <TmdbRow title="Trending Movies" items={trendingMovies.data} isLoading={trendingMovies.isLoading} type="movie" viewAll="/movies" ranked />
 
-      {/* Native ad — placement="home-row-1" (after 2nd row) */}
-      <LazyNativeAd placement="home-row-1" className="px-[5%] my-3" />
-
       {/* Ad #2 */}
       <InlineAdRow count={4} />
 
       <TmdbRow title="Trending TV Shows" items={trendingTv.data} isLoading={trendingTv.isLoading} type="tv" viewAll="/tv" ranked />
       <LiveTvRow />
       <TmdbRow title="Now Playing" items={nowPlaying.data} isLoading={nowPlaying.isLoading} type="movie" />
-
-      {/* Ad #3 */}
-      <InlineAdRow count={4} />
-
       <TmdbRow title="Upcoming Releases" items={upcoming.data} isLoading={upcoming.isLoading} type="movie" />
       <TmdbRow title="Top Rated Movies" items={topRated.data} isLoading={topRated.isLoading} type="movie" />
       <TmdbRow title="Popular TV Shows" items={popularTv.data} isLoading={popularTv.isLoading} type="tv" />
 
-      {/* Native ad — placement="home-row-2" (after 4th row block) */}
-      <LazyNativeAd placement="home-row-2" className="px-[5%] my-3" />
-
-      {/* Ad #4 */}
+      {/* Ad #3 */}
       <InlineAdRow count={4} />
 
       <TmdbRow title="Top Rated TV" items={topRatedTv.data} isLoading={topRatedTv.isLoading} type="tv" />
       <TmdbRow title="Airing Today" items={airingToday.data} isLoading={airingToday.isLoading} type="tv" />
       <TmdbRow title="On the Air" items={onAir.data} isLoading={onAir.isLoading} type="tv" />
-
-      {/* Ad #5 */}
-      <InlineAdRow count={4} />
-
       <TmdbRow title="Action & Adventure" items={action.data} isLoading={action.isLoading} type="movie" />
       <TmdbRow title="Drama" items={drama.data} isLoading={drama.isLoading} type="movie" />
       <TmdbRow title="Comedy" items={comedy.data} isLoading={comedy.isLoading} type="movie" />
 
-      {/* Ad #6 */}
+      {/* Ad #4 */}
       <InlineAdRow count={4} />
 
       <TmdbRow title="Horror" items={horror.data} isLoading={horror.isLoading} type="movie" />
