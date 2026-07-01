@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
-import LazyNativeAd from "@/components/LazyNativeAd";
+
 import TmdbRow from "@/components/TmdbRow";
 import Footer from "@/components/Footer";
 import {
@@ -71,10 +71,6 @@ const MovieWatchPage = () => {
           />
         </div>
 
-        {/* Post-roll native ad directly below the player */}
-        <div className="px-4 pt-3">
-          <LazyNativeAd placement="player-below" />
-        </div>
 
 
 

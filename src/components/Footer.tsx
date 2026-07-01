@@ -28,9 +28,10 @@ const COLS = [
     links: [
       { label: "Help Center", to: "/help" },
       { label: "FAQ", to: "/faq" },
+      { label: "FAQs & Questions", to: "/faqs" },
+      { label: "Movie FAQ", to: "/movie-faq" },
       { label: "Contact Us", to: "/contact" },
       { label: "Redeem Gift Cards", to: "/redeem" },
-      { label: "Buy Gift Cards", to: "/gift-cards" },
     ],
   },
   {
