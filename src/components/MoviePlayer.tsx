@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { RefreshCw, ChevronRight, Maximize2, Shield, WifiOff, CloudDownload } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw, ChevronRight, Maximize2, Shield, WifiOff, CloudDownload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { recordStream, getCachedStream } from "@/lib/streamCache";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
-import PlayerBrandLoader from "@/components/PlayerBrandLoader";
 
 export type ServerId = "hd" | "pixaplay";
 
@@ -15,23 +14,22 @@ interface ServerDef {
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-// Server order: FastStream (formerly server 2) is now the default; HD is the fallback.
 export const PLAYER_SERVERS: ServerDef[] = [
   {
-    id: "pixaplay",
-    label: "Server 1 · FastStream",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
-  },
-  {
     id: "hd",
-    label: "Server 2 · HD",
+    label: "Server 1 · HD",
     build: (id, type, s, e) =>
       type === "tv"
         ? `https://vidsrc.pm/embed/tv/${id}/${s}/${e}`
         : `https://vidsrc.pm/embed/movie/${id}`,
+  },
+  {
+    id: "pixaplay",
+    label: "Server 2 · FastStream",
+    build: (id, type, s, e) =>
+      type === "tv"
+        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
+        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
   },
 ];
 
@@ -182,23 +180,19 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
         )}
 
         {loading && !error && (
-          <PlayerBrandLoader variant="loading" label={`Loading ${server.label}…`} />
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none" style={{ background: "#0A0A0A" }}>
+            <Loader2 className="w-9 h-9 animate-spin mb-2" style={{ color: "#E50914" }} />
+            <p className="text-white text-xs font-medium">Loading {server.label}…</p>
+          </div>
         )}
 
         {error && (
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 px-6 text-center" style={{ background: "#0A0A0A" }}>
-            <img
-              src="/logo-compact.png"
-              alt="BingBloom"
-              className="h-14 w-14 rounded-xl drop-shadow-[0_0_24px_rgba(229,9,20,0.55)]"
-            />
-            <p className="text-white text-sm font-semibold tracking-wide">Coming soon</p>
-            <p className="text-white/55 text-[10.5px] max-w-xs leading-relaxed">
-              This title isn't streamable on {server.label} yet. Try another server.
-            </p>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 px-6 text-center" style={{ background: "#0A0A0A" }}>
+            <AlertCircle className="w-8 h-8" style={{ color: "#E50914" }} />
+            <p className="text-white text-xs font-medium">Couldn't load {server.label}.</p>
             <button
               onClick={() => selectServer(serverIdx + 1)}
-              className="flex items-center gap-1.5 text-white text-[11px] px-3 py-1.5 rounded-md font-semibold pointer-events-auto"
+              className="flex items-center gap-1.5 text-white text-[11px] px-3 py-1.5 rounded-md font-semibold"
               style={{ background: "#E50914" }}
             >
               <RefreshCw className="w-3 h-3" /> Try next server

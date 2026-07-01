@@ -1,108 +1,76 @@
+# BingBloom: APK swap, install nudge, downloads manager, subtitles, full SEO
 
-# BingBloom: Ad cleanup, Video SEO, FAQ hub, Bing TV & Live TV upgrade, full SEO pass
+## 1. Replace bundled APK
+- Upload `/mnt/user-uploads/BINGBLOOM_APK_APP_OFFICIAL.apk` via `lovable-assets create`, overwrite `src/assets/bingbloom-app.apk.asset.json` with the new CDN URL.
+- `InstallAppPage` already reads from that asset → real download stays wired. Verify filename `BingBloom.apk` and `Content-Disposition: attachment` works (it does — Lovable assets CDN serves raw file).
 
-## 1. Ads — revert to old clean placement (premium feel)
-Remove all `<LazyNativeAd>` placements added in the last pass; restore ONLY the original `<InlineAdRow>` slots that were there before. Keep the ad network the same (`NativeAd` iframe) but limit to **4 slots max per page**, small/compact size (≤60px mobile).
+## 2. First-visit install nudge (mobile only)
+- New `src/components/InstallNudge.tsx`: small bottom toast (mobile-only via `useIsMobile`), shows once (localStorage flag `bb_install_nudge_v1`), CTA "Install app" → `/install`, dismiss "X".
+- Mount in `AppLayout.tsx`; 3s delay; hide on `/install`, `/onboarding/*`, `/welcome`.
 
-- Delete `src/components/LazyNativeAd.tsx`.
-- Edit `HomePage.tsx`, `SearchPage.tsx`, `MovieDetailPage.tsx`, `TVDetailPage.tsx`, `EpisodesList.tsx`, `MovieWatchPage.tsx`, `TvWatchPage.tsx`, `AppLayout.tsx` — remove every `LazyNativeAd` import + JSX. Restore the original 3–4 `<InlineAdRow>` rows on Home (between sections), 1 on Search (after ~10 results), 1 on movie/TV detail (below description), 1 below player.
-- Ensure `NativeAd` uses `compact` variant everywhere.
+## 3. Downloads page in desktop top bar
+- Add `Downloads` link next to theme toggle in `TopBar.tsx` (desktop only, `hidden md:inline-flex`) → `/my-downloads` (route already exists).
+- Surface badge with active-download count from new downloads store.
 
-## 2. Video sitemap — 150 videos for Google Video indexing
-- New generator: extend `scripts/generate-sitemap.ts` to also emit `public/video-sitemap.xml` with **150 entries** (100 movies + 50 TV) using Google's Video sitemap namespace:
-  ```xml
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-          xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-    <url>
-      <loc>https://bingbloom.lovable.app/movie/{id}</loc>
-      <video:video>
-        <video:thumbnail_loc>https://image.tmdb.org/t/p/w500{poster}</video:thumbnail_loc>
-        <video:title>{title}</video:title>
-        <video:description>{overview}</video:description>
-        <video:player_loc allow_embed="yes">https://bingbloom.lovable.app/watch/movie/{id}</video:player_loc>
-        <video:duration>{runtime*60}</video:duration>
-        <video:publication_date>{release_date}</video:publication_date>
-        <video:family_friendly>yes</video:family_friendly>
-      </video:video>
-    </url>
-  </urlset>
-  ```
-- Add a **sitemap index** `public/sitemap-index.xml` pointing to `sitemap.xml` + `video-sitemap.xml` + `faq-sitemap.xml`.
-- Reference `sitemap-index.xml` in `robots.txt`.
-- Submit both `video-sitemap.xml` and `sitemap-index.xml` to Google Search Console via the connector.
+## 4. Real download manager (progress / pause / resume + subtitle download)
+- New `src/lib/downloadManager.ts`: uses `fetch` + `ReadableStream` reader to download video URL in chunks, stores Blob parts in IndexedDB (`bb-downloads` DB), exposes `start/pause/resume/cancel/list` and a Zustand-like subscribe API. Computes `progress` from `Content-Length`. Resume uses HTTP `Range` headers when server supports; otherwise re-starts from saved byte count.
+- Hook `src/hooks/useDownloads.ts` exposing reactive list.
+- `MyDownloadsPage.tsx` rewrite: lists items with progress bar (`<Progress />`), Pause/Resume/Cancel/Delete buttons, Open file (assembles Blob → object URL → `<video>` modal).
+- Subtitle download: when starting, also fetch `.vtt`/`.srt` URL if provided (from OpenSubtitles search by IMDb id or TMDB title) and store alongside. Best-effort; skip silently on failure.
 
-## 3. FAQ hub — 100 questions
-- New page `src/pages/FAQsPage.tsx` at route `/faqs` — 100 questions/answers, every answer names **BingBloom** and links to `/movies`, `/live`, `/install`, etc.
-- Questions grouped into categories (Streaming, Movies, TV, Live TV, Music, App, Legal, Account) with shadcn `Accordion`, dark theme.
-- `FAQPage` JSON-LD covering all 100 Q&A (chunked to keep script tag under ~30KB).
-- Add link in `Footer.tsx` under a new "Help" column: "FAQs & Questions" → `/faqs`.
-- Remove `QuickAnswers` component usage from `MovieDetailPage.tsx` (delete the import + `<QuickAnswers />` render — leave the file for now).
-- New generator output `public/faq-sitemap.xml` — one URL per top-30 question as `/faqs#q-{n}` (Google handles fragment sitemaps as the base URL, but they signal freshness).
-- Register `/faqs` route in `App.tsx`.
+## 5. Player subtitles section
+- `VideoPlayer.tsx`: add subtitle picker dropdown (gear icon → "Subtitles" submenu). Sources:
+  1. Downloaded subtitle (if playing local file)
+  2. Remote OpenSubtitles search results (English + auto-detect)
+  3. "Off"
+- Inject `<track kind="subtitles" src=... default>` and toggle `track.mode`.
+- New `src/lib/subtitles.ts`: `searchSubtitles(query, imdbId?)` against `https://rest.opensubtitles.org/search` (free, no key) with `X-User-Agent` header, returns `{lang,label,url}[]`. Convert `.srt` → `.vtt` in-browser via tiny converter.
 
-## 4. Bing TV + branded Live TV
-### Bing TV (in-app live channel)
-- New virtual channel `bing-tv` injected at the **top** of the Live TV list in `HomePage.tsx` live row and `LiveTVPage.tsx`.
-- Logo: `src/assets/bingbloom-official-logo.png`.
-- Behavior: when selected, opens a full-screen player that auto-plays a rotating queue of TMDB popular movies via the existing `MoviePlayer`. Programme guide shows next 6 movies with start/end times computed from runtime.
-- Component: `src/components/BingTvChannel.tsx` — fetches `popular` movies, builds a schedule array, on mount picks the "currently airing" movie based on wall-clock modulo total-runtime.
-- New route `/live/bing-tv` renders this component.
+## 6. SEO — robots, sitemap, JSON-LD, meta, FAQ, blog
+- **robots.txt**: keep allow-all (already correct), confirm `Sitemap:` directive points to `https://bingbloom.lovable.app/sitemap.xml`.
+- **sitemap**: bump `scripts/generate-sitemap.ts` to fetch live TMDB popular movies (≥100) + popular TV (≥20) + season/episode entries for top 5 shows + blog posts + `/movie-faq`. Keep static pages. Cap unchanged or raise to 400+. Add `lastmod=today`.
+- **JSON-LD**: extend `SEO.tsx` already supports `jsonLd`. Add helpers in `src/lib/seoSchemas.ts`: `websiteSchema`, `organizationSchema`, `movieSchema`, `tvSeriesSchema`, `softwareApplicationSchema`, `faqSchema`, `breadcrumbSchema`.
+- Inject `WebSite + SearchAction` + `SoftwareApplication` on `HomePage`.
+- Inject `Movie` schema on `MovieDetailPage` (name, image=poster, datePublished, aggregateRating, director, actors from TMDB credits).
+- Inject `TVSeries` schema on `TVDetailPage`.
+- **Meta titles**: MovieDetailPage title format `"{title} ({year}) | Watch Free on BingBloom"`, description from TMDB overview (160 char trim).
+- **Internal links**: MovieDetailPage already has recommendations row — ensure each card is `<Link to="/movie/:id">` (verify, fix if not).
+- **Movie FAQ page** `/movie-faq`: new `src/pages/MovieFAQ.tsx` with 20 Q&A about popular movies + FAQPage schema. Route in `App.tsx`.
+- **Quick Answers on movie page**: new `QuickAnswers` component (4 collapsibles: "Where to watch X for free?", "Is X on Netflix?", "Cast of X", "X runtime/rating") injected above recommendations.
+- **Blog**: new `src/pages/Blog.tsx` index + `src/pages/BlogPost.tsx` detail. 5 seed posts in `src/data/blogPosts.ts` with full markdown bodies. Routes `/blog` and `/blog/:slug`. Article JSON-LD on each post.
 
-### Official channel logos
-Add hardcoded logo overrides in `src/lib/iptv.ts` for: BBC News, CNN, Fox News, MSNBC, CNBC, Bloomberg, Sky News — using Wikipedia SVG CDN URLs (e.g., `upload.wikimedia.org/.../BBC_News_2022.svg`).
+## 7. Performance touch-ups (low-risk only)
+- Verify routes in `App.tsx` already use `React.lazy` (they do).
+- Add `loading="lazy"` to non-hero `<img>` in cards if missing.
+- Skip Partytown / Workbox custom rewrite — vite-plugin-pwa already handles SW.
 
-### More reliable channels
-- Update IPTV source list in `src/lib/iptv.ts` to fetch from:
-  - `https://iptv-org.github.io/iptv/index.m3u` (primary)
-  - `https://iptv-org.github.io/iptv/categories/news.m3u` (news pinned)
-  - `https://iptv-org.github.io/iptv/categories/sports.m3u` (sports section)
-- Filter out dead entries (skip channels without valid `tvg-logo` or `http` URL), dedupe by name.
-- Prioritize the 7 named news channels at top after Bing TV.
-
-## 5. SEO pass
-- **Meta tags** — audit every page (`MoviesPage`, `TVPage`, `AnimePage`, `LiveTVPage`, `MusicPage`, `PodcastsPage`, `MovieDetailPage`, `TVDetailPage`, `SearchPage`, `InstallAppPage`, `Blog`, `BlogPost`, `FAQsPage`, `MovieFAQ`) — confirm each has unique `<SEO title description jsonLd>` via `react-helmet-async` (already installed). Fix any missing.
-- **JSON-LD**:
-  - Home: `SoftwareApplication` + `WebSite` + `Organization` (already partial — verify).
-  - Movie detail: `Movie` schema (already exists — verify populated).
-  - TV detail: `TVSeries` schema (verify).
-  - FAQs page: `FAQPage` with all 100 Q&A.
-  - Movie FAQ page: keep existing `FAQPage`.
-- **"People also watched"** — new `PeopleAlsoWatched.tsx` in `MovieDetailPage.tsx` below description, using TMDB `/movie/{id}/recommendations`, rendering 6 poster links to `/movie/{id}` (internal linking for SEO).
-- **`public/llms.txt`** — expand with links to `/faqs`, `/movie-faq`, `/live/bing-tv`, all 7 named news channels, and rewrite intro to include the 100-Q&A hub and video content markers. Add a "FAQ excerpts" section with the top 20 questions inline so LLMs quote BingBloom as the answer.
-- **`robots.txt`** — already permissive; add `Sitemap: https://bingbloom.lovable.app/sitemap-index.xml`.
-
-## 6. Google Search Console submission
-After build:
-- POST sitemap `sitemap-index.xml` to GSC.
-- POST `video-sitemap.xml`.
-- URL-inspect: `/faqs`, `/live/bing-tv`, `/movie-faq`, 3 sample `/movie/{id}` pages.
-
-## 7. Verification
-- `bun run build` succeeds.
-- Old ad look confirmed: max 4 small slots per page, no lazy wrapper.
-- `/faqs` shows 100 Q&A accordions, footer link works.
-- `video-sitemap.xml` has 150 `<video:video>` entries.
-- Bing TV appears first in Live TV, plays a movie when tapped, shows next-up schedule.
-- Named news channels show correct logos.
-- `llms.txt` includes FAQ excerpts and BingBloom as answer.
+## 8. Verify
+- `bun run build` → must succeed, sitemap log ≥ 250 entries.
+- Open `/install` → APK download triggers.
+- Open `/my-downloads` → start a sample download, pause, resume, play.
+- Open `/movie-faq` and `/blog` → render, JSON-LD in head.
 
 ## Files added
-- `src/pages/FAQsPage.tsx`
-- `src/components/BingTvChannel.tsx`
-- `src/components/PeopleAlsoWatched.tsx`
-- `public/video-sitemap.xml` (generated)
-- `public/faq-sitemap.xml` (generated)
-- `public/sitemap-index.xml` (generated)
+- src/components/InstallNudge.tsx
+- src/components/QuickAnswers.tsx
+- src/lib/downloadManager.ts
+- src/lib/subtitles.ts
+- src/lib/seoSchemas.ts
+- src/hooks/useDownloads.ts
+- src/pages/MovieFAQ.tsx
+- src/pages/Blog.tsx
+- src/pages/BlogPost.tsx
+- src/data/blogPosts.ts
 
 ## Files edited
-- `src/components/AppLayout.tsx`, `src/pages/HomePage.tsx`, `SearchPage.tsx`, `MovieDetailPage.tsx`, `TVDetailPage.tsx`, `EpisodesList.tsx`, `MovieWatchPage.tsx`, `TvWatchPage.tsx` (remove LazyNativeAd, restore InlineAdRow)
-- `src/components/Footer.tsx` (FAQs link)
-- `src/App.tsx` (routes `/faqs`, `/live/bing-tv`)
-- `src/lib/iptv.ts` (logos + more channel sources)
-- `src/pages/LiveTVPage.tsx` (Bing TV pinned first)
-- `scripts/generate-sitemap.ts` (emit video + faq + index sitemaps)
-- `public/robots.txt` (sitemap index)
-- `public/llms.txt` (expanded)
-
-## Files deleted
-- `src/components/LazyNativeAd.tsx`
+- src/assets/bingbloom-app.apk.asset.json (new CDN URL)
+- src/components/AppLayout.tsx (mount nudge)
+- src/components/TopBar.tsx (Downloads link desktop)
+- src/components/VideoPlayer.tsx (subtitle picker)
+- src/pages/MyDownloadsPage.tsx (real manager UI)
+- src/pages/MovieDetailPage.tsx (Movie schema, title, QuickAnswers)
+- src/pages/TVDetailPage.tsx (TVSeries schema)
+- src/pages/HomePage.tsx (WebSite + SoftwareApplication schema)
+- src/App.tsx (new routes)
+- scripts/generate-sitemap.ts (TMDB fetch, blog, faq)
+- public/robots.txt (verify)

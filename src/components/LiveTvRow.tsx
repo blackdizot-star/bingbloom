@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { Radio, Tv } from "lucide-react";
 import { TVAPP_CHANNELS } from "@/lib/iptv";
-import bingLogo from "@/assets/bingbloom-official-logo.png";
 
-// Official channel logos so the row renders instantly without needing a playlist fetch.
+// Wikipedia / clearbit logos for the top channels so the row renders fast
+// without hitting a playlist endpoint.
 const CHANNEL_LOGOS: Record<string, string> = {
   "bbc-news": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/BBC_News_2022_%28Boxed%29.svg/512px-BBC_News_2022_%28Boxed%29.svg.png",
   "cnn": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/CNN.svg/512px-CNN.svg.png",
@@ -19,34 +19,18 @@ const CHANNEL_LOGOS: Record<string, string> = {
   "nfl-network": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/NFL_Network_logo.svg/512px-NFL_Network_logo.svg.png",
   "nba-tv": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/NBA_TV.svg/512px-NBA_TV.svg.png",
   "mlb-network": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/MLB_Network_logo.svg/512px-MLB_Network_logo.svg.png",
+  "tennis-channel": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Tennis_Channel_logo_2016.svg/512px-Tennis_Channel_logo_2016.svg.png",
   "mtv": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/MTV-2021.svg/512px-MTV-2021.svg.png",
+  "vh1": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/VH1_logonew.svg/512px-VH1_logonew.svg.png",
   "comedy-central": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Comedy_Central_2018.svg/512px-Comedy_Central_2018.svg.png",
   "tnt": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/TNT_Logo_2016.svg/512px-TNT_Logo_2016.svg.png",
+  "tbs": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/TBS_logo_2016.svg/512px-TBS_logo_2016.svg.png",
+  "usa-network": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/USA_Network_logo_%282016%29.svg/512px-USA_Network_logo_%282016%29.svg.png",
 };
 
-interface Item {
-  slug: string;
-  name: string;
-  logo?: string;
-  to: string;
-  bing?: boolean;
-}
-
-/** Compact horizontal row of curated live TV channels — Bing TV pinned first. */
+/** Compact horizontal row of curated live TV channels for the home page. */
 const LiveTvRow = () => {
-  // Prioritize the 7 named news channels + Bing TV first.
-  const priorityOrder = ["bbc-news", "cnn", "fox-news", "msnbc", "cnbc", "bloomberg", "sky-news"];
-  const priority = priorityOrder
-    .map((slug) => TVAPP_CHANNELS.find((c) => c.slug === slug))
-    .filter((c): c is (typeof TVAPP_CHANNELS)[number] => Boolean(c));
-  const rest = TVAPP_CHANNELS.filter((c) => !priorityOrder.includes(c.slug)).slice(0, 14);
-
-  const items: Item[] = [
-    { slug: "bing-tv", name: "Bing TV", logo: bingLogo, to: "/live/bing-tv", bing: true },
-    ...priority.map((c) => ({ slug: c.slug, name: c.name, logo: CHANNEL_LOGOS[c.slug], to: `/live-tv?ch=${encodeURIComponent(c.slug)}` })),
-    ...rest.map((c) => ({ slug: c.slug, name: c.name, logo: CHANNEL_LOGOS[c.slug], to: `/live-tv?ch=${encodeURIComponent(c.slug)}` })),
-  ];
-
+  const channels = TVAPP_CHANNELS.slice(0, 20);
   return (
     <section className="mt-6 md:mt-10 px-[5%]">
       <div className="mb-2 flex items-end justify-between md:mb-4">
@@ -56,38 +40,40 @@ const LiveTvRow = () => {
         <Link to="/live-tv" className="text-xs text-primary/90 hover:text-primary md:text-sm">All ›</Link>
       </div>
       <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-        {items.map((ch) => (
-          <Link
-            key={ch.slug}
-            to={ch.to}
-            className="group flex-shrink-0 w-[120px] sm:w-[140px] md:w-[160px]"
-          >
-            <div className={`aspect-video rounded-lg overflow-hidden relative shadow-md transition-transform duration-200 group-hover:-translate-y-1 ring-1 ${ch.bing ? "ring-[#E50914]/70" : "ring-border"}`} style={{ background: ch.bing ? "linear-gradient(135deg,#1a0f10,#000)" : undefined }}>
-              {ch.logo ? (
-                <img
-                  src={ch.logo}
-                  alt={ch.name}
-                  loading="lazy"
-                  className={`absolute inset-0 w-full h-full object-contain p-3 ${ch.bing ? "" : "bg-white/95"}`}
-                />
-              ) : (
-                <div className="absolute inset-0 grid place-items-center text-foreground/70 bg-gradient-to-br from-surface-2 to-black">
-                  <Tv className="h-7 w-7" />
+        {channels.map((ch) => {
+          const logo = CHANNEL_LOGOS[ch.slug];
+          return (
+            <Link
+              key={ch.slug}
+              to={`/live-tv?ch=${encodeURIComponent(ch.slug)}`}
+              className="group flex-shrink-0 w-[120px] sm:w-[140px] md:w-[160px]"
+            >
+              <div className="aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-surface-2 to-black relative shadow-md transition-transform duration-200 group-hover:-translate-y-1 ring-1 ring-border">
+                {logo ? (
+                  <img
+                    src={logo}
+                    alt={ch.name}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-contain p-3 bg-white/95"
+                  />
+                ) : (
+                  <div className="absolute inset-0 grid place-items-center text-foreground/70">
+                    <Tv className="h-7 w-7" />
+                  </div>
+                )}
+                <div className="absolute top-1 left-1 rounded-sm bg-primary px-1.5 py-[1px] text-[8px] font-bold uppercase tracking-wide text-primary-foreground">
+                  LIVE
                 </div>
-              )}
-              <div className="absolute top-1 left-1 rounded-sm bg-primary px-1.5 py-[1px] text-[8px] font-bold uppercase tracking-wide text-primary-foreground">
-                LIVE
               </div>
-            </div>
-            <p className="mt-1 text-[11px] md:text-xs font-medium text-foreground line-clamp-1 group-hover:text-primary">
-              {ch.name}
-            </p>
-          </Link>
-        ))}
+              <p className="mt-1 text-[11px] md:text-xs font-medium text-foreground line-clamp-1 group-hover:text-primary">
+                {ch.name}
+              </p>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
 };
 
 export default LiveTvRow;
-

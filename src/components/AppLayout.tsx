@@ -5,6 +5,7 @@ import BottomNav from "./BottomNav";
 import Footer from "./Footer";
 import InlineAdRow from "./InlineAdRow";
 
+
 interface AppLayoutProps {
   children: ReactNode;
   hideNav?: boolean;
@@ -47,6 +48,7 @@ const AppLayout = ({ children, hideNav, hideFooter }: AppLayoutProps) => {
       </main>
       {showFooter && <Footer />}
       <BottomNav />
+      
     </div>
   );
 };
