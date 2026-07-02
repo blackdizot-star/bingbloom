@@ -35,8 +35,17 @@ public class MainActivity extends BridgeActivity {
 				WebSettings webSettings = webView.getSettings();
 				webSettings.setJavaScriptEnabled(true);
 				webSettings.setDomStorageEnabled(true);
+				webSettings.setDatabaseEnabled(true);
+				webSettings.setAllowFileAccess(true);
+				webSettings.setAllowContentAccess(true);
+				webSettings.setAllowUniversalAccessFromFileURLs(true);
+				webSettings.setAllowFileAccessFromFileURLs(true);
+				webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+				webSettings.setSupportZoom(false);
+				webSettings.setBuiltInZoomControls(false);
 				webSettings.setLoadWithOverviewMode(true);
 				webSettings.setUseWideViewPort(true);
+				webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
 				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
 					webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);

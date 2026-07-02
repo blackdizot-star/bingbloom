@@ -1,10 +1,10 @@
 import { useEffect, useRef } from "react";
 
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
-const AD_SRC = `https://pl29160309.effectivecpmnetwork.com/${AD_KEY}/invoke.js`;
+const AD_SRC = `https://www.highperformanceformat.com/${AD_KEY}/invoke.js`;
 
 /**
- * EffectiveCPMNetwork native banner.
+ * Adsterra/HighPerformanceFormat native banner.
  * - `compact` shrinks the slot
  * - `inline` removes padding/labels so several can sit in a row
  */
@@ -22,18 +22,21 @@ const NativeAd = ({
   useEffect(() => {
     const host = ref.current;
     if (!host) return;
-    // Isolate each instance in its own iframe so the global invoke.js
-    // doesn't collide with sibling slots and actually renders an ad.
-    const iframe = document.createElement("iframe");
-    iframe.scrolling = "no";
-    iframe.frameBorder = "0";
-    iframe.style.cssText =
-      "border:0;display:block;width:100%;height:100%;background:transparent;";
-    iframe.title = "Sponsored";
+
+    const slotId = `adsterra-native-${AD_KEY.slice(0, 8)}`;
     host.innerHTML = "";
-    host.appendChild(iframe);
-    const html = `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:transparent;}#container-${AD_KEY}{width:100%;}</style></head><body><script async data-cfasync="false" src="${AD_SRC}"><\/script><div id="container-${AD_KEY}"></div></body></html>`;
-    iframe.srcdoc = html;
+
+    const container = document.createElement("div");
+    container.id = slotId;
+    container.style.cssText = "width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
+    host.appendChild(container);
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.setAttribute("data-cfasync", "false");
+    script.src = AD_SRC;
+    host.appendChild(script);
+
     return () => {
       host.innerHTML = "";
     };

@@ -4,6 +4,8 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+  release:
+    types: [ created ]
 
 jobs:
   build:
@@ -50,11 +52,20 @@ jobs:
           -exportOptionsPlist ExportOptions.plist \
           -exportPath build/ipa
 
-    - name: Upload IPA to GitHub Release
+    - name: Rename IPA
+      run: |
+        cd ios/App/build/ipa
+        ls -la
+        # Find the .ipa file and rename it to app-release.ipa
+        find . -name "*.ipa" -exec mv {} app-release.ipa \;
+
+    - name: Create or Update GitHub Release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: ios/App/build/ipa/App.ipa
+        files: ios/App/build/ipa/app-release.ipa
+        tag_name: v1.0.0
+        body: "BingBloom iOS App Release"
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

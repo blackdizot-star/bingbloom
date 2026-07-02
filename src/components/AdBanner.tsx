@@ -22,20 +22,36 @@ interface AdBannerProps {
   label?: boolean;
 }
 
-/**
- * Renders an isolated highperformanceformat.com iframe ad.
- * Each instance lives inside a sandboxed <iframe srcdoc> so that
- * the global `atOptions` from invoke.js doesn't collide between slots.
- */
 const AdBanner = ({ format, className = "", label = true }: AdBannerProps) => {
-  const ref = useRef<HTMLIFrameElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const cfg = CONFIG[format];
 
   useEffect(() => {
-    if (!ref.current) return;
-    const html = `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center;}</style></head><body><script type="text/javascript">atOptions = { 'key':'${cfg.key}', 'format':'iframe', 'height':${cfg.height}, 'width':${cfg.width}, 'params':{} };<\/script><script src="https://www.highperformanceformat.com/${cfg.key}/invoke.js"><\/script></body></html>`;
-    ref.current.srcdoc = html;
-  }, [cfg.key, cfg.height, cfg.width]);
+    const host = ref.current;
+    if (!host) return;
+
+    const slotId = `adsterra-banner-${format}-${cfg.key.slice(0, 8)}`;
+    host.innerHTML = "";
+
+    const wrapper = document.createElement("div");
+    wrapper.style.cssText = `width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:transparent;overflow:hidden;`;
+
+    const container = document.createElement("div");
+    container.id = slotId;
+    container.style.cssText = "width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
+    wrapper.appendChild(container);
+    host.appendChild(wrapper);
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.setAttribute("data-cfasync", "false");
+    script.src = `https://www.highperformanceformat.com/${cfg.key}/invoke.js`;
+    host.appendChild(script);
+
+    return () => {
+      host.innerHTML = "";
+    };
+  }, [cfg.key, cfg.height, cfg.width, format]);
 
   return (
     <div
@@ -49,19 +65,10 @@ const AdBanner = ({ format, className = "", label = true }: AdBannerProps) => {
         </span>
       )}
       <div
+        ref={ref}
         className="relative overflow-hidden rounded-md max-w-full"
         style={{ width: cfg.width, height: cfg.height, maxWidth: "100%" }}
-      >
-        <iframe
-          ref={ref}
-          title={`ad-${format}`}
-          width={cfg.width}
-          height={cfg.height}
-          scrolling="no"
-          frameBorder={0}
-          style={{ border: 0, display: "block", width: "100%", height: "100%" }}
-        />
-      </div>
+      />
     </div>
   );
 };
