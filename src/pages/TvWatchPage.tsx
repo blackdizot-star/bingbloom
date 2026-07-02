@@ -70,6 +70,13 @@ const TvWatchPage = () => {
           />
         </div>
 
+        {/* Sponsor row directly beneath the player */}
+        <div className="mt-2">
+          <InlineAdRow count={4} />
+        </div>
+
+
+
 
 
 

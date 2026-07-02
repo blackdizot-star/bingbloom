@@ -1,108 +1,60 @@
+# Sponsor Education Modal + Ad Placement Pass
 
-# BingBloom: Ad cleanup, Video SEO, FAQ hub, Bing TV & Live TV upgrade, full SEO pass
+## 1. Sponsor Education Modal (new)
 
-## 1. Ads — revert to old clean placement (premium feel)
-Remove all `<LazyNativeAd>` placements added in the last pass; restore ONLY the original `<InlineAdRow>` slots that were there before. Keep the ad network the same (`NativeAd` iframe) but limit to **4 slots max per page**, small/compact size (≤60px mobile).
+**New file:** `src/components/SponsorEducationModal.tsx`
 
-- Delete `src/components/LazyNativeAd.tsx`.
-- Edit `HomePage.tsx`, `SearchPage.tsx`, `MovieDetailPage.tsx`, `TVDetailPage.tsx`, `EpisodesList.tsx`, `MovieWatchPage.tsx`, `TvWatchPage.tsx`, `AppLayout.tsx` — remove every `LazyNativeAd` import + JSX. Restore the original 3–4 `<InlineAdRow>` rows on Home (between sections), 1 on Search (after ~10 results), 1 on movie/TV detail (below description), 1 below player.
-- Ensure `NativeAd` uses `compact` variant everywhere.
+- Full-screen overlay (`fixed inset-0 z-[100] bg-black/80 backdrop-blur`) — non-dismissable by outside click or ESC. User MUST tap the CTA to close (boosts engagement).
+- Card: `#1A1A1A`, rounded 12px, max-w-[400px], centered, white text, red `#E50914` CTA.
+- Title: "🤝 How BingBloom Stays Free". Body copy per spec.
+- CTA: "Got it – let's watch! →" — on click:
+  1. Fires a native ad reveal (mounts `NativeAd` with the `11098740` In-Page Push key inside the same modal footer for ~4s so user actually sees an ad they can click), then
+  2. Closes modal and marks localStorage.
+- Return-visit variant (view count ≥ 2): show a short **"Thanks for supporting BingBloom 💛"** message instead of the education copy, same CTA behavior.
 
-## 2. Video sitemap — 150 videos for Google Video indexing
-- New generator: extend `scripts/generate-sitemap.ts` to also emit `public/video-sitemap.xml` with **150 entries** (100 movies + 50 TV) using Google's Video sitemap namespace:
-  ```xml
-  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-          xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-    <url>
-      <loc>https://bingbloom.lovable.app/movie/{id}</loc>
-      <video:video>
-        <video:thumbnail_loc>https://image.tmdb.org/t/p/w500{poster}</video:thumbnail_loc>
-        <video:title>{title}</video:title>
-        <video:description>{overview}</video:description>
-        <video:player_loc allow_embed="yes">https://bingbloom.lovable.app/watch/movie/{id}</video:player_loc>
-        <video:duration>{runtime*60}</video:duration>
-        <video:publication_date>{release_date}</video:publication_date>
-        <video:family_friendly>yes</video:family_friendly>
-      </video:video>
-    </url>
-  </urlset>
-  ```
-- Add a **sitemap index** `public/sitemap-index.xml` pointing to `sitemap.xml` + `video-sitemap.xml` + `faq-sitemap.xml`.
-- Reference `sitemap-index.xml` in `robots.txt`.
-- Submit both `video-sitemap.xml` and `sitemap-index.xml` to Google Search Console via the connector.
+**Frequency logic (localStorage):**
+- `bb_sponsor_shown_count` — total lifetime shows (cap = 3).
+- `bb_sponsor_last_shown` — ms timestamp; require ≥ 24h gap between shows after the first.
+- `bb_sponsor_session_shown` — sessionStorage flag; max 1 per visit.
+- Trigger: mount a `<SponsorEducationGate />` in `AppLayout`. After **15 s** on the page (per visit), if session flag not set AND count < 3, show modal. First visit ever → education variant. Subsequent → thank-you variant.
 
-## 3. FAQ hub — 100 questions
-- New page `src/pages/FAQsPage.tsx` at route `/faqs` — 100 questions/answers, every answer names **BingBloom** and links to `/movies`, `/live`, `/install`, etc.
-- Questions grouped into categories (Streaming, Movies, TV, Live TV, Music, App, Legal, Account) with shadcn `Accordion`, dark theme.
-- `FAQPage` JSON-LD covering all 100 Q&A (chunked to keep script tag under ~30KB).
-- Add link in `Footer.tsx` under a new "Help" column: "FAQs & Questions" → `/faqs`.
-- Remove `QuickAnswers` component usage from `MovieDetailPage.tsx` (delete the import + `<QuickAnswers />` render — leave the file for now).
-- New generator output `public/faq-sitemap.xml` — one URL per top-30 question as `/faqs#q-{n}` (Google handles fragment sitemaps as the base URL, but they signal freshness).
-- Register `/faqs` route in `App.tsx`.
+**Wire-up:** import `<SponsorEducationGate />` inside `AppLayout` (top-level, once).
 
-## 4. Bing TV + branded Live TV
-### Bing TV (in-app live channel)
-- New virtual channel `bing-tv` injected at the **top** of the Live TV list in `HomePage.tsx` live row and `LiveTVPage.tsx`.
-- Logo: `src/assets/bingbloom-official-logo.png`.
-- Behavior: when selected, opens a full-screen player that auto-plays a rotating queue of TMDB popular movies via the existing `MoviePlayer`. Programme guide shows next 6 movies with start/end times computed from runtime.
-- Component: `src/components/BingTvChannel.tsx` — fetches `popular` movies, builds a schedule array, on mount picks the "currently airing" movie based on wall-clock modulo total-runtime.
-- New route `/live/bing-tv` renders this component.
+## 2. Ad Placement Pass (restore/extend the old 4-up `InlineAdRow`)
 
-### Official channel logos
-Add hardcoded logo overrides in `src/lib/iptv.ts` for: BBC News, CNN, Fox News, MSNBC, CNBC, Bloomberg, Sky News — using Wikipedia SVG CDN URLs (e.g., `upload.wikimedia.org/.../BBC_News_2022.svg`).
+All slots use the existing `<InlineAdRow count={4} />` (already the premium look).
 
-### More reliable channels
-- Update IPTV source list in `src/lib/iptv.ts` to fetch from:
-  - `https://iptv-org.github.io/iptv/index.m3u` (primary)
-  - `https://iptv-org.github.io/iptv/categories/news.m3u` (news pinned)
-  - `https://iptv-org.github.io/iptv/categories/sports.m3u` (sports section)
-- Filter out dead entries (skip channels without valid `tvg-logo` or `http` URL), dedupe by name.
-- Prioritize the 7 named news channels at top after Bing TV.
+| Location | File | Position |
+|---|---|---|
+| Below player (movie) | `src/pages/MovieWatchPage.tsx` | Immediately under `<MoviePlayer/>`, before "You May Also Like" |
+| Below player (TV) | `src/pages/TvWatchPage.tsx` | Same position under player |
+| Movie detail — above cast | `src/pages/MovieDetailPage.tsx` | Insert `<InlineAdRow count={4}/>` directly above the Cast section |
+| TV detail — above cast | `src/pages/TVDetailPage.tsx` | Same |
+| Movies page — top | `src/pages/MoviesPage.tsx` | First child under the `<h1>` header block |
+| Anime page — top | `src/pages/AnimePage.tsx` | First child under header |
+| Explore / discover cards | `src/pages/SearchPage.tsx` (Explore grid) | Inject an `<InlineAdRow count={4}/>` after every 5 result cards |
 
-## 5. SEO pass
-- **Meta tags** — audit every page (`MoviesPage`, `TVPage`, `AnimePage`, `LiveTVPage`, `MusicPage`, `PodcastsPage`, `MovieDetailPage`, `TVDetailPage`, `SearchPage`, `InstallAppPage`, `Blog`, `BlogPost`, `FAQsPage`, `MovieFAQ`) — confirm each has unique `<SEO title description jsonLd>` via `react-helmet-async` (already installed). Fix any missing.
-- **JSON-LD**:
-  - Home: `SoftwareApplication` + `WebSite` + `Organization` (already partial — verify).
-  - Movie detail: `Movie` schema (already exists — verify populated).
-  - TV detail: `TVSeries` schema (verify).
-  - FAQs page: `FAQPage` with all 100 Q&A.
-  - Movie FAQ page: keep existing `FAQPage`.
-- **"People also watched"** — new `PeopleAlsoWatched.tsx` in `MovieDetailPage.tsx` below description, using TMDB `/movie/{id}/recommendations`, rendering 6 poster links to `/movie/{id}` (internal linking for SEO).
-- **`public/llms.txt`** — expand with links to `/faqs`, `/movie-faq`, `/live/bing-tv`, all 7 named news channels, and rewrite intro to include the 100-Q&A hub and video content markers. Add a "FAQ excerpts" section with the top 20 questions inline so LLMs quote BingBloom as the answer.
-- **`robots.txt`** — already permissive; add `Sitemap: https://bingbloom.lovable.app/sitemap-index.xml`.
+Existing `HomePage` and `AppLayout` end-of-page ads stay untouched.
 
-## 6. Google Search Console submission
-After build:
-- POST sitemap `sitemap-index.xml` to GSC.
-- POST `video-sitemap.xml`.
-- URL-inspect: `/faqs`, `/live/bing-tv`, `/movie-faq`, 3 sample `/movie/{id}` pages.
+## 3. Sitemap resubmit to Google Search Console
 
-## 7. Verification
-- `bun run build` succeeds.
-- Old ad look confirmed: max 4 small slots per page, no lazy wrapper.
-- `/faqs` shows 100 Q&A accordions, footer link works.
-- `video-sitemap.xml` has 150 `<video:video>` entries.
-- Bing TV appears first in Live TV, plays a movie when tapped, shows next-up schedule.
-- Named news channels show correct logos.
-- `llms.txt` includes FAQ excerpts and BingBloom as answer.
+Re-POST all three sitemaps (they exist in `/public`):
+- `https://bingbloom.lovable.app/sitemap-index.xml`
+- `https://bingbloom.lovable.app/sitemap.xml`
+- `https://bingbloom.lovable.app/video-sitemap.xml`
+- `https://bingbloom.lovable.app/faq-sitemap.xml`
 
-## Files added
-- `src/pages/FAQsPage.tsx`
-- `src/components/BingTvChannel.tsx`
-- `src/components/PeopleAlsoWatched.tsx`
-- `public/video-sitemap.xml` (generated)
-- `public/faq-sitemap.xml` (generated)
-- `public/sitemap-index.xml` (generated)
+Via `PUT /webmasters/v3/sites/<site>/sitemaps/<encoded-url>` through the connector gateway. Confirm 200/204 for each.
 
-## Files edited
-- `src/components/AppLayout.tsx`, `src/pages/HomePage.tsx`, `SearchPage.tsx`, `MovieDetailPage.tsx`, `TVDetailPage.tsx`, `EpisodesList.tsx`, `MovieWatchPage.tsx`, `TvWatchPage.tsx` (remove LazyNativeAd, restore InlineAdRow)
-- `src/components/Footer.tsx` (FAQs link)
-- `src/App.tsx` (routes `/faqs`, `/live/bing-tv`)
-- `src/lib/iptv.ts` (logos + more channel sources)
-- `src/pages/LiveTVPage.tsx` (Bing TV pinned first)
-- `scripts/generate-sitemap.ts` (emit video + faq + index sitemaps)
-- `public/robots.txt` (sitemap index)
-- `public/llms.txt` (expanded)
+## Technical notes
 
-## Files deleted
-- `src/components/LazyNativeAd.tsx`
+- The `NativeAd` component already exists and accepts an ad key; confirm it supports the `11098740` In-Page Push key or add a new `NativeAd variant="inpage-push"` prop that swaps the script src to `//pl11098740…/invoke.js` (verify against existing pattern in `NativeAd.tsx`).
+- Modal uses shadcn `Dialog` with `onPointerDownOutside` and `onEscapeKeyDown` preventDefault so user is forced to tap CTA.
+- SSR-safe: guard all `localStorage`/`sessionStorage` reads with `typeof window !== 'undefined'`.
+- No changes to routing, backend, or existing ad components — purely additive.
+
+## Files touched
+
+**New:** `src/components/SponsorEducationModal.tsx`, `src/components/SponsorEducationGate.tsx`
+**Edited:** `AppLayout.tsx`, `MovieWatchPage.tsx`, `TvWatchPage.tsx`, `MovieDetailPage.tsx`, `TVDetailPage.tsx`, `MoviesPage.tsx`, `AnimePage.tsx`, `SearchPage.tsx`, possibly `NativeAd.tsx` (add In-Page Push key)
+**Runtime:** GSC sitemap PUT calls via curl

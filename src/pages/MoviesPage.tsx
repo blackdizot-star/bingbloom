@@ -48,6 +48,8 @@ const MoviesPage = () => {
         <p className="text-sm text-muted-foreground mt-1">Discover trending, top-rated and upcoming films</p>
       </div>
 
+      <InlineAdRow count={4} />
+
       <TmdbRow title="Trending This Week" items={trending.data} isLoading={trending.isLoading} type="movie" />
       <TmdbRow title="Now Playing in Theaters" items={nowPlaying.data} isLoading={nowPlaying.isLoading} type="movie" />
       <TmdbRow title="Upcoming Releases" items={upcoming.data} isLoading={upcoming.isLoading} type="movie" />
