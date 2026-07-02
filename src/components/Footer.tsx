@@ -16,7 +16,7 @@ const COLS = [
     title: "Watch",
     links: [
       { label: "Ways to Watch", to: "/ways-to-watch" },
-      { label: "Install the App", to: "/install" },
+      { label: "Check for update", to: "https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n" },
       { label: "Download APK", to: "/download-apk" },
       { label: "Speed Test", to: "/speed-test" },
       { label: "Follow Us", to: "/follow-us" },
@@ -61,7 +61,11 @@ const Footer = () => (
             <ul className="space-y-1.5">
               {col.links.map((l) => (
                 <li key={l.label}>
-                  <Link to={l.to} className="hover:text-white hover:underline transition-colors">{l.label}</Link>
+                  {l.to && l.to.startsWith("http") ? (
+                    <a href={l.to} target="_blank" rel="noreferrer" className="hover:text-white hover:underline transition-colors">{l.label}</a>
+                  ) : (
+                    <Link to={l.to} className="hover:text-white hover:underline transition-colors">{l.label}</Link>
+                  )}
                 </li>
               ))}
             </ul>

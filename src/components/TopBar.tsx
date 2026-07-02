@@ -120,13 +120,15 @@ const TopBar = () => {
 
           {/* Right cluster — mobile: install, search, profile, settings (rightmost) */}
           <div className="flex items-center gap-1 flex-shrink-0">
-            <Link
-              to="/install"
-              className="md:hidden inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-[0_2px_8px_rgba(229,9,20,0.45)]"
-              aria-label="Install App"
+            <a
+              href="https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n"
+              target="_blank"
+              rel="noreferrer"
+              className="md:hidden inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-[0_2px_8px_rgba(229,9,20,0.45)]"
+              aria-label="Check for update"
             >
-              <Download className="h-3 w-3" /> Install
-            </Link>
+              <Download className="h-3 w-3" /> Update
+            </a>
             <Link
               to="/search"
               aria-label="Search"

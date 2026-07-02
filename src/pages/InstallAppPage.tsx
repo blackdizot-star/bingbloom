@@ -69,21 +69,21 @@ const InstallAppPage = () => {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          <button
-            onClick={handleInstall}
-            disabled={downloading}
-            className="flex-1 min-w-[140px] gradient-bb text-primary-foreground font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 text-xs disabled:opacity-60"
-          >
-            {done ? (<><Check className="w-3.5 h-3.5" /> Downloaded — open APK</>) : downloading ? "Downloading…" : (<><Download className="w-3.5 h-3.5" /> Install</>)}
-          </button>
           <a
             href="https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex min-w-[140px] items-center justify-center gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-xs font-semibold text-foreground"
+            className="flex-1 min-w-[140px] gradient-bb text-primary-foreground font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 text-xs"
           >
-            <BellRing className="h-3.5 w-3.5 text-primary" /> Update channel
+            <BellRing className="w-3.5 h-3.5" /> Check for update
           </a>
+          <button
+            onClick={() => navigator.share?.({ title: "BingBloom", url: window.location.href }).catch(() => {})}
+            className="w-10 grid place-items-center rounded-xl border border-border bg-card"
+            aria-label="Share"
+          >
+            <Share2 className="w-3.5 h-3.5 text-foreground" />
+          </button>
           <button
             onClick={() => navigator.share?.({ title: "BingBloom", url: window.location.href }).catch(() => {})}
             className="w-10 grid place-items-center rounded-xl border border-border bg-card"
