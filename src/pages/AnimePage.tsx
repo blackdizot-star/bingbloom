@@ -79,6 +79,8 @@ const AnimePage = () => {
         <p className="text-sm text-muted-foreground mt-1">25 hand-picked collections</p>
       </div>
 
+      <InlineAdRow count={4} />
+
       {/* Sticky category menu */}
       <div className="sticky top-12 md:top-14 z-30 bg-background/95 backdrop-blur border-b border-border">
         <div

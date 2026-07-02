@@ -7,6 +7,7 @@ import TmdbRow from "@/components/TmdbRow";
 import DownloadButton from "@/components/DownloadButton";
 import { useTvDetail, useTvSeason, useTvSimilar, useTvRecommendations, useTrendingTv, usePopularTv, useTopRatedTv } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
+import InlineAdRow from "@/components/InlineAdRow";
 
 const TVDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -222,6 +223,10 @@ const TVDetailPage = () => {
               </div>
             </section>
           )}
+
+          <div className="mt-8 -mx-[5%]">
+            <InlineAdRow count={4} />
+          </div>
 
           {cast.length > 0 && (
             <section className="mt-10">

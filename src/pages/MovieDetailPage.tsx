@@ -8,6 +8,7 @@ import TrailerModal from "@/components/TrailerModal";
 import { useMovieDetail, useMovieSimilar, useMovieRecommendations, useTrendingMovies, usePopularMovies, useTopRatedMovies } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
 import DownloadButton from "@/components/DownloadButton";
+import InlineAdRow from "@/components/InlineAdRow";
 import { movieSchema } from "@/lib/seoSchemas";
 
 const MovieDetailPage = () => {
@@ -145,6 +146,10 @@ const MovieDetailPage = () => {
               </div>
             </div>
 
+          </div>
+
+          <div className="mt-8 -mx-[5%]">
+            <InlineAdRow count={4} />
           </div>
 
           {cast.length > 0 && (
