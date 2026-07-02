@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, ArrowLeft, Loader2, TrendingUp, Star, Play } from "lucide-react";
+import { Search, ArrowLeft, Loader2, Flame, Star, Play } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
@@ -274,26 +274,27 @@ const SearchPage = () => {
         {showExplore ? (
           <>
             <div className="flex items-center gap-1.5 mb-3">
-              <TrendingUp className="w-3.5 h-3.5" style={{ color: "#E50914" }} />
+              <Flame className="w-4 h-4 fill-[#E50914]" style={{ color: "#E50914" }} />
               <h2 className="text-white text-sm font-bold">Trending now</h2>
             </div>
             {isFetching && results.length === 0 ? (
               <BrandedLoadingState label="Loading trending" />
             ) : (
-              <div className="space-y-2 pb-4">
-                {(results as ResultItem[]).slice(0, 24).map((m, i) => (
-                  <div key={`sg-${m._type}-${m.id}`}>
-                    <ResultRow item={m} onClick={() => openItem(m)} />
-                    {/* 4 native ad rows interspersed every ~5 items */}
-                    {(i === 4 || i === 9 || i === 14 || i === 19) && (
-                      <div className="-mx-5 my-3">
-                        <SponsoredLabel />
-                        <InlineAdRow count={4} />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-3 gap-2 pb-4">
+                  {(results as ResultItem[]).slice(0, 24).map((m, i) => (
+                    <div key={`sg-${m._type}-${m.id}`} className="contents">
+                      <ExploreCard item={m} onClick={() => openItem(m)} />
+                      {(i === 5 || i === 11 || i === 17) && (
+                        <div className="col-span-3 -mx-5 my-1">
+                          <SponsoredLabel />
+                          <InlineAdRow count={4} />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </>
         ) : (
