@@ -6,7 +6,7 @@ import SEO from "@/components/SEO";
 import MoviePlayer from "@/components/MoviePlayer";
 import { usePopularMovies } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
-import logo from "@/assets/bingbloom-official-logo.png";
+import logo from "@/assets/bingbloom-logo.jpeg";
 
 /**
  * Bing TV — a virtual 24/7 movie channel. Deterministically selects
