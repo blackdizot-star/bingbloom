@@ -60,6 +60,8 @@ import GiftCards from "./pages/GiftCards";
 import CookiePreferences from "./pages/CookiePreferences";
 import LegalGuarantee from "./pages/LegalGuarantee";
 import MovieFAQ from "./pages/MovieFAQ";
+import FAQsPage from "./pages/FAQsPage";
+import BingTvChannel from "./components/BingTvChannel";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 
@@ -197,6 +199,8 @@ const App = () => {
           <Route path="/cookie-preferences" element={<CookiePreferences />} />
           <Route path="/legal-guarantee" element={<LegalGuarantee />} />
           <Route path="/movie-faq" element={<MovieFAQ />} />
+          <Route path="/faqs" element={<FAQsPage />} />
+          <Route path="/live/bing-tv" element={<BingTvChannel />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
 

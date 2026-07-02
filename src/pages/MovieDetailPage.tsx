@@ -8,7 +8,6 @@ import TrailerModal from "@/components/TrailerModal";
 import { useMovieDetail, useMovieSimilar, useMovieRecommendations, useTrendingMovies, usePopularMovies, useTopRatedMovies } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
 import DownloadButton from "@/components/DownloadButton";
-import QuickAnswers from "@/components/QuickAnswers";
 import { movieSchema } from "@/lib/seoSchemas";
 
 const MovieDetailPage = () => {
@@ -170,7 +169,6 @@ const MovieDetailPage = () => {
             </section>
           )}
 
-          <QuickAnswers title={data.title} year={year} runtime={runtime} rating={data.vote_average} cast={actorNames} />
 
           {recs.length > 0 && (
             <div className="mt-10 -mx-[5%]">

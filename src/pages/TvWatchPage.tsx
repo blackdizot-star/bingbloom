@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
+
 import TmdbRow from "@/components/TmdbRow";
 import Footer from "@/components/Footer";
 import { useTvDetail, useTvSeason, useTrendingTv, usePopularTv, useTopRatedTv } from "@/hooks/useTmdb";
@@ -68,6 +69,9 @@ const TvWatchPage = () => {
             backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
           />
         </div>
+
+
+
 
         {data && (
           <div className="px-4 pb-4">

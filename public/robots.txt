@@ -10,7 +10,21 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: GPTBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 User-agent: *
 Allow: /
 
+Sitemap: https://bingbloom.lovable.app/sitemap-index.xml
 Sitemap: https://bingbloom.lovable.app/sitemap.xml
+Sitemap: https://bingbloom.lovable.app/video-sitemap.xml
