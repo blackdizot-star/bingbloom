@@ -6,7 +6,7 @@ const LAST_KEY = "bb_sponsor_last_shown";
 const SESSION_KEY = "bb_sponsor_session_shown";
 const MAX_SHOWS = 3;
 const MIN_GAP_MS = 24 * 60 * 60 * 1000; // 24h between shows after the first
-const DELAY_MS = 15_000;
+const DELAY_MS = 30_000;
 
 const readNum = (key: string, store: Storage) => {
   const v = store.getItem(key);

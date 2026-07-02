@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, ArrowLeft, Loader2, TrendingUp, Star, Play } from "lucide-react";
+import { Search, ArrowLeft, Loader2, Flame, Star, Play } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
@@ -107,6 +107,41 @@ const ResultRow = ({ item, onClick }: { item: ResultItem; onClick: () => void })
         {item.overview && (
           <p className="text-[10px] text-white/40 mt-1 line-clamp-2">{item.overview}</p>
         )}
+      </div>
+    </button>
+  );
+};
+
+const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void }) => {
+  const title = (item as any).title || (item as any).name || "Untitled";
+  const date = (item as any).release_date || (item as any).first_air_date || "";
+  const poster = item.poster_path || item.backdrop_path;
+  return (
+    <button
+      onClick={onClick}
+      className="text-left rounded-xl overflow-hidden hover:scale-[1.02] transition-transform"
+      style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
+    >
+      <div className="relative w-full aspect-[2/3] bg-black">
+        {poster ? (
+          <img src={img(poster, "w300")} alt={title} loading="lazy" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full grid place-items-center text-white/25 text-[9px]">No art</div>
+        )}
+        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+          <Play className="w-2.5 h-2.5 text-white fill-white" />
+        </span>
+        {!!item.vote_average && (
+          <span className="absolute top-1 left-1 flex items-center gap-0.5 px-1 py-0.5 rounded bg-black/70 text-[9px] font-semibold text-amber-400">
+            <Star className="w-2.5 h-2.5 fill-amber-400" /> {item.vote_average.toFixed(1)}
+          </span>
+        )}
+      </div>
+      <div className="p-1.5">
+        <h3 className="text-[11px] font-bold text-white line-clamp-1 leading-tight">{title}</h3>
+        <p className="text-[9.5px] text-white/55 mt-0.5 line-clamp-1">
+          {item._type === "tv" ? "Series" : "Movie"}{date ? ` · ${date.slice(0, 4)}` : ""}
+        </p>
       </div>
     </button>
   );
@@ -274,26 +309,27 @@ const SearchPage = () => {
         {showExplore ? (
           <>
             <div className="flex items-center gap-1.5 mb-3">
-              <TrendingUp className="w-3.5 h-3.5" style={{ color: "#E50914" }} />
+              <Flame className="w-4 h-4 fill-[#E50914]" style={{ color: "#E50914" }} />
               <h2 className="text-white text-sm font-bold">Trending now</h2>
             </div>
             {isFetching && results.length === 0 ? (
               <BrandedLoadingState label="Loading trending" />
             ) : (
-              <div className="space-y-2 pb-4">
-                {(results as ResultItem[]).slice(0, 24).map((m, i) => (
-                  <div key={`sg-${m._type}-${m.id}`}>
-                    <ResultRow item={m} onClick={() => openItem(m)} />
-                    {/* 4 native ad rows interspersed every ~5 items */}
-                    {(i === 4 || i === 9 || i === 14 || i === 19) && (
-                      <div className="-mx-5 my-3">
-                        <SponsoredLabel />
-                        <InlineAdRow count={4} />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-3 gap-2 pb-4">
+                  {(results as ResultItem[]).slice(0, 24).map((m, i) => (
+                    <div key={`sg-${m._type}-${m.id}`} className="contents">
+                      <ExploreCard item={m} onClick={() => openItem(m)} />
+                      {(i === 5 || i === 11 || i === 17) && (
+                        <div className="col-span-3 -mx-5 my-1">
+                          <SponsoredLabel />
+                          <InlineAdRow count={4} />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </>
         ) : (
