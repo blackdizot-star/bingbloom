@@ -26,22 +26,19 @@ jobs:
     - name: Build React app
       run: npm run build
 
-    - name: Setup Cocoapods
-      run: |
-        sudo gem install cocoapods
-        cd ios/App && pod install && cd ../..
-
     - name: Sync Capacitor
       run: npx cap sync ios
 
     - name: Build iOS app
       run: |
         cd ios/App
+        xcodebuild -resolvePackageDependencies
         xcodebuild -workspace App.xcworkspace \
           -scheme App \
           -configuration Release \
           -derivedDataPath build \
           -archivePath build/App.xcarchive \
+          -allowProvisioningUpdates \
           archive
 
     - name: Export IPA
