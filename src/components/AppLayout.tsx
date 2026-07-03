@@ -48,7 +48,7 @@ const AppLayout = ({ children, hideNav, hideFooter }: AppLayoutProps) => {
       </main>
       {showFooter && <Footer />}
       <BottomNav />
-      <SponsorEducationGate />
+      
     </div>
   );
 };
