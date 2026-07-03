@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap><loc>https://bingbloom.lovable.app/sitemap.xml</loc><lastmod>2026-07-03</lastmod></sitemap>
-  <sitemap><loc>https://bingbloom.lovable.app/video-sitemap.xml</loc><lastmod>2026-07-03</lastmod></sitemap>
-  <sitemap><loc>https://bingbloom.lovable.app/faq-sitemap.xml</loc><lastmod>2026-07-03</lastmod></sitemap>
-  <sitemap><loc>https://bingbloom.lovable.app/top-videos-sitemap.xml</loc><lastmod>2026-07-03</lastmod></sitemap>
+  <sitemap><loc>https://bingbloom.lovable.app/sitemap.xml</loc><lastmod>2026-07-02</lastmod></sitemap>
+  <sitemap><loc>https://bingbloom.lovable.app/video-sitemap.xml</loc><lastmod>2026-07-02</lastmod></sitemap>
+  <sitemap><loc>https://bingbloom.lovable.app/faq-sitemap.xml</loc><lastmod>2026-07-02</lastmod></sitemap>
 </sitemapindex>

@@ -10,7 +10,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import OfflineBanner from "@/components/OfflineBanner";
 import AppSplashScreen from "@/components/AppSplashScreen";
 import AdConsent from "@/components/AdConsent";
-import SponsorSession from "@/components/SponsorSession";
 import HomePage from "./pages/HomePage";
 import FollowUsPage from "./pages/FollowUsPage";
 import MoviesPage from "./pages/MoviesPage";
@@ -134,7 +133,6 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SponsorSession />
         <Routes>
           <Route path="/welcome" element={<Navigate to="/home" replace />} />
           <Route path="/signin" element={<Navigate to="/home" replace />} />

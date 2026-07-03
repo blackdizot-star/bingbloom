@@ -11,10 +11,7 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
       </span>
       <div className="grid grid-cols-4 gap-1">
         {Array.from({ length: count }).map((_, i) => (
-          <div
-            key={i}
-            className="min-h-[70px] md:min-h-[90px] rounded-md overflow-hidden bg-surface-2/40"
-          >
+          <div key={i} className="min-h-[56px] rounded-md overflow-hidden bg-surface-2/40">
             <NativeAd inline />
           </div>
         ))}
@@ -24,4 +21,3 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
 };
 
 export default InlineAdRow;
-

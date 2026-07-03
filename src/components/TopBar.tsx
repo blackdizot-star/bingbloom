@@ -121,22 +121,13 @@ const TopBar = () => {
           {/* Right cluster — mobile: install, search, profile, settings (rightmost) */}
           <div className="flex items-center gap-1 flex-shrink-0">
             <a
-              href="https://bingbloomdownload.lovable.app"
+              href="https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n"
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noreferrer"
               className="md:hidden inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-[0_2px_8px_rgba(229,9,20,0.45)]"
-              aria-label="Install BingBloom app"
+              aria-label="Check for update"
             >
-              <Download className="h-3 w-3" /> Install
-            </a>
-            <a
-              href="https://bingbloomdownload.lovable.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground shadow-[0_2px_10px_rgba(229,9,20,0.45)] hover:brightness-110"
-              aria-label="Install BingBloom app on desktop"
-            >
-              <Download className="h-3.5 w-3.5" /> Install App
+              <Download className="h-3 w-3" /> Update
             </a>
             <Link
               to="/search"
