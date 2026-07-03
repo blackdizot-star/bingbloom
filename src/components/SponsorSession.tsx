@@ -71,31 +71,12 @@ const SponsorSession = () => {
   }, [location.pathname, modalOpen, thanksOpen]);
 
   const handleContinue = () => {
-    // Open smartlink synchronously to survive popup blockers.
-    // Fallbacks: window.open -> programmatic anchor click -> navigate current tab.
+    // Open smartlink synchronously to survive popup blockers
     try {
       const w = window.open(SMARTLINK, "_blank", "noopener,noreferrer");
-      if (!w) {
-        const a = document.createElement("a");
-        a.href = SMARTLINK;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }
+      if (!w) window.location.href = SMARTLINK;
     } catch {
-      try {
-        const a = document.createElement("a");
-        a.href = SMARTLINK;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } catch {
-        window.location.href = SMARTLINK;
-      }
+      window.location.href = SMARTLINK;
     }
 
     const next = countRef.current + 1;

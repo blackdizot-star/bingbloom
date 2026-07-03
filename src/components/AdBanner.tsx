@@ -38,12 +38,7 @@ const AdBanner = ({ format, className = "", label = true }: AdBannerProps) => {
 
     const container = document.createElement("div");
     container.id = slotId;
-    // Provide explicit px height so third-party scripts can size correctly,
-    // but allow the slot to scale down responsively via max-width.
-    container.style.cssText = `width:100%;height:${cfg.height}px;min-height:${cfg.height}px;display:flex;align-items:center;justify-content:center;max-width:${cfg.width}px;`;
-    container.dataset.adFormat = format;
-    container.dataset.adWidth = String(cfg.width);
-    container.dataset.adHeight = String(cfg.height);
+    container.style.cssText = "width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
     wrapper.appendChild(container);
     host.appendChild(wrapper);
 
@@ -72,7 +67,7 @@ const AdBanner = ({ format, className = "", label = true }: AdBannerProps) => {
       <div
         ref={ref}
         className="relative overflow-hidden rounded-md max-w-full"
-        style={{ width: "100%", height: cfg.height, maxWidth: cfg.width }}
+        style={{ width: cfg.width, height: cfg.height, maxWidth: "100%" }}
       />
     </div>
   );

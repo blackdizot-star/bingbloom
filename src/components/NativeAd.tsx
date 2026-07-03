@@ -29,8 +29,7 @@ const NativeAd = ({
 
     const container = document.createElement("div");
     container.id = slotId;
-    container.style.cssText = "width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;max-width:100%;";
-    container.dataset.adKey = AD_KEY;
+    container.style.cssText = "width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
     host.appendChild(container);
 
     const script = document.createElement("script");
