@@ -1,60 +1,74 @@
-# Sponsor Education Modal + Ad Placement Pass
+# Sponsor Modal v2 + Install Button + Ad Fixes + Video Sitemap
 
-## 1. Sponsor Education Modal (new)
+## 1. Rewrite Sponsor Modal (mandatory, 3×/session)
 
-**New file:** `src/components/SponsorEducationModal.tsx`
+**Replace** `SponsorEducationGate.tsx` + `SponsorEducationModal.tsx` with a single new controller `src/components/SponsorSession.tsx` mounted once in `AppLayout`.
 
-- Full-screen overlay (`fixed inset-0 z-[100] bg-black/80 backdrop-blur`) — non-dismissable by outside click or ESC. User MUST tap the CTA to close (boosts engagement).
-- Card: `#1A1A1A`, rounded 12px, max-w-[400px], centered, white text, red `#E50914` CTA.
-- Title: "🤝 How BingBloom Stays Free". Body copy per spec.
-- CTA: "Got it – let's watch! →" — on click:
-  1. Fires a native ad reveal (mounts `NativeAd` with the `11098740` In-Page Push key inside the same modal footer for ~4s so user actually sees an ad they can click), then
-  2. Closes modal and marks localStorage.
-- Return-visit variant (view count ≥ 2): show a short **"Thanks for supporting BingBloom 💛"** message instead of the education copy, same CTA behavior.
+### Storage (sessionStorage — resets on tab close)
+- `bingbloom_sponsor_count` — 0 | 1 | 2 | 3
+- `bingbloom_page_views` — resets after each modal
+- `bingbloom_modal_open_at` — timestamp when smartlink opened (to trigger Thank You on return)
 
-**Frequency logic (localStorage):**
-- `bb_sponsor_shown_count` — total lifetime shows (cap = 3).
-- `bb_sponsor_last_shown` — ms timestamp; require ≥ 24h gap between shows after the first.
-- `bb_sponsor_session_shown` — sessionStorage flag; max 1 per visit.
-- Trigger: mount a `<SponsorEducationGate />` in `AppLayout`. After **15 s** on the page (per visit), if session flag not set AND count < 3, show modal. First visit ever → education variant. Subsequent → thank-you variant.
+### Trigger logic
+- On mount: if count === 0, start a 30 s `setTimeout` → show Modal #1.
+- Subscribe to `useLocation()` in a child component; on every pathname change AFTER count ≥ 1 and count < 3, increment page_views. When page_views ≥ 3 → show next modal, reset page_views to 0.
+- After count === 3, stop.
 
-**Wire-up:** import `<SponsorEducationGate />` inside `AppLayout` (top-level, once).
+### Modal UI (mandatory)
+- Fixed overlay `z-[200] bg-[#0A0A0A]/80` — blocks pointer events on the app.
+- Card `#1A1A1A`, rounded 12 px, `w-[calc(100vw-2rem)] max-w-[400px]` (mobile compact), centered.
+- Title: **🤝 A Word From Our Sponsor**
+- Body: "BingBloom is completely free because of our sponsors. Tap continue to support us and keep the app free."
+- Warning line: "⚠️ This helps keep the app free for everyone."
+- CTA: full-width red `#E50914` button "Continue →".
+- NO close button, NO ESC/outside dismiss, NO `<Dialog>` (use plain div — shadcn Dialog auto-adds close). We render our own overlay.
 
-## 2. Ad Placement Pass (restore/extend the old 4-up `InlineAdRow`)
+### Continue handler
+1. `sessionStorage.setItem('bingbloom_sponsor_count', String(count + 1))`
+2. Close modal (React state)
+3. `window.open('https://www.effectivecpmnetwork.com/iwr6evary?key=710650d8dcbe7dd3d1aed9c9e4449f7c', '_blank', 'noopener,noreferrer')` — synchronous in click handler
+4. Set `bingbloom_modal_open_at = Date.now()`
+5. Show "Thank You!" toast-style overlay for 2 s (auto-dismiss via `setTimeout`).
 
-All slots use the existing `<InlineAdRow count={4} />` (already the premium look).
+### Thank You screen
+- Same overlay style, smaller card, non-blocking after 2 s. Title "Thank You!", body "Thank you for supporting BingBloom. Enjoy your content!"
 
-| Location | File | Position |
-|---|---|---|
-| Below player (movie) | `src/pages/MovieWatchPage.tsx` | Immediately under `<MoviePlayer/>`, before "You May Also Like" |
-| Below player (TV) | `src/pages/TvWatchPage.tsx` | Same position under player |
-| Movie detail — above cast | `src/pages/MovieDetailPage.tsx` | Insert `<InlineAdRow count={4}/>` directly above the Cast section |
-| TV detail — above cast | `src/pages/TVDetailPage.tsx` | Same |
-| Movies page — top | `src/pages/MoviesPage.tsx` | First child under the `<h1>` header block |
-| Anime page — top | `src/pages/AnimePage.tsx` | First child under header |
-| Explore / discover cards | `src/pages/SearchPage.tsx` (Explore grid) | Inject an `<InlineAdRow count={4}/>` after every 5 result cards |
+## 2. Install Button (desktop + phone update button)
 
-Existing `HomePage` and `AppLayout` end-of-page ads stay untouched.
+Currently `TopBar` (assumed) or nav has an "Update" button on phone. Rework `src/hooks/useInstallPrompt.ts` consumer:
 
-## 3. Sitemap resubmit to Google Search Console
+- **Desktop:** add an "Install App" button in `TopBar` (visible on `md:` breakpoint) linking (external, new tab) to `https://bingbloomdownload.lovable.app`.
+- **Mobile:** replace the existing update button with an "Install" button linking to the same URL.
+- Simple `<a href target="_blank" rel="noopener">` — no PWA prompt logic needed.
 
-Re-POST all three sitemaps (they exist in `/public`):
-- `https://bingbloom.lovable.app/sitemap-index.xml`
-- `https://bingbloom.lovable.app/sitemap.xml`
-- `https://bingbloom.lovable.app/video-sitemap.xml`
-- `https://bingbloom.lovable.app/faq-sitemap.xml`
+## 3. Ad fixes — restore custom sizing, ensure load
 
-Via `PUT /webmasters/v3/sites/<site>/sitemaps/<encoded-url>` through the connector gateway. Confirm 200/204 for each.
+- `NativeAd.tsx`: current script may collide when multiple `InlineAdRow` slots share the same `slotId`. Fix: make `slotId` unique per instance (`useId()`), and give each container a proper `min-height` so Adsterra fills it. Ensure the injected script only runs after the container is in the DOM (it already is).
+- `InlineAdRow.tsx`: keep 4-up grid on all breakpoints per user request; add explicit `min-h-[70px]` on mobile, `min-h-[90px]` on `md:` so slots render before script fills them (prevents 0-height collapse).
+- Verify each existing placement (Home, AppLayout end, Movie/TV watch, Movie/TV detail above cast, Movies/Anime top, Search every 5) still renders — no changes needed beyond the component fix.
+
+## 4. Video sitemap — 25-entry set + resubmit
+
+- Currently `public/video-sitemap.xml` already exists (140 videos per prior log). User asks for a "sitemap of the 25 movies video" — interpret as ensuring a curated top-25 video sitemap and resubmit.
+- Update `scripts/generate-sitemap.ts` if needed to cap or add a new `public/top-videos-sitemap.xml` (25 entries from a hand-picked list in `src/data/movies.ts`).
+- Add it to `sitemap-index.xml`.
+- Resubmit all sitemaps via GSC connector gateway `PUT /webmasters/v3/sites/<encoded-site>/sitemaps/<encoded-sitemap-url>`.
+
+## 5. Cleanup
+
+- Delete `SponsorEducationModal.tsx`, `SponsorEducationGate.tsx`.
+- Remove their imports from `AppLayout.tsx`; import `SponsorSession` instead.
+- Remove any Adsterra In-Page Push key `11098740` references (previous plan iteration).
+
+## Files
+
+**New:** `src/components/SponsorSession.tsx`, `public/top-videos-sitemap.xml`
+**Edited:** `src/components/AppLayout.tsx`, `src/components/NativeAd.tsx`, `src/components/InlineAdRow.tsx`, `src/components/TopBar.tsx`, `public/sitemap-index.xml`, `scripts/generate-sitemap.ts`
+**Deleted:** `src/components/SponsorEducationModal.tsx`, `src/components/SponsorEducationGate.tsx`
+**Runtime:** GSC sitemap PUT calls (curl via exec)
 
 ## Technical notes
 
-- The `NativeAd` component already exists and accepts an ad key; confirm it supports the `11098740` In-Page Push key or add a new `NativeAd variant="inpage-push"` prop that swaps the script src to `//pl11098740…/invoke.js` (verify against existing pattern in `NativeAd.tsx`).
-- Modal uses shadcn `Dialog` with `onPointerDownOutside` and `onEscapeKeyDown` preventDefault so user is forced to tap CTA.
-- SSR-safe: guard all `localStorage`/`sessionStorage` reads with `typeof window !== 'undefined'`.
-- No changes to routing, backend, or existing ad components — purely additive.
-
-## Files touched
-
-**New:** `src/components/SponsorEducationModal.tsx`, `src/components/SponsorEducationGate.tsx`
-**Edited:** `AppLayout.tsx`, `MovieWatchPage.tsx`, `TvWatchPage.tsx`, `MovieDetailPage.tsx`, `TVDetailPage.tsx`, `MoviesPage.tsx`, `AnimePage.tsx`, `SearchPage.tsx`, possibly `NativeAd.tsx` (add In-Page Push key)
-**Runtime:** GSC sitemap PUT calls via curl
+- All storage access guarded with `typeof window !== 'undefined'`.
+- Modal uses a plain fixed `<div>` (not shadcn Dialog) to guarantee no close affordance and full pointer blocking.
+- Router page-view listener lives inside `<BrowserRouter>` — mount `SponsorSession` inside `App.tsx` Routes tree (wrap Routes in a fragment with `<SponsorSession />`), not in `AppLayout` (AppLayout is per-page and would remount).
