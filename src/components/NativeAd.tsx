@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
 const AD_SRC = `https://www.highperformanceformat.com/${AD_KEY}/invoke.js`;
@@ -18,12 +18,13 @@ const NativeAd = ({
   inline?: boolean;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const uid = useId().replace(/[:]/g, "");
 
   useEffect(() => {
     const host = ref.current;
     if (!host) return;
 
-    const slotId = `adsterra-native-${AD_KEY.slice(0, 8)}`;
+    const slotId = `adsterra-native-${uid}`;
     host.innerHTML = "";
 
     const container = document.createElement("div");
