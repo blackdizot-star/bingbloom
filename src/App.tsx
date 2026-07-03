@@ -134,6 +134,7 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <SponsorSession />
         <Routes>
           <Route path="/welcome" element={<Navigate to="/home" replace />} />
           <Route path="/signin" element={<Navigate to="/home" replace />} />
