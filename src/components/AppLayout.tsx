@@ -4,7 +4,7 @@ import TopBar from "./TopBar";
 import BottomNav from "./BottomNav";
 import Footer from "./Footer";
 import InlineAdRow from "./InlineAdRow";
-import SponsorEducationGate from "./SponsorEducationGate";
+
 
 interface AppLayoutProps {
   children: ReactNode;
