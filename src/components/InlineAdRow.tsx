@@ -1,22 +1,18 @@
 import NativeAd from "./NativeAd";
 
 /**
- * 4-up grid of tiny native ads — flush with surrounding content.
+ * 4-up grid of native ads. Each slot is an isolated iframe so the Adsterra
+ * script fills every container independently.
  */
 const InlineAdRow = ({ count = 4 }: { count?: number }) => {
   return (
-    <div className="px-[4%] my-0 py-1">
-      <span className="block text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-0.5">
+    <div className="px-[4%] my-2">
+      <span className="block text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">
         Sponsored
       </span>
       <div className="grid grid-cols-4 gap-1 md:gap-2">
         {Array.from({ length: count }).map((_, i) => (
-          <div
-            key={i}
-            className="min-h-[48px] md:min-h-[100px] rounded-md overflow-hidden bg-surface-2/40 flex items-center justify-center"
-          >
-            <NativeAd inline />
-          </div>
+          <NativeAd key={i} inline height={90} />
         ))}
       </div>
     </div>
@@ -24,4 +20,3 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
 };
 
 export default InlineAdRow;
-
