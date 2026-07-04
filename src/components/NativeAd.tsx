@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 
 // Adsterra Native Banner key
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
-const AD_SRC = `//pl27893789.effectiveratecpm.com/${AD_KEY}/invoke.js`;
+const AD_SRC = `https://disturbknockedcaterpillar.com/${AD_KEY}/invoke.js`;
 const CONTAINER_ID = `container-${AD_KEY}`;
 
 /**
