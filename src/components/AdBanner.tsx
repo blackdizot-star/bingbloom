@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-// 300x250 deliberately removed — heavy, intrusive format that hurts corporate look.
 type AdFormat =
   | "banner-468x60"
   | "banner-728x90"
@@ -22,6 +21,12 @@ interface AdBannerProps {
   label?: boolean;
 }
 
+/**
+ * Adsterra iframe banner. Needs atOptions defined in the SAME document
+ * before invoke.js runs. We isolate each ad inside a sandboxed iframe so
+ * multiple banners can coexist on the page without colliding on the
+ * global `atOptions` variable.
+ */
 const AdBanner = ({ format, className = "", label = true }: AdBannerProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const cfg = CONFIG[format];
@@ -29,24 +34,24 @@ const AdBanner = ({ format, className = "", label = true }: AdBannerProps) => {
   useEffect(() => {
     const host = ref.current;
     if (!host) return;
-
-    const slotId = `adsterra-banner-${format}-${cfg.key.slice(0, 8)}`;
     host.innerHTML = "";
 
-    const wrapper = document.createElement("div");
-    wrapper.style.cssText = `width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:transparent;overflow:hidden;`;
+    const iframe = document.createElement("iframe");
+    iframe.width = String(cfg.width);
+    iframe.height = String(cfg.height);
+    iframe.scrolling = "no";
+    iframe.frameBorder = "0";
+    iframe.style.cssText = `border:0;display:block;width:${cfg.width}px;height:${cfg.height}px;max-width:100%;`;
+    iframe.setAttribute("referrerpolicy", "no-referrer-when-downgrade");
+    host.appendChild(iframe);
 
-    const container = document.createElement("div");
-    container.id = slotId;
-    container.style.cssText = "width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
-    wrapper.appendChild(container);
-    host.appendChild(wrapper);
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    script.src = `https://www.highperformanceformat.com/${cfg.key}/invoke.js`;
-    host.appendChild(script);
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+    doc.open();
+    doc.write(`<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;padding:0;background:transparent;overflow:hidden;}</style></head><body><script type="text/javascript">
+      atOptions = { key: '${cfg.key}', format: 'iframe', height: ${cfg.height}, width: ${cfg.width}, params: {} };
+    <\/script><script async data-cfasync="false" src="//www.highperformanceformat.com/${cfg.key}/invoke.js"><\/script></body></html>`);
+    doc.close();
 
     return () => {
       host.innerHTML = "";
