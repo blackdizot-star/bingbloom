@@ -1,47 +1,103 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 
-const SHOWN_KEY = "bingbloom_sponsor_shown";
+const COUNT_KEY = "bingbloom_sponsor_count";
+const VIEWS_KEY = "bingbloom_page_views";
 const SMARTLINK =
-  "https://disturbknockedcaterpillar.com/nwjvz3hi?key=3014137aa1fc26af4e61a613a86687ee";
-const DELAY_MS = 30_000;
+  "https://www.effectivecpmnetwork.com/iwr6evary?key=710650d8dcbe7dd3d1aed9c9e4449f7c";
+const FIRST_DELAY_MS = 30_000;
+const PAGE_VIEW_THRESHOLD = 3;
+const MAX_COUNT = 3;
+const THANKS_MS = 2000;
 
-const alreadyShown = () => {
-  if (typeof window === "undefined") return true;
+const readCount = () => {
+  if (typeof window === "undefined") return 0;
   try {
-    return sessionStorage.getItem(SHOWN_KEY) === "1";
+    return Number(sessionStorage.getItem(COUNT_KEY) || "0") || 0;
   } catch {
-    return false;
+    return 0;
+  }
+};
+
+const readViews = () => {
+  if (typeof window === "undefined") return 0;
+  try {
+    return Number(sessionStorage.getItem(VIEWS_KEY) || "0") || 0;
+  } catch {
+    return 0;
   }
 };
 
 const SponsorSession = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const firedRef = useRef(false);
+  const [thanksOpen, setThanksOpen] = useState(false);
+  const countRef = useRef<number>(readCount());
+  const firstPathRef = useRef<string | null>(null);
+  const location = useLocation();
 
+  // 30-second first-modal timer
   useEffect(() => {
-    if (alreadyShown() || firedRef.current) return;
+    if (countRef.current >= MAX_COUNT) return;
+    if (countRef.current !== 0) return;
     const t = window.setTimeout(() => {
-      if (firedRef.current) return;
-      firedRef.current = true;
-      setModalOpen(true);
-    }, DELAY_MS);
+      if (countRef.current === 0) setModalOpen(true);
+    }, FIRST_DELAY_MS);
     return () => window.clearTimeout(t);
   }, []);
 
-  const handleContinue = () => {
+  // Page-view counter (after modal #1)
+  useEffect(() => {
+    // Skip the initial mount path
+    if (firstPathRef.current === null) {
+      firstPathRef.current = location.pathname;
+      return;
+    }
+    if (firstPathRef.current === location.pathname) return;
+    firstPathRef.current = location.pathname;
+
+    const count = countRef.current;
+    if (count < 1 || count >= MAX_COUNT) return;
+    if (modalOpen || thanksOpen) return;
+
     try {
-      sessionStorage.setItem(SHOWN_KEY, "1");
+      const next = readViews() + 1;
+      if (next >= PAGE_VIEW_THRESHOLD) {
+        sessionStorage.setItem(VIEWS_KEY, "0");
+        setModalOpen(true);
+      } else {
+        sessionStorage.setItem(VIEWS_KEY, String(next));
+      }
+    } catch {}
+  }, [location.pathname, modalOpen, thanksOpen]);
+
+  const handleContinue = () => {
+    // Open smartlink synchronously to survive popup blockers
+    try {
+      const w = window.open(SMARTLINK, "_blank", "noopener,noreferrer");
+      if (!w) window.location.href = SMARTLINK;
+    } catch {
+      window.location.href = SMARTLINK;
+    }
+
+    const next = countRef.current + 1;
+    countRef.current = next;
+    try {
+      sessionStorage.setItem(COUNT_KEY, String(next));
+      sessionStorage.setItem(VIEWS_KEY, "0");
     } catch {}
 
-    window.location.assign(SMARTLINK);
+    setModalOpen(false);
+    setThanksOpen(true);
+    window.setTimeout(() => setThanksOpen(false), THANKS_MS);
   };
 
-  if (!modalOpen) return null;
+  if (!modalOpen && !thanksOpen) return null;
 
   return (
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center p-4"
       style={{ background: "rgba(10,10,10,0.85)" }}
+      onClickCapture={(e) => e.stopPropagation()}
     >
       {modalOpen && (
         <div
@@ -63,12 +119,25 @@ const SponsorSession = () => {
           </p>
           <button
             onClick={handleContinue}
-            type="button"
-            className="relative z-[201] w-full touch-manipulation py-3 rounded-lg font-bold text-[13px] sm:text-[14px] text-white transition-transform active:scale-95 cursor-pointer"
+            className="w-full py-3 rounded-lg font-bold text-[13px] sm:text-[14px] text-white transition-transform active:scale-95"
             style={{ background: "#E50914" }}
           >
             Continue →
           </button>
+        </div>
+      )}
+      {thanksOpen && !modalOpen && (
+        <div
+          className="w-full max-w-[340px] rounded-[12px] p-5 text-center shadow-2xl"
+          style={{ background: "#1A1A1A", color: "#FFFFFF" }}
+          role="status"
+          aria-live="polite"
+        >
+          <div className="text-2xl mb-2">💛</div>
+          <h3 className="text-[15px] font-bold mb-1.5">Thank You!</h3>
+          <p className="text-[12px] leading-relaxed text-white/80">
+            Thank you for supporting BingBloom. Enjoy your content!
+          </p>
         </div>
       )}
     </div>
