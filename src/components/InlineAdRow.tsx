@@ -9,11 +9,11 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
       <span className="block text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-0.5">
         Sponsored
       </span>
-      <div className="grid grid-cols-4 gap-1">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {Array.from({ length: count }).map((_, i) => (
           <div
             key={i}
-            className="min-h-[70px] md:min-h-[90px] rounded-md overflow-hidden bg-surface-2/40"
+            className="min-h-[100px] md:min-h-[120px] rounded-md overflow-hidden bg-surface-2/40 flex items-center justify-center"
           >
             <NativeAd inline />
           </div>

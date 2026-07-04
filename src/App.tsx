@@ -10,6 +10,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import OfflineBanner from "@/components/OfflineBanner";
 import AppSplashScreen from "@/components/AppSplashScreen";
 import AdConsent from "@/components/AdConsent";
+import SponsorPopup from "@/components/SponsorPopup";
 
 import HomePage from "./pages/HomePage";
 import FollowUsPage from "./pages/FollowUsPage";
@@ -134,6 +135,8 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <SponsorPopup />
+        
         
         <Routes>
           <Route path="/welcome" element={<Navigate to="/home" replace />} />
