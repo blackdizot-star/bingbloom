@@ -13,7 +13,7 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
         {Array.from({ length: count }).map((_, i) => (
           <div
             key={i}
-            className="min-h-[60px] md:min-h-[110px] rounded-md overflow-hidden bg-surface-2/40 flex items-center justify-center"
+            className="min-h-[48px] md:min-h-[100px] rounded-md overflow-hidden bg-surface-2/40 flex items-center justify-center"
           >
             <NativeAd inline />
           </div>
