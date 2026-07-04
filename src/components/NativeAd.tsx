@@ -49,7 +49,7 @@ const NativeAd = ({
       <div role="complementary" aria-label="Sponsored" className={`w-full ${className}`}>
         <div
           ref={ref}
-          className="w-full min-h-[60px] md:min-h-[100px] rounded-md overflow-hidden bg-surface-2/40"
+          className="w-full min-h-[48px] md:min-h-[90px] rounded-md overflow-hidden bg-surface-2/40"
         />
       </div>
     );
