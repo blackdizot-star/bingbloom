@@ -137,6 +137,7 @@ const App = () => {
       <Sonner />
       <BrowserRouter>
         <SponsorPopup />
+        <MaintenanceNotice />
         
         
         <Routes>
