@@ -1,12 +1,16 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
-const AD_SRC = `https://www.highperformanceformat.com/${AD_KEY}/invoke.js`;
+const AD_SRC = `//www.highperformanceformat.com/${AD_KEY}/invoke.js`;
 
 /**
- * Adsterra/HighPerformanceFormat native banner.
- * - `compact` shrinks the slot
- * - `inline` removes padding/labels so several can sit in a row
+ * Adsterra native banner.
+ * Native banners require:
+ *   1. A <div id="container-<key>"> in the DOM
+ *   2. The invoke.js script loaded once per key on the page
+ * Multiple instances of the same key on one page do NOT render more ads,
+ * so we ensure the script is added only once and each mount gets its own
+ * container div.
  */
 const NativeAd = ({
   className = "",
@@ -18,25 +22,30 @@ const NativeAd = ({
   inline?: boolean;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const uid = useId().replace(/[:]/g, "");
 
   useEffect(() => {
     const host = ref.current;
     if (!host) return;
-
-    const slotId = `adsterra-native-${uid}`;
     host.innerHTML = "";
 
     const container = document.createElement("div");
-    container.id = slotId;
-    container.style.cssText = "width:100%;height:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
+    container.id = `container-${AD_KEY}`;
+    container.style.cssText =
+      "width:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
     host.appendChild(container);
 
-    const script = document.createElement("script");
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    script.src = AD_SRC;
-    host.appendChild(script);
+    // Load invoke.js once per page
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[data-adsterra-key="${AD_KEY}"]`,
+    );
+    if (!existing) {
+      const s = document.createElement("script");
+      s.async = true;
+      s.setAttribute("data-cfasync", "false");
+      s.setAttribute("data-adsterra-key", AD_KEY);
+      s.src = AD_SRC;
+      document.body.appendChild(s);
+    }
 
     return () => {
       host.innerHTML = "";
@@ -52,7 +61,7 @@ const NativeAd = ({
       >
         <div
           ref={ref}
-          className="w-full min-h-[60px] rounded-md overflow-hidden bg-surface-2/40"
+          className="w-full min-h-[70px] md:min-h-[90px] rounded-md overflow-hidden bg-surface-2/40"
         />
       </div>
     );
@@ -69,7 +78,7 @@ const NativeAd = ({
       </span>
       <div
         ref={ref}
-        className={`w-full ${compact ? "min-h-[60px]" : "min-h-[100px]"} rounded-md overflow-hidden`}
+        className={`w-full ${compact ? "min-h-[70px]" : "min-h-[120px]"} rounded-md overflow-hidden`}
       />
     </div>
   );

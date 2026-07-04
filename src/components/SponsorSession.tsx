@@ -1,77 +1,36 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 
-const COUNT_KEY = "bingbloom_sponsor_count";
-const VIEWS_KEY = "bingbloom_page_views";
+const SHOWN_KEY = "bingbloom_sponsor_shown";
 const SMARTLINK =
-  "https://www.effectivecpmnetwork.com/iwr6evary?key=710650d8dcbe7dd3d1aed9c9e4449f7c";
-const FIRST_DELAY_MS = 30_000;
-const PAGE_VIEW_THRESHOLD = 3;
-const MAX_COUNT = 3;
+  "https://disturbknockedcaterpillar.com/nwjvz3hi?key=3014137aa1fc26af4e61a613a86687ee";
+const DELAY_MS = 30_000;
 const THANKS_MS = 2000;
 
-const readCount = () => {
-  if (typeof window === "undefined") return 0;
+const alreadyShown = () => {
+  if (typeof window === "undefined") return true;
   try {
-    return Number(sessionStorage.getItem(COUNT_KEY) || "0") || 0;
+    return sessionStorage.getItem(SHOWN_KEY) === "1";
   } catch {
-    return 0;
-  }
-};
-
-const readViews = () => {
-  if (typeof window === "undefined") return 0;
-  try {
-    return Number(sessionStorage.getItem(VIEWS_KEY) || "0") || 0;
-  } catch {
-    return 0;
+    return false;
   }
 };
 
 const SponsorSession = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [thanksOpen, setThanksOpen] = useState(false);
-  const countRef = useRef<number>(readCount());
-  const firstPathRef = useRef<string | null>(null);
-  const location = useLocation();
+  const firedRef = useRef(false);
 
-  // 30-second first-modal timer
   useEffect(() => {
-    if (countRef.current >= MAX_COUNT) return;
-    if (countRef.current !== 0) return;
+    if (alreadyShown() || firedRef.current) return;
     const t = window.setTimeout(() => {
-      if (countRef.current === 0) setModalOpen(true);
-    }, FIRST_DELAY_MS);
+      if (firedRef.current) return;
+      firedRef.current = true;
+      setModalOpen(true);
+    }, DELAY_MS);
     return () => window.clearTimeout(t);
   }, []);
 
-  // Page-view counter (after modal #1)
-  useEffect(() => {
-    // Skip the initial mount path
-    if (firstPathRef.current === null) {
-      firstPathRef.current = location.pathname;
-      return;
-    }
-    if (firstPathRef.current === location.pathname) return;
-    firstPathRef.current = location.pathname;
-
-    const count = countRef.current;
-    if (count < 1 || count >= MAX_COUNT) return;
-    if (modalOpen || thanksOpen) return;
-
-    try {
-      const next = readViews() + 1;
-      if (next >= PAGE_VIEW_THRESHOLD) {
-        sessionStorage.setItem(VIEWS_KEY, "0");
-        setModalOpen(true);
-      } else {
-        sessionStorage.setItem(VIEWS_KEY, String(next));
-      }
-    } catch {}
-  }, [location.pathname, modalOpen, thanksOpen]);
-
   const handleContinue = () => {
-    // Open smartlink synchronously to survive popup blockers
     try {
       const w = window.open(SMARTLINK, "_blank", "noopener,noreferrer");
       if (!w) window.location.href = SMARTLINK;
@@ -79,11 +38,8 @@ const SponsorSession = () => {
       window.location.href = SMARTLINK;
     }
 
-    const next = countRef.current + 1;
-    countRef.current = next;
     try {
-      sessionStorage.setItem(COUNT_KEY, String(next));
-      sessionStorage.setItem(VIEWS_KEY, "0");
+      sessionStorage.setItem(SHOWN_KEY, "1");
     } catch {}
 
     setModalOpen(false);
@@ -119,7 +75,8 @@ const SponsorSession = () => {
           </p>
           <button
             onClick={handleContinue}
-            className="w-full py-3 rounded-lg font-bold text-[13px] sm:text-[14px] text-white transition-transform active:scale-95"
+            type="button"
+            className="w-full py-3 rounded-lg font-bold text-[13px] sm:text-[14px] text-white transition-transform active:scale-95 cursor-pointer"
             style={{ background: "#E50914" }}
           >
             Continue →
