@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
-const AD_SRC = `//www.highperformanceformat.com/${AD_KEY}/invoke.js`;
+const AD_SRC = `//pl24000000.profitableratecpm.com/${AD_KEY}/invoke.js`;
 
 /**
  * Adsterra native banner.

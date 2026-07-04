@@ -32,19 +32,10 @@ const SponsorSession = () => {
 
   const handleContinue = () => {
     try {
-      const w = window.open(SMARTLINK, "_blank", "noopener,noreferrer");
-      if (!w) window.location.href = SMARTLINK;
-    } catch {
-      window.location.href = SMARTLINK;
-    }
-
-    try {
       sessionStorage.setItem(SHOWN_KEY, "1");
     } catch {}
 
-    setModalOpen(false);
-    setThanksOpen(true);
-    window.setTimeout(() => setThanksOpen(false), THANKS_MS);
+    window.location.assign(SMARTLINK);
   };
 
   if (!modalOpen && !thanksOpen) return null;
@@ -53,7 +44,6 @@ const SponsorSession = () => {
     <div
       className="fixed inset-0 z-[200] flex items-center justify-center p-4"
       style={{ background: "rgba(10,10,10,0.85)" }}
-      onClickCapture={(e) => e.stopPropagation()}
     >
       {modalOpen && (
         <div
@@ -76,7 +66,7 @@ const SponsorSession = () => {
           <button
             onClick={handleContinue}
             type="button"
-            className="w-full py-3 rounded-lg font-bold text-[13px] sm:text-[14px] text-white transition-transform active:scale-95 cursor-pointer"
+            className="relative z-[201] w-full touch-manipulation py-3 rounded-lg font-bold text-[13px] sm:text-[14px] text-white transition-transform active:scale-95 cursor-pointer"
             style={{ background: "#E50914" }}
           >
             Continue →
