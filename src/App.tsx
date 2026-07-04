@@ -9,6 +9,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import OfflineBanner from "@/components/OfflineBanner";
 import AppSplashScreen from "@/components/AppSplashScreen";
+import AdConsent from "@/components/AdConsent";
 import SponsorSession from "@/components/SponsorSession";
 import HomePage from "./pages/HomePage";
 import FollowUsPage from "./pages/FollowUsPage";
@@ -127,6 +128,7 @@ const App = () => {
     persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7 }}
   >
     <AppSplashScreen />
+    <AdConsent />
     <OfflineBanner />
     <TooltipProvider>
       <Toaster />
