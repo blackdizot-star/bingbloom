@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useMemo } from "react";
 
 // Adsterra Native Banner key
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
@@ -6,50 +6,52 @@ const AD_SRC = `https://disturbknockedcaterpillar.com/${AD_KEY}/invoke.js`;
 const CONTAINER_ID = `container-${AD_KEY}`;
 
 /**
- * Adsterra Native Banner.
- * Native banner script requires a single container id: `container-{key}`.
- * We mount that container once inside our host div and inject the script.
+ * Adsterra Native Banner rendered inside an isolated iframe.
+ *
+ * The Adsterra native-banner script only fills ONE container per document
+ * (it looks up `container-<key>` and stops). To render multiple ads on the
+ * same page we sandbox each slot in its own iframe document so the script
+ * always finds a fresh container to fill.
  */
+const buildSrcDoc = (heightPx: number) => `<!doctype html>
+<html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  html,body{margin:0;padding:0;background:transparent;overflow:hidden;
+    font-family:-apple-system,system-ui,sans-serif;color:#9ca3af;}
+  #${CONTAINER_ID}{width:100%;min-height:${heightPx}px;display:block;}
+  a{color:inherit;}
+</style>
+</head><body>
+<div id="${CONTAINER_ID}"></div>
+<script async data-cfasync="false" src="${AD_SRC}"><\/script>
+</body></html>`;
+
 const NativeAd = ({
   className = "",
   compact = false,
   inline = false,
+  height,
 }: {
   className?: string;
   compact?: boolean;
   inline?: boolean;
+  height?: number;
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
+  // Mobile-first sizing. Iframe needs an explicit numeric height.
+  const h = height ?? (inline ? 90 : compact ? 110 : 150);
 
-  useEffect(() => {
-    const host = ref.current;
-    if (!host) return;
-
-    host.innerHTML = "";
-
-    const container = document.createElement("div");
-    container.id = CONTAINER_ID;
-    container.style.cssText =
-      "width:100%;min-height:100%;display:flex;align-items:center;justify-content:center;";
-    host.appendChild(container);
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.setAttribute("data-cfasync", "false");
-    script.src = AD_SRC;
-    host.appendChild(script);
-
-    return () => {
-      host.innerHTML = "";
-    };
-  }, []);
+  const srcDoc = useMemo(() => buildSrcDoc(h), [h]);
 
   if (inline) {
     return (
       <div role="complementary" aria-label="Sponsored" className={`w-full ${className}`}>
-        <div
-          ref={ref}
-          className="w-full min-h-[48px] md:min-h-[90px] rounded-md overflow-hidden bg-surface-2/40"
+        <iframe
+          title="Sponsored"
+          srcDoc={srcDoc}
+          scrolling="no"
+          className="w-full block rounded-md overflow-hidden bg-surface-2/40 border-0"
+          style={{ height: `${h}px` }}
         />
       </div>
     );
@@ -64,9 +66,12 @@ const NativeAd = ({
       <span className="block text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">
         Sponsored
       </span>
-      <div
-        ref={ref}
-        className={`w-full ${compact ? "min-h-[90px]" : "min-h-[140px]"} rounded-md overflow-hidden`}
+      <iframe
+        title="Sponsored"
+        srcDoc={srcDoc}
+        scrolling="no"
+        className="w-full block rounded-md overflow-hidden border-0"
+        style={{ height: `${h}px` }}
       />
     </div>
   );
