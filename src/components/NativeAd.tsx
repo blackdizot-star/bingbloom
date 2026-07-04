@@ -1,9 +1,7 @@
 import { useEffect, useRef } from "react";
 
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
-const AD_SRC = `//pl24000000.profitableratecpm.com/${AD_KEY}/invoke.js`;
-// ^ Adsterra native banner URL pattern. If your dashboard shows a different
-// host, update AD_SRC — the key + `container-<key>` div stays the same.
+const AD_SRC = `//www.highperformanceformat.com/${AD_KEY}/invoke.js`;
 
 /**
  * Adsterra native banner.
