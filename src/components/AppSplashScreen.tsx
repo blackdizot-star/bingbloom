@@ -4,8 +4,8 @@ import splash2 from "@/assets/splash-2.jpg";
 import splash3 from "@/assets/splash-3.jpg";
 
 const IMAGES = [splash1, splash2, splash3];
-const DURATION_MS = 10000;
-const SLIDE_MS = Math.floor(DURATION_MS / IMAGES.length); // ~3.3s each
+const DURATION_MS = 6000;
+const SLIDE_MS = Math.floor(DURATION_MS / IMAGES.length); // 2s each
 
 const AppSplashScreen = () => {
   const [visible, setVisible] = useState(true);
@@ -18,7 +18,7 @@ const AppSplashScreen = () => {
       setIndex((i) => (i + 1) % IMAGES.length);
     }, SLIDE_MS);
 
-    const welcome = window.setTimeout(() => setShowWelcome(true), DURATION_MS - 1500);
+    const welcome = window.setTimeout(() => setShowWelcome(true), DURATION_MS - 1200);
 
     const finish = window.setTimeout(() => {
       setFadeOut(true);
@@ -54,7 +54,7 @@ const AppSplashScreen = () => {
         <img
           src="/logo-compact.png"
           alt="BingBloom"
-          className="h-16 w-16 rounded-2xl object-contain shadow-[0_0_28px_rgba(229,9,20,0.45)] animate-[bounce_1.2s_ease-in-out_infinite]"
+          className="h-16 w-16 rounded-2xl object-contain shadow-[0_0_28px_rgba(229,9,20,0.45)] animate-[bounce_1s_ease-in-out_2]"
         />
         {showWelcome ? (
           <div className="animate-fade-in">

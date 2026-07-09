@@ -15,23 +15,23 @@ interface ServerDef {
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-// Server order: FastStream (formerly server 2) is now the default; HD is the fallback.
+// Server order: HD is now the default (Server 1); FastStream is the fallback.
 export const PLAYER_SERVERS: ServerDef[] = [
   {
-    id: "pixaplay",
-    label: "Server 1 · FastStream",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
-  },
-  {
     id: "hd",
-    label: "Server 2 · HD",
+    label: "Server 1 · HD",
     build: (id, type, s, e) =>
       type === "tv"
         ? `https://vidsrc.pm/embed/tv/${id}/${s}/${e}`
         : `https://vidsrc.pm/embed/movie/${id}`,
+  },
+  {
+    id: "pixaplay",
+    label: "Server 2 · FastStream",
+    build: (id, type, s, e) =>
+      type === "tv"
+        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
+        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
   },
 ];
 
@@ -173,7 +173,7 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
             className="absolute inset-0 w-full h-full"
             onLoad={handleLoad}
             allowFullScreen
-            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
+            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write; cast; remote-playback"
             sandbox={adBlock ? SANDBOX_BLOCKED : SANDBOX_FULL}
             referrerPolicy="origin"
             title="BingBloom Player"
