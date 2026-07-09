@@ -4,8 +4,8 @@ import splash2 from "@/assets/splash-2.jpg";
 import splash3 from "@/assets/splash-3.jpg";
 
 const IMAGES = [splash1, splash2, splash3];
-const DURATION_MS = 10000;
-const SLIDE_MS = Math.floor(DURATION_MS / IMAGES.length); // ~3.3s each
+const DURATION_MS = 6000;
+const SLIDE_MS = Math.floor(DURATION_MS / IMAGES.length); // ~2s each
 
 const AppSplashScreen = () => {
   const [visible, setVisible] = useState(true);
