@@ -32,16 +32,21 @@ const NativeAd = ({
   compact = false,
   inline = false,
   height,
+  desktopHeight,
 }: {
   className?: string;
   compact?: boolean;
   inline?: boolean;
   height?: number;
+  desktopHeight?: number;
 }) => {
   // Mobile-first sizing. Iframe needs an explicit numeric height.
-  const h = height ?? (inline ? 90 : compact ? 110 : 150);
+  const h = height ?? (inline ? 110 : compact ? 130 : 180);
+  // Desktop needs a taller slot so Adsterra fills the full creative and
+  // counts the impression (short frames get flagged as under-viewable).
+  const dh = desktopHeight ?? (inline ? 240 : compact ? 260 : 320);
 
-  const srcDoc = useMemo(() => buildSrcDoc(h), [h]);
+  const srcDoc = useMemo(() => buildSrcDoc(Math.max(h, dh)), [h, dh]);
 
   if (inline) {
     return (
@@ -50,8 +55,8 @@ const NativeAd = ({
           title="Sponsored"
           srcDoc={srcDoc}
           scrolling="no"
-          className="w-full block rounded-md overflow-hidden bg-surface-2/40 border-0"
-          style={{ height: `${h}px` }}
+          className="w-full block rounded-md overflow-hidden bg-surface-2/40 border-0 h-[var(--ad-h)] md:h-[var(--ad-dh)]"
+          style={{ ["--ad-h" as any]: `${h}px`, ["--ad-dh" as any]: `${dh}px` }}
         />
       </div>
     );
@@ -70,8 +75,8 @@ const NativeAd = ({
         title="Sponsored"
         srcDoc={srcDoc}
         scrolling="no"
-        className="w-full block rounded-md overflow-hidden border-0"
-        style={{ height: `${h}px` }}
+        className="w-full block rounded-md overflow-hidden border-0 h-[var(--ad-h)] md:h-[var(--ad-dh)]"
+        style={{ ["--ad-h" as any]: `${h}px`, ["--ad-dh" as any]: `${dh}px` }}
       />
     </div>
   );
