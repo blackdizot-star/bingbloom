@@ -15,23 +15,23 @@ interface ServerDef {
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-// Server order: FastStream (formerly server 2) is now the default; HD is the fallback.
+// Server order: HD (vidsrc) is now the default; FastStream is the fallback.
 export const PLAYER_SERVERS: ServerDef[] = [
   {
-    id: "pixaplay",
-    label: "Server 1 · FastStream",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
-  },
-  {
     id: "hd",
-    label: "Server 2 · HD",
+    label: "Server 1 · HD",
     build: (id, type, s, e) =>
       type === "tv"
         ? `https://vidsrc.pm/embed/tv/${id}/${s}/${e}`
         : `https://vidsrc.pm/embed/movie/${id}`,
+  },
+  {
+    id: "pixaplay",
+    label: "Server 2 · FastStream",
+    build: (id, type, s, e) =>
+      type === "tv"
+        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
+        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
   },
 ];
 
