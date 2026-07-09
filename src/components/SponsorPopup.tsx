@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Heart, Check } from "lucide-react";
+import { Heart, Check, Play } from "lucide-react";
+import NativeAd from "./NativeAd";
 
 const KEY = "bingbloom_sponsor_popup_shown";
 const PENDING = "bingbloom_sponsor_pending";
@@ -47,7 +47,10 @@ const SponsorPopup = () => {
 
   const handleContinue = () => {
     sessionStorage.setItem(PENDING, "1");
-    window.open(SMARTLINK, "_blank", "noopener,noreferrer");
+    // Open in a new tab; fall back to top-level nav if popups are blocked
+    // so the CTA reliably works on mobile browsers.
+    const win = window.open(SMARTLINK, "_blank", "noopener,noreferrer");
+    if (!win) window.location.href = SMARTLINK;
   };
 
   return (
@@ -78,20 +81,48 @@ const SponsorPopup = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center text-center gap-3 pt-1">
-            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <Heart className="w-7 h-7 text-primary" />
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Heart className="w-6 h-6 text-primary" />
             </div>
-            <DialogTitle className="text-lg sm:text-xl font-bold">BingBloom is free</DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground">
-              Thanks to our sponsors, you stream unlimited movies, TV shows and anime
-              at no cost. Tap continue to support us and keep BingBloom free.
+            <DialogTitle className="text-base sm:text-lg font-bold">
+              BingBloom is free
+            </DialogTitle>
+            <DialogDescription className="text-[12px] text-muted-foreground">
+              Tap the sponsor below or the button to keep BingBloom free.
             </DialogDescription>
-            <Button onClick={handleContinue} className="w-full mt-2" size="lg">
-              Continue
-            </Button>
+
+            <div className="w-full">
+              <NativeAd inline height={130} desktopHeight={220} />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleContinue}
+              className="group relative w-full mt-1 flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-bold text-white overflow-hidden"
+              style={{
+                background:
+                  "linear-gradient(90deg,#E50914 0%,#ff2a34 50%,#E50914 100%)",
+                animation: "sp-cta-glow 1.8s ease-in-out infinite",
+              }}
+            >
+              <Play className="w-4 h-4 fill-white" />
+              <span>Continue &amp; Support</span>
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                style={{
+                  background:
+                    "linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent)",
+                }}
+              />
+            </button>
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground/60">
               Sponsored message
             </p>
+            <style>{`@keyframes sp-cta-glow {
+              0%,100% { box-shadow: 0 0 12px rgba(229,9,20,0.55), 0 0 22px rgba(229,9,20,0.25); }
+              50%     { box-shadow: 0 0 22px rgba(229,9,20,0.95), 0 0 40px rgba(229,9,20,0.5); }
+            }`}</style>
           </div>
         )}
       </DialogContent>
