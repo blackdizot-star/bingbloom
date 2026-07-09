@@ -173,7 +173,7 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
             className="absolute inset-0 w-full h-full"
             onLoad={handleLoad}
             allowFullScreen
-            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
+            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write; cast; remote-playback"
             sandbox={adBlock ? SANDBOX_BLOCKED : SANDBOX_FULL}
             referrerPolicy="origin"
             title="BingBloom Player"
