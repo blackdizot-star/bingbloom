@@ -5,23 +5,21 @@ import { Heart, Check } from "lucide-react";
 
 const KEY = "bingbloom_sponsor_popup_shown";
 const PENDING = "bingbloom_sponsor_pending";
-// Native-ad click URL — behaves like a click on an Adsterra native ad so the
-// impression/click is credited toward native CPM instead of a plain smartlink.
-const NATIVE_AD_CLICK =
-  "https://disturbknockedcaterpillar.com/0d460b18275609106dbf608190ecb46b/invoke.js?click=1";
+const SMARTLINK =
+  "https://disturbknockedcaterpillar.com/nwjvz3hi?key=3014137aa1fc26af4e61a613a86687ee";
 
 const SponsorPopup = () => {
   const [open, setOpen] = useState(false);
   const [thanks, setThanks] = useState(false);
 
-  // Show once per visit (session), 2m 30s after entry
+  // Show once per visit (session), 30s after entry
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem(KEY)) return;
     const t = window.setTimeout(() => {
       setOpen(true);
       sessionStorage.setItem(KEY, "1");
-    }, 150000);
+    }, 30000);
     return () => window.clearTimeout(t);
   }, []);
 
@@ -49,7 +47,7 @@ const SponsorPopup = () => {
 
   const handleContinue = () => {
     sessionStorage.setItem(PENDING, "1");
-    window.open(NATIVE_AD_CLICK, "_blank", "noopener,noreferrer");
+    window.open(SMARTLINK, "_blank", "noopener,noreferrer");
   };
 
   return (
