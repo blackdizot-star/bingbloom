@@ -48,11 +48,18 @@ const ReviewSection = ({ videoId }: { videoId: string }) => {
   const postReview = async () => {
     if (!text.trim() || posting) return;
     setPosting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("Please sign in to post a review.");
+      setPosting(false);
+      return;
+    }
     const starPrefix = rating > 0 ? `${"★".repeat(rating)}${"☆".repeat(5 - rating)} ` : "";
     await supabase.from("comments").insert({
       video_id: videoId,
       author_name: userName,
       comment_text: starPrefix + text.trim(),
+      user_id: user.id,
     });
     setText(""); setRating(0); setPosting(false);
   };
