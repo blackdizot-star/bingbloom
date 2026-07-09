@@ -20,6 +20,7 @@ export type Database = {
           comment_text: string
           created_at: string
           id: string
+          user_id: string | null
           video_id: string
         }
         Insert: {
@@ -27,6 +28,7 @@ export type Database = {
           comment_text: string
           created_at?: string
           id?: string
+          user_id?: string | null
           video_id: string
         }
         Update: {
@@ -34,6 +36,7 @@ export type Database = {
           comment_text?: string
           created_at?: string
           id?: string
+          user_id?: string | null
           video_id?: string
         }
         Relationships: []

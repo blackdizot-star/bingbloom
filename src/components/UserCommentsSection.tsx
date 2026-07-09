@@ -53,10 +53,17 @@ const UserCommentsSection = ({ videoId }: { videoId: string }) => {
   const postComment = async () => {
     if (!text.trim() || posting) return;
     setPosting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("Please sign in to post a comment.");
+      setPosting(false);
+      return;
+    }
     await supabase.from("comments").insert({
       video_id: videoId,
       author_name: userName,
       comment_text: text.trim(),
+      user_id: user.id,
     });
     setText("");
     setPosting(false);
