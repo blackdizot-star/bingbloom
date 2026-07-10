@@ -62,9 +62,11 @@ const NativeAd = ({
     return (
       <div role="complementary" aria-label="Sponsored" className={`w-full ${className}`}>
         <iframe
+          key={rot}
           title="Sponsored"
           srcDoc={srcDoc}
           scrolling="no"
+          loading="lazy"
           className="w-full block rounded-md overflow-hidden bg-surface-2/40 border-0 h-[var(--ad-h)] md:h-[var(--ad-dh)]"
           style={{ ["--ad-h" as any]: `${h}px`, ["--ad-dh" as any]: `${dh}px` }}
         />
@@ -82,9 +84,11 @@ const NativeAd = ({
         Sponsored
       </span>
       <iframe
+        key={rot}
         title="Sponsored"
         srcDoc={srcDoc}
         scrolling="no"
+        loading="lazy"
         className="w-full block rounded-md overflow-hidden border-0 h-[var(--ad-h)] md:h-[var(--ad-dh)]"
         style={{ ["--ad-h" as any]: `${h}px`, ["--ad-dh" as any]: `${dh}px` }}
       />
