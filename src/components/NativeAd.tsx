@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const ROTATE_MS = 45_000;
 
 // Adsterra Native Banner key
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
@@ -47,6 +49,14 @@ const NativeAd = ({
   const dh = desktopHeight ?? (inline ? 240 : compact ? 260 : 320);
 
   const srcDoc = useMemo(() => buildSrcDoc(Math.max(h, dh)), [h, dh]);
+
+  // Auto-rotate creative periodically for higher CTR and fresh impressions.
+  const [rot, setRot] = useState(0);
+  const timerRef = useRef<number | null>(null);
+  useEffect(() => {
+    timerRef.current = window.setInterval(() => setRot((r) => r + 1), ROTATE_MS);
+    return () => { if (timerRef.current) window.clearInterval(timerRef.current); };
+  }, []);
 
   if (inline) {
     return (
