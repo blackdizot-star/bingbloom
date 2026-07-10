@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
+import AdsterraIframeAd from "@/components/AdsterraIframeAd";
 
 import TmdbRow from "@/components/TmdbRow";
 import Footer from "@/components/Footer";
@@ -58,95 +59,133 @@ const MovieWatchPage = () => {
           <h1 className="text-[13px] font-semibold text-white truncate">{data?.title || "Watch"}</h1>
         </header>
 
-        <div className="w-full md:max-w-2xl lg:max-w-3xl md:mx-auto">
-          <MoviePlayer
-            tmdbId={tmdbId || ""}
-            type="movie"
-            serverId={server}
-            onServerChange={setServer}
-            title={data?.title}
-            year={year}
-            poster={data?.poster_path ? img(data.poster_path, "w500") : null}
-            backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
-          />
-        </div>
-
-        {/* Sponsor row directly beneath the player */}
-        <div className="mt-2">
-          <InlineAdRow count={4} />
-        </div>
-
-
-
-
-
-
-        {data && (
-          <div className="px-4 pb-4">
-            <div className="pt-3">
-              <h2 className="text-base font-bold text-white tracking-tight">{data.title}</h2>
-              <p className="text-[10.5px] text-white/55 mt-0.5">
-                {year}{data.runtime ? ` · ${data.runtime} min` : ""}
-              </p>
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6 lg:px-4 lg:pt-3">
+          <div className="min-w-0">
+            <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0">
+              <MoviePlayer
+                tmdbId={tmdbId || ""}
+                type="movie"
+                serverId={server}
+                onServerChange={setServer}
+                title={data?.title}
+                year={year}
+                poster={data?.poster_path ? img(data.poster_path, "w500") : null}
+                backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
+              />
             </div>
 
-            <section className="mt-4">
-              <h3 className="text-[12px] font-semibold text-white mb-2">You May Also Like</h3>
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
-                {suggestions.slice(0, 20).map((m: any) => (
-                  <Link
-                    key={m.id}
-                    to={`/watch/movie/${m.id}`}
-                    className="relative flex-shrink-0 w-[110px] aspect-video rounded-lg overflow-hidden bg-white/5 border border-white/10"
-                  >
-                    {(m.backdrop_path || m.poster_path) && (
-                      <img src={img(m.backdrop_path || m.poster_path, "w300")} alt={m.title} loading="lazy" className="w-full h-full object-cover" />
-                    )}
-                    <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
-                      <Play className="w-2.5 h-2.5 text-white fill-white" />
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </section>
+            {/* Sponsor row directly beneath the player */}
+            <div className="mt-2">
+              <InlineAdRow count={4} />
+            </div>
 
-            {data.overview && (
-              <section className="mt-4">
-                <h3 className="text-[12px] font-semibold text-white mb-1">Synopsis</h3>
-                <p className="text-[11px] leading-relaxed text-white/65 line-clamp-3">{data.overview}</p>
-              </section>
-            )}
+            {data && (
+              <div className="px-4 pb-4 lg:px-0">
+                <div className="pt-3">
+                  <h2 className="text-base font-bold text-white tracking-tight">{data.title}</h2>
+                  <p className="text-[10.5px] text-white/55 mt-0.5">
+                    {year}{data.runtime ? ` · ${data.runtime} min` : ""}
+                  </p>
+                </div>
 
-            {cast.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-[12px] font-semibold text-white mb-1.5">Cast</h3>
-                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-                  {cast.map((c: any) => (
-                    <div key={c.credit_id || c.id} className="flex-shrink-0 w-11 text-center">
-                      <div className="w-11 h-11 rounded-full overflow-hidden bg-white/5 mx-auto">
-                        <img src={img(c.profile_path, "w200") || "/placeholder.svg"} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
-                      </div>
+                {/* Mobile/tablet: horizontal suggestions. Desktop shows list in sidebar. */}
+                <section className="mt-4 lg:hidden">
+                  <h3 className="text-[12px] font-semibold text-white mb-2">You May Also Like</h3>
+                  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
+                    {suggestions.slice(0, 20).map((m: any) => (
+                      <Link
+                        key={m.id}
+                        to={`/watch/movie/${m.id}`}
+                        className="relative flex-shrink-0 w-[110px] aspect-video rounded-lg overflow-hidden bg-white/5 border border-white/10"
+                      >
+                        {(m.backdrop_path || m.poster_path) && (
+                          <img src={img(m.backdrop_path || m.poster_path, "w300")} alt={m.title} loading="lazy" className="w-full h-full object-cover" />
+                        )}
+                        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+                          <Play className="w-2.5 h-2.5 text-white fill-white" />
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+
+                {data.overview && (
+                  <section className="mt-4">
+                    <h3 className="text-[12px] font-semibold text-white mb-1">Synopsis</h3>
+                    <p className="text-[11px] leading-relaxed text-white/65 line-clamp-3">{data.overview}</p>
+                  </section>
+                )}
+
+                {cast.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-[12px] font-semibold text-white mb-1.5">Cast</h3>
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                      {cast.map((c: any) => (
+                        <div key={c.credit_id || c.id} className="flex-shrink-0 w-11 text-center">
+                          <div className="w-11 h-11 rounded-full overflow-hidden bg-white/5 mx-auto">
+                            <img src={img(c.profile_path, "w200") || "/placeholder.svg"} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                <div className="mt-3 -mx-4 lg:mx-0">
+                  <InlineAdRow count={4} />
+                </div>
+
+                <div className="mt-2 -mx-4 lg:mx-0 space-y-0.5">
+                  <TmdbRow title="Trending Now" items={trending.data} isLoading={trending.isLoading} type="movie" />
+                  <TmdbRow title="Popular Movies" items={popular.data} isLoading={popular.isLoading} type="movie" />
+                  <TmdbRow title="Top Rated" items={topRated.data} isLoading={topRated.isLoading} type="movie" ranked />
+                </div>
+
+                <div className="mt-2 -mx-4 lg:mx-0">
+                  <InlineAdRow count={4} />
                 </div>
               </div>
             )}
-
-            <div className="mt-3 -mx-4">
-              <InlineAdRow count={4} />
-            </div>
-
-            <div className="mt-2 -mx-4 space-y-0.5">
-              <TmdbRow title="Trending Now" items={trending.data} isLoading={trending.isLoading} type="movie" />
-              <TmdbRow title="Popular Movies" items={popular.data} isLoading={popular.isLoading} type="movie" />
-              <TmdbRow title="Top Rated" items={topRated.data} isLoading={topRated.isLoading} type="movie" ranked />
-            </div>
-
-            <div className="mt-2 -mx-4">
-              <InlineAdRow count={4} />
-            </div>
           </div>
-        )}
+
+          {/* Desktop sidebar — YouTube-style suggestions column */}
+          <aside className="hidden lg:block w-[340px] shrink-0 pt-1">
+            <div className="sticky top-14 space-y-4">
+              <AdsterraIframeAd />
+              <div>
+                <h3 className="text-[13px] font-semibold text-white mb-2">Up Next</h3>
+                <div className="space-y-2">
+                  {suggestions.slice(0, 12).map((m: any) => (
+                    <Link
+                      key={m.id}
+                      to={`/watch/movie/${m.id}`}
+                      className="flex gap-2 group"
+                    >
+                      <div className="relative w-[160px] aspect-video rounded-lg overflow-hidden bg-white/5 shrink-0 border border-white/5">
+                        {(m.backdrop_path || m.poster_path) && (
+                          <img src={img(m.backdrop_path || m.poster_path, "w300")} alt={m.title} loading="lazy" className="w-full h-full object-cover" />
+                        )}
+                        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914] opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Play className="w-2.5 h-2.5 text-white fill-white" />
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[12px] font-semibold text-white leading-snug line-clamp-2 group-hover:text-[#E50914]">
+                          {m.title}
+                        </p>
+                        <p className="text-[10px] text-white/50 mt-1">
+                          {(m.release_date || "").slice(0, 4)}
+                          {m.vote_average ? ` · ★ ${m.vote_average.toFixed(1)}` : ""}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <AdsterraIframeAd />
+            </div>
+          </aside>
+        </div>
       </div>
       <Footer />
     </div>

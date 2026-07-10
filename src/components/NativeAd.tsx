@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const ROTATE_MS = 45_000;
 
 // Adsterra Native Banner key
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
@@ -48,13 +50,23 @@ const NativeAd = ({
 
   const srcDoc = useMemo(() => buildSrcDoc(Math.max(h, dh)), [h, dh]);
 
+  // Auto-rotate creative periodically for higher CTR and fresh impressions.
+  const [rot, setRot] = useState(0);
+  const timerRef = useRef<number | null>(null);
+  useEffect(() => {
+    timerRef.current = window.setInterval(() => setRot((r) => r + 1), ROTATE_MS);
+    return () => { if (timerRef.current) window.clearInterval(timerRef.current); };
+  }, []);
+
   if (inline) {
     return (
       <div role="complementary" aria-label="Sponsored" className={`w-full ${className}`}>
         <iframe
+          key={rot}
           title="Sponsored"
           srcDoc={srcDoc}
           scrolling="no"
+          loading="lazy"
           className="w-full block rounded-md overflow-hidden bg-surface-2/40 border-0 h-[var(--ad-h)] md:h-[var(--ad-dh)]"
           style={{ ["--ad-h" as any]: `${h}px`, ["--ad-dh" as any]: `${dh}px` }}
         />
@@ -72,9 +84,11 @@ const NativeAd = ({
         Sponsored
       </span>
       <iframe
+        key={rot}
         title="Sponsored"
         srcDoc={srcDoc}
         scrolling="no"
+        loading="lazy"
         className="w-full block rounded-md overflow-hidden border-0 h-[var(--ad-h)] md:h-[var(--ad-dh)]"
         style={{ ["--ad-h" as any]: `${h}px`, ["--ad-dh" as any]: `${dh}px` }}
       />

@@ -8,7 +8,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import OfflineBanner from "@/components/OfflineBanner";
-import AppSplashScreen from "@/components/AppSplashScreen";
+import WhatsAppPopup from "@/components/WhatsAppPopup";
 import AdConsent from "@/components/AdConsent";
 import SponsorPopup from "@/components/SponsorPopup";
 import MaintenanceNotice from "@/components/MaintenanceNotice";
@@ -129,7 +129,7 @@ const App = () => {
     client={queryClient}
     persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7 }}
   >
-    <AppSplashScreen />
+    <WhatsAppPopup />
     <AdConsent />
     <OfflineBanner />
     <TooltipProvider>

@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
+import AdsterraIframeAd from "@/components/AdsterraIframeAd";
 
 import TmdbRow from "@/components/TmdbRow";
 import Footer from "@/components/Footer";
@@ -55,123 +56,185 @@ const TvWatchPage = () => {
           </h1>
         </header>
 
-        <div className="w-full md:max-w-2xl lg:max-w-3xl md:mx-auto">
-          <MoviePlayer
-            tmdbId={tmdbId || ""}
-            type="tv"
-            season={seasonNum}
-            episode={episodeNum}
-            serverId={server}
-            onServerChange={setServer}
-            title={data?.name}
-            year={(data?.first_air_date || "").slice(0, 4)}
-            poster={data?.poster_path ? img(data.poster_path, "w500") : null}
-            backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
-          />
-        </div>
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6 lg:px-4 lg:pt-3">
+          <div className="min-w-0">
+            <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0">
+              <MoviePlayer
+                tmdbId={tmdbId || ""}
+                type="tv"
+                season={seasonNum}
+                episode={episodeNum}
+                serverId={server}
+                onServerChange={setServer}
+                title={data?.name}
+                year={(data?.first_air_date || "").slice(0, 4)}
+                poster={data?.poster_path ? img(data.poster_path, "w500") : null}
+                backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
+              />
+            </div>
 
-        {/* Sponsor row directly beneath the player */}
-        <div className="mt-2">
-          <InlineAdRow count={4} />
-        </div>
+            {/* Sponsor row directly beneath the player */}
+            <div className="mt-2">
+              <InlineAdRow count={4} />
+            </div>
 
+            {data && (
+              <div className="px-4 pb-4 lg:px-0">
+                <div className="flex items-start justify-between gap-3 pt-3 flex-wrap">
+                  <div className="min-w-0">
+                    <h2 className="text-base font-bold text-white tracking-tight">{data.name}</h2>
+                    <p className="text-[10.5px] text-white/55 mt-0.5">Season {seasonNum} · Episode {episodeNum}</p>
+                  </div>
+                  {seasons.length > 0 && (
+                    <div className="relative lg:hidden">
+                      <select
+                        value={activeSeason}
+                        onChange={(e) => setActiveSeason(Number(e.target.value))}
+                        className="appearance-none bg-white/8 text-white text-[11px] pl-3 pr-7 py-1.5 rounded-lg border border-white/10"
+                      >
+                        {seasons.map((s: any) => (
+                          <option key={s.id} value={s.season_number} className="bg-[#1a1a1a]">
+                            Season {s.season_number}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-3 h-3 text-white/70 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  )}
+                </div>
 
+                {/* Mobile/tablet: horizontal episode strip. Desktop uses sidebar list. */}
+                <section className="mt-4 lg:hidden">
+                  <h3 className="text-[12px] font-semibold text-white mb-2">Episodes</h3>
+                  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
+                    {seasonQuery.isLoading
+                      ? Array.from({ length: 6 }).map((_, i) => (
+                          <div key={i} className="flex-shrink-0 w-[110px] h-[68px] bg-white/5 rounded-lg animate-pulse" />
+                        ))
+                      : (seasonQuery.data?.episodes || []).map((ep: any) => {
+                          const isPlaying = activeSeason === seasonNum && ep.episode_number === episodeNum;
+                          return (
+                            <Link
+                              key={ep.id}
+                              to={`/watch/tv/${data.id}/${activeSeason}/${ep.episode_number}`}
+                              className={`relative flex-shrink-0 w-[110px] aspect-video rounded-lg overflow-hidden bg-white/5 ${isPlaying ? "neon-playing" : "border border-white/10"}`}
+                            >
+                              {ep.still_path && (
+                                <img src={img(ep.still_path, "w300")} alt={ep.name} loading="lazy" className="w-full h-full object-cover" />
+                              )}
+                              <span className="absolute top-1 left-1 text-[9px] font-extrabold text-white">E{ep.episode_number}</span>
+                              {isPlaying && (
+                                <span className="absolute bottom-1 right-1 grid place-items-center w-4 h-4 rounded-full bg-[#E50914]">
+                                  <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                  </div>
+                </section>
 
+                {data.overview && (
+                  <section className="mt-4">
+                    <h3 className="text-[12px] font-semibold text-white mb-1">Synopsis</h3>
+                    <p className="text-[11px] leading-relaxed text-white/65 line-clamp-3">{data.overview}</p>
+                  </section>
+                )}
 
+                {cast.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-[12px] font-semibold text-white mb-1.5">Cast</h3>
+                    <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                      {cast.map((c: any) => (
+                        <div key={c.credit_id || c.id} className="flex-shrink-0 w-11 text-center">
+                          <div className="w-11 h-11 rounded-full overflow-hidden bg-white/5 mx-auto">
+                            <img src={img(c.profile_path, "w200") || "/placeholder.svg"} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
+                <div className="mt-3 -mx-4 lg:mx-0">
+                  <InlineAdRow count={4} />
+                </div>
 
-        {data && (
-          <div className="px-4 pb-4">
-            <div className="flex items-start justify-between gap-3 pt-3 flex-wrap">
-              <div className="min-w-0">
-                <h2 className="text-base font-bold text-white tracking-tight">{data.name}</h2>
-                <p className="text-[10.5px] text-white/55 mt-0.5">Season {seasonNum} · Episode {episodeNum}</p>
+                <div className="mt-2 -mx-4 lg:mx-0 space-y-0.5">
+                  <TmdbRow title="Trending TV" items={trending.data} isLoading={trending.isLoading} type="tv" />
+                  <TmdbRow title="Popular Shows" items={popular.data} isLoading={popular.isLoading} type="tv" />
+                  <TmdbRow title="Top Rated" items={topRated.data} isLoading={topRated.isLoading} type="tv" ranked />
+                </div>
+
+                <div className="mt-2 -mx-4 lg:mx-0">
+                  <InlineAdRow count={4} />
+                </div>
               </div>
+            )}
+          </div>
+
+          {/* Desktop sidebar — episode list (YouTube-style) */}
+          <aside className="hidden lg:block w-[340px] shrink-0 pt-1">
+            <div className="sticky top-14 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto pr-1">
+              <AdsterraIframeAd />
+
               {seasons.length > 0 && (
-                <div className="relative">
-                  <select
-                    value={activeSeason}
-                    onChange={(e) => setActiveSeason(Number(e.target.value))}
-                    className="appearance-none bg-white/8 text-white text-[11px] pl-3 pr-7 py-1.5 rounded-lg border border-white/10"
-                  >
-                    {seasons.map((s: any) => (
-                      <option key={s.id} value={s.season_number} className="bg-[#1a1a1a]">
-                        Season {s.season_number}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3 h-3 text-white/70 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-[13px] font-semibold text-white">Episodes</h3>
+                    <div className="relative">
+                      <select
+                        value={activeSeason}
+                        onChange={(e) => setActiveSeason(Number(e.target.value))}
+                        className="appearance-none bg-white/8 text-white text-[11px] pl-2 pr-6 py-1 rounded-md border border-white/10"
+                      >
+                        {seasons.map((s: any) => (
+                          <option key={s.id} value={s.season_number} className="bg-[#1a1a1a]">
+                            Season {s.season_number}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-3 h-3 text-white/70 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    {seasonQuery.isLoading
+                      ? Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="h-16 bg-white/5 rounded-lg animate-pulse" />
+                        ))
+                      : (seasonQuery.data?.episodes || []).map((ep: any) => {
+                          const isPlaying = activeSeason === seasonNum && ep.episode_number === episodeNum;
+                          return (
+                            <Link
+                              key={ep.id}
+                              to={`/watch/tv/${data!.id}/${activeSeason}/${ep.episode_number}`}
+                              className={`flex gap-2 p-1.5 rounded-lg group ${isPlaying ? "bg-[#E50914]/15 border border-[#E50914]/40" : "hover:bg-white/5 border border-transparent"}`}
+                            >
+                              <div className="relative w-[110px] aspect-video rounded-md overflow-hidden bg-white/5 shrink-0">
+                                {ep.still_path && (
+                                  <img src={img(ep.still_path, "w300")} alt={ep.name} loading="lazy" className="w-full h-full object-cover" />
+                                )}
+                                <span className="absolute top-1 left-1 text-[9px] font-extrabold text-white bg-black/60 px-1 rounded">E{ep.episode_number}</span>
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className={`text-[11.5px] font-semibold leading-snug line-clamp-2 ${isPlaying ? "text-[#E50914]" : "text-white group-hover:text-[#E50914]"}`}>
+                                  {ep.name || `Episode ${ep.episode_number}`}
+                                </p>
+                                <p className="text-[10px] text-white/50 mt-0.5">
+                                  {ep.runtime ? `${ep.runtime} min` : ep.air_date || ""}
+                                </p>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                  </div>
                 </div>
               )}
+
+              <AdsterraIframeAd />
             </div>
-
-            <section className="mt-4">
-              <h3 className="text-[12px] font-semibold text-white mb-2">Episodes</h3>
-              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
-                {seasonQuery.isLoading
-                  ? Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="flex-shrink-0 w-[110px] h-[68px] bg-white/5 rounded-lg animate-pulse" />
-                    ))
-                  : (seasonQuery.data?.episodes || []).map((ep: any) => {
-                      const isPlaying = activeSeason === seasonNum && ep.episode_number === episodeNum;
-                      return (
-                        <Link
-                          key={ep.id}
-                          to={`/watch/tv/${data.id}/${activeSeason}/${ep.episode_number}`}
-                          className={`relative flex-shrink-0 w-[110px] aspect-video rounded-lg overflow-hidden bg-white/5 ${isPlaying ? "neon-playing" : "border border-white/10"}`}
-                        >
-                          {ep.still_path && (
-                            <img src={img(ep.still_path, "w300")} alt={ep.name} loading="lazy" className="w-full h-full object-cover" />
-                          )}
-                          <span className="absolute top-1 left-1 text-[9px] font-extrabold text-white">E{ep.episode_number}</span>
-                          {isPlaying && (
-                            <span className="absolute bottom-1 right-1 grid place-items-center w-4 h-4 rounded-full bg-[#E50914]">
-                              <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                            </span>
-                          )}
-                        </Link>
-                      );
-                    })}
-              </div>
-            </section>
-
-            {data.overview && (
-              <section className="mt-4">
-                <h3 className="text-[12px] font-semibold text-white mb-1">Synopsis</h3>
-                <p className="text-[11px] leading-relaxed text-white/65 line-clamp-3">{data.overview}</p>
-              </section>
-            )}
-
-            {cast.length > 0 && (
-              <div className="mt-4">
-                <h3 className="text-[12px] font-semibold text-white mb-1.5">Cast</h3>
-                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-                  {cast.map((c: any) => (
-                    <div key={c.credit_id || c.id} className="flex-shrink-0 w-11 text-center">
-                      <div className="w-11 h-11 rounded-full overflow-hidden bg-white/5 mx-auto">
-                        <img src={img(c.profile_path, "w200") || "/placeholder.svg"} alt={c.name} loading="lazy" className="w-full h-full object-cover" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="mt-3 -mx-4">
-              <InlineAdRow count={4} />
-            </div>
-
-            <div className="mt-2 -mx-4 space-y-0.5">
-              <TmdbRow title="Trending TV" items={trending.data} isLoading={trending.isLoading} type="tv" />
-              <TmdbRow title="Popular Shows" items={popular.data} isLoading={popular.isLoading} type="tv" />
-              <TmdbRow title="Top Rated" items={topRated.data} isLoading={topRated.isLoading} type="tv" ranked />
-            </div>
-
-            <div className="mt-2 -mx-4">
-              <InlineAdRow count={4} />
-            </div>
-          </div>
-        )}
+          </aside>
+        </div>
       </div>
       <Footer />
     </div>
