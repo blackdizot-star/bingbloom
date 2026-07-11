@@ -102,33 +102,6 @@
 </head>
   <body>
     <div id="root"></div>
-    <script>
-      // Global redirect / pop-under kill-switch. The player iframe cannot use
-      // the `sandbox` attribute (vidsrc.pm refuses to load in a sandboxed
-      // frame), so we block programmatic redirects here instead.
-      (function () {
-        try {
-          var lastUserGesture = 0;
-          ['pointerdown', 'keydown', 'touchstart'].forEach(function (ev) {
-            window.addEventListener(ev, function () { lastUserGesture = Date.now(); }, true);
-          });
-          var _open = window.open;
-          window.open = function (url, name, features) {
-            // Only allow window.open within 1500ms of a real user gesture.
-            if (Date.now() - lastUserGesture > 1500) return null;
-            try { return _open.call(window, url, name || '_blank', features || 'noopener,noreferrer'); }
-            catch (_) { return null; }
-          };
-          // Prevent iframes from navigating the top window without a gesture.
-          window.addEventListener('beforeunload', function (e) {
-            if (Date.now() - lastUserGesture > 1500) {
-              e.preventDefault();
-              e.returnValue = '';
-            }
-          });
-        } catch (_) { /* noop */ }
-      })();
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

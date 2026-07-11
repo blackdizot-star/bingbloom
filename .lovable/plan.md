@@ -1,58 +1,74 @@
-# Fix HD Player + Ads Overhaul
+# Sponsor Modal v2 + Install Button + Ad Fixes + Video Sitemap
 
-Goal: HD (vidsrc) server plays without the "sandboxed frame" error, fullscreen works, no redirect pop-unders escape the app, and the new Adsterra 300x250 sidebar ad renders reliably on desktop with the new smartlink CTA.
+## 1. Rewrite Sponsor Modal (mandatory, 3×/session)
 
-## Tasks
+**Replace** `SponsorEducationGate.tsx` + `SponsorEducationModal.tsx` with a single new controller `src/components/SponsorSession.tsx` mounted once in `AppLayout`.
 
-1. **Remove `sandbox` from the player iframe (root cause of "restricted frame" error).**
-   - In `src/components/MoviePlayer.tsx` delete both `SANDBOX_BLOCKED` / `SANDBOX_FULL` constants and the `sandbox={...}` prop.
-   - vidsrc.pm refuses to boot inside any `sandbox` value — must be a plain iframe.
+### Storage (sessionStorage — resets on tab close)
+- `bingbloom_sponsor_count` — 0 | 1 | 2 | 3
+- `bingbloom_page_views` — resets after each modal
+- `bingbloom_modal_open_at` — timestamp when smartlink opened (to trigger Thank You on return)
 
-2. **Keep redirects blocked without `sandbox`.**
-   - Add `<meta http-equiv="Content-Security-Policy" content="sandbox allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox;">` — no, CSP sandbox has same limits. Instead:
-   - Intercept top-nav via `window.open` override in `index.html` (already partially there) + add `onbeforeunload` guard when user hasn't clicked in the last 800ms → cancels programmatic pop-unders.
-   - Add `referrerPolicy="no-referrer"` and drop the ad-block ON/OFF toggle button (it's now handled globally).
+### Trigger logic
+- On mount: if count === 0, start a 30 s `setTimeout` → show Modal #1.
+- Subscribe to `useLocation()` in a child component; on every pathname change AFTER count ≥ 1 and count < 3, increment page_views. When page_views ≥ 3 → show next modal, reset page_views to 0.
+- After count === 3, stop.
 
-3. **Fix fullscreen on the HD server.**
-   - Add `allow="autoplay; fullscreen *; picture-in-picture; encrypted-media; clipboard-write; web-share"` and `allowFullScreen` (both already present but need to be preserved after sandbox removal).
-   - Ensure container `.player-shell` has `:fullscreen { width:100vw; height:100vh; }` CSS so the iframe fills the screen.
+### Modal UI (mandatory)
+- Fixed overlay `z-[200] bg-[#0A0A0A]/80` — blocks pointer events on the app.
+- Card `#1A1A1A`, rounded 12 px, `w-[calc(100vw-2rem)] max-w-[400px]` (mobile compact), centered.
+- Title: **🤝 A Word From Our Sponsor**
+- Body: "BingBloom is completely free because of our sponsors. Tap continue to support us and keep the app free."
+- Warning line: "⚠️ This helps keep the app free for everyone."
+- CTA: full-width red `#E50914` button "Continue →".
+- NO close button, NO ESC/outside dismiss, NO `<Dialog>` (use plain div — shadcn Dialog auto-adds close). We render our own overlay.
 
-4. **Reorder servers so HD is default and clearly first.**
-   - Confirm `PLAYER_SERVERS[0].id === "hd"` (already true) and force `serverIdx = 0` on mount if no cached preference.
+### Continue handler
+1. `sessionStorage.setItem('bingbloom_sponsor_count', String(count + 1))`
+2. Close modal (React state)
+3. `window.open('https://www.effectivecpmnetwork.com/iwr6evary?key=710650d8dcbe7dd3d1aed9c9e4449f7c', '_blank', 'noopener,noreferrer')` — synchronous in click handler
+4. Set `bingbloom_modal_open_at = Date.now()`
+5. Show "Thank You!" toast-style overlay for 2 s (auto-dismiss via `setTimeout`).
 
-5. **Swap sidebar ad to new 300x250 unit.**
-   - Update `src/components/AdsterraIframeAd.tsx`:
-     - `AD_KEY = "2a559855d3a6c946481e0f960f0cf064"`
-     - width `300`, height `250`
-     - container box `w-[300px] h-[250px]`
-   - Keep 45s rotation and `srcDoc` isolation.
+### Thank You screen
+- Same overlay style, smaller card, non-blocking after 2 s. Title "Thank You!", body "Thank you for supporting BingBloom. Enjoy your content!"
 
-6. **Wire the new smartlink as the CTA under every ad slot.**
-   - `SMARTLINK = "https://disturbknockedcaterpillar.com/nwjvz3hi?key=3014137aa1fc26af4e61a613a86687ee"`
-   - Update `src/components/InlineAdRow.tsx` CTA `href` and any other place the old smartlink was referenced.
+## 2. Install Button (desktop + phone update button)
 
-7. **Ensure ads render + count as impressions.**
-   - In `NativeAd.tsx` bump desktop min-height to 260 and mobile to 100 so Adsterra's viewability check passes.
-   - Add `IntersectionObserver` gate: only mount the iframe once the slot enters the viewport (prevents empty iframes above the fold from being counted as unfilled).
-   - Force iframe reload via `key={rot}` (already there) — verify 45s tick.
+Currently `TopBar` (assumed) or nav has an "Update" button on phone. Rework `src/hooks/useInstallPrompt.ts` consumer:
 
-8. **Add the new 300x250 slot into the desktop player sidebar.**
-   - `MovieWatchPage.tsx` + `TvWatchPage.tsx`: render `<AdsterraIframeAd />` at the top of the right sidebar with a "Sponsored" label; keep it sticky (`sticky top-20`).
+- **Desktop:** add an "Install App" button in `TopBar` (visible on `md:` breakpoint) linking (external, new tab) to `https://bingbloomdownload.lovable.app`.
+- **Mobile:** replace the existing update button with an "Install" button linking to the same URL.
+- Simple `<a href target="_blank" rel="noopener">` — no PWA prompt logic needed.
 
-9. **Global redirect kill-switch.**
-   - In `index.html` add a small inline script that:
-     - overrides `window.open` to only allow calls triggered by a real user gesture (checks `event.isTrusted` via a click listener flag),
-     - blocks `window.top.location` writes from iframes by setting `window.name = ""` and `Object.defineProperty` guard.
-   - This stops pop-unders even though the player iframe no longer has `sandbox`.
+## 3. Ad fixes — restore custom sizing, ensure load
 
-10. **Verify.**
-    - Build passes.
-    - Playwright: open `/watch/movie/<id>`, screenshot player — no "restricted frame" banner, fullscreen button works.
-    - Confirm sidebar 300x250 iframe loads a creative (network request to `disturbknockedcaterpillar.com/2a559855.../invoke.js` → 200).
-    - Click a CTA → new tab opens smartlink; no unexpected top-level nav on the app tab.
+- `NativeAd.tsx`: current script may collide when multiple `InlineAdRow` slots share the same `slotId`. Fix: make `slotId` unique per instance (`useId()`), and give each container a proper `min-height` so Adsterra fills it. Ensure the injected script only runs after the container is in the DOM (it already is).
+- `InlineAdRow.tsx`: keep 4-up grid on all breakpoints per user request; add explicit `min-h-[70px]` on mobile, `min-h-[90px]` on `md:` so slots render before script fills them (prevents 0-height collapse).
+- Verify each existing placement (Home, AppLayout end, Movie/TV watch, Movie/TV detail above cast, Movies/Anime top, Search every 5) still renders — no changes needed beyond the component fix.
+
+## 4. Video sitemap — 25-entry set + resubmit
+
+- Currently `public/video-sitemap.xml` already exists (140 videos per prior log). User asks for a "sitemap of the 25 movies video" — interpret as ensuring a curated top-25 video sitemap and resubmit.
+- Update `scripts/generate-sitemap.ts` if needed to cap or add a new `public/top-videos-sitemap.xml` (25 entries from a hand-picked list in `src/data/movies.ts`).
+- Add it to `sitemap-index.xml`.
+- Resubmit all sitemaps via GSC connector gateway `PUT /webmasters/v3/sites/<encoded-site>/sitemaps/<encoded-sitemap-url>`.
+
+## 5. Cleanup
+
+- Delete `SponsorEducationModal.tsx`, `SponsorEducationGate.tsx`.
+- Remove their imports from `AppLayout.tsx`; import `SponsorSession` instead.
+- Remove any Adsterra In-Page Push key `11098740` references (previous plan iteration).
+
+## Files
+
+**New:** `src/components/SponsorSession.tsx`, `public/top-videos-sitemap.xml`
+**Edited:** `src/components/AppLayout.tsx`, `src/components/NativeAd.tsx`, `src/components/InlineAdRow.tsx`, `src/components/TopBar.tsx`, `public/sitemap-index.xml`, `scripts/generate-sitemap.ts`
+**Deleted:** `src/components/SponsorEducationModal.tsx`, `src/components/SponsorEducationGate.tsx`
+**Runtime:** GSC sitemap PUT calls (curl via exec)
 
 ## Technical notes
 
-- Files touched: `MoviePlayer.tsx`, `AdsterraIframeAd.tsx`, `NativeAd.tsx`, `InlineAdRow.tsx`, `MovieWatchPage.tsx`, `TvWatchPage.tsx`, `index.html`, `src/index.css` (fullscreen rule).
-- No backend / Supabase changes.
-- Ad-block toggle UI removed from player because redirect protection is now global.
+- All storage access guarded with `typeof window !== 'undefined'`.
+- Modal uses a plain fixed `<div>` (not shadcn Dialog) to guarantee no close affordance and full pointer blocking.
+- Router page-view listener lives inside `<BrowserRouter>` — mount `SponsorSession` inside `App.tsx` Routes tree (wrap Routes in a fragment with `<SponsorSession />`), not in `AppLayout` (AppLayout is per-page and would remount).

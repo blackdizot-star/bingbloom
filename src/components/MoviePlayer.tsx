@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { RefreshCw, ChevronRight, Maximize2, WifiOff, CloudDownload } from "lucide-react";
+import { RefreshCw, ChevronRight, Maximize2, Shield, WifiOff, CloudDownload } from "lucide-react";
 import { Link } from "react-router-dom";
 import { recordStream, getCachedStream } from "@/lib/streamCache";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
@@ -15,7 +15,7 @@ interface ServerDef {
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-// HD (vidsrc) is the default server. FastStream is the fallback.
+// Server order: HD (vidsrc) is now the default; FastStream is the fallback.
 export const PLAYER_SERVERS: ServerDef[] = [
   {
     id: "hd",
@@ -48,16 +48,17 @@ interface Props {
   backdrop?: string | null;
 }
 
-// NOTE: no `sandbox` attribute — vidsrc.pm refuses to load inside a
-// sandboxed frame ("This player cannot be loaded inside a restricted
-// (sandboxed) frame"). Redirect / pop-under protection is enforced
-// globally by the guard installed in index.html.
+// When ad-block is ON: omit allow-top-navigation & allow-popups → blocks redirects
+// and pop-unders but keeps play/pause/seek/fullscreen working inside the iframe.
+const SANDBOX_BLOCKED = "allow-same-origin allow-scripts allow-forms allow-presentation";
+const SANDBOX_FULL = "allow-same-origin allow-scripts allow-popups allow-forms allow-presentation allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation";
 
 const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId, onServerChange, title, year, poster, backdrop }: Props) => {
-  const initialIdx = Math.max(0, PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "hd")));
+  const initialIdx = Math.max(0, PLAYER_SERVERS.findIndex((s) => s.id === serverId));
   const [serverIdx, setServerIdx] = useState(initialIdx === -1 ? 0 : initialIdx);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [adBlock, setAdBlock] = useState(true);
   const [resolvedSrc, setResolvedSrc] = useState<string>("");
   const containerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -82,6 +83,7 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
   const server = PLAYER_SERVERS[serverIdx];
   const builtSrc = server.build(tmdbId, type, season, episode);
 
+  // Resolve from cache first, then fall back to template URL.
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -136,6 +138,7 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
     else document.exitFullscreen?.();
   };
 
+  // Offline + not saved → show a soft, friendly notice instead of a dead iframe.
   if (!online && !savedOffline) {
     return (
       <div className="w-full" style={{ background: "#0A0A0A" }}>
@@ -162,21 +165,19 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
 
   return (
     <div className="w-full" style={{ background: "#0A0A0A" }}>
-      <div
-        ref={containerRef}
-        className="relative w-full aspect-video overflow-hidden bb-player-shell"
-      >
+      <div ref={containerRef} className="relative w-full aspect-video overflow-hidden">
         {resolvedSrc && (
           <iframe
-            key={resolvedSrc}
+            key={`${resolvedSrc}-${adBlock ? "b" : "f"}`}
             src={resolvedSrc}
             className="absolute inset-0 w-full h-full"
             onLoad={handleLoad}
             allowFullScreen
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
+            sandbox={adBlock ? SANDBOX_BLOCKED : SANDBOX_FULL}
             referrerPolicy="origin"
             title="BingBloom Player"
-            style={{ border: 0 }}
+            style={{ border: 0, aspectRatio: "16/9" }}
           />
         )}
 
@@ -206,6 +207,14 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
         )}
 
         <div className="absolute top-2 right-2 z-30 flex items-center gap-1.5 pointer-events-auto">
+          <button
+            onClick={() => setAdBlock((s) => !s)}
+            title={adBlock ? "Ad-block on — redirects blocked" : "Ad-block off"}
+            className="flex items-center gap-1 text-white text-[10px] px-2 py-1 rounded-md backdrop-blur-md"
+            style={{ background: adBlock ? "#E50914" : "rgba(0,0,0,0.55)" }}
+          >
+            <Shield className="w-3 h-3" /> {adBlock ? "ON" : "OFF"}
+          </button>
           <button onClick={toggleFullscreen} title="Fullscreen" className="p-1.5 rounded-md text-white backdrop-blur-md" style={{ background: "rgba(0,0,0,0.55)" }}>
             <Maximize2 className="w-3 h-3" />
           </button>
