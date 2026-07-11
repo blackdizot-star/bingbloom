@@ -186,3 +186,21 @@
   animation: neonPulse 1.8s ease-in-out infinite;
   border: 1.5px solid rgba(229,9,20,0.85);
 }
+
+/* Player fullscreen: ensure the iframe fills the entire viewport when the
+   shell enters fullscreen. Without this override the aspect-video ratio
+   keeps the player letterboxed in FS mode. */
+.bb-player-shell:fullscreen,
+.bb-player-shell:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  aspect-ratio: auto;
+  background: #000;
+}
+.bb-player-shell:fullscreen iframe,
+.bb-player-shell:-webkit-full-screen iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
