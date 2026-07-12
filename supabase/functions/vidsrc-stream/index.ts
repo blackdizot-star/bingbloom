@@ -178,6 +178,7 @@ async function fetchText(url: string, referer: string): Promise<{ url: string; t
       headers: {
         "User-Agent": UA,
         Referer: referer,
+        "Accept-Language": "en-US,en;q=0.9",
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       },
       redirect: "follow",
@@ -187,6 +188,26 @@ async function fetchText(url: string, referer: string): Promise<{ url: string; t
   } catch {
     return null;
   }
+}
+
+async function resolveVsembed(
+  id: string,
+  type: "movie" | "tv",
+  season?: string,
+  episode?: string,
+): Promise<string | null> {
+  const start = type === "tv"
+    ? `https://vsembed.ru/embed/tv/${id}/${season}/${episode}/`
+    : `https://vsembed.ru/embed/movie/${id}/`;
+  const inner = await fetchText(start, "https://vidsrc.to/");
+  if (!inner) return null;
+  const rcpRaw = extractFirstIframe(inner.text) || extractProrcpPath(inner.text);
+  if (!rcpRaw) return await extractPlayerStream(inner.text) || extractDirectMedia(inner.text);
+  const rcp = await fetchText(absoluteUrl(rcpRaw, inner.url), inner.url);
+  if (!rcp) return null;
+  const prorcpRaw = extractProrcpPath(rcp.text);
+  const player = prorcpRaw ? await fetchText(absoluteUrl(prorcpRaw, rcp.url), rcp.url) : rcp;
+  return player ? await extractPlayerStream(player.text) || extractDirectMedia(player.text) : null;
 }
 
 function extractFirstIframe(html: string): string | null {
@@ -429,6 +450,7 @@ Deno.serve(async (req) => {
 
     const attempts: { name: string; run: () => Promise<string | null> }[] = [
       ...(imdbId ? [{ name: "VidScr PM", run: () => resolveVidScrPm(imdbId, type, season, episode) }] : []),
+      ...(imdbId ? [{ name: "VSEmbed direct", run: () => resolveVsembed(imdbId, type, season, episode) }] : []),
       { name: "VidSrc.to", run: () => resolveVidSrcTo(imdbId || tmdbId, type, season, episode) },
       { name: "VidSrc.sbs", run: () => resolveVidSrcSbs(tmdbId, type, season, episode) },
       { name: "VidSrc.xyz", run: () => scrapeVidsrcXyz(tmdbId, type, season, episode) },
