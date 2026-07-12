@@ -15,6 +15,7 @@ export type ServerId = "moviebox";
 
 interface Props {
   tmdbId: string;
+  imdbId?: string | null;
   type?: "movie" | "tv";
   season?: number;
   episode?: number;
@@ -27,7 +28,7 @@ interface Props {
 }
 
 const MoviePlayer = ({
-  tmdbId, type = "movie", season = 1, episode = 1,
+  tmdbId, imdbId, type = "movie", season = 1, episode = 1,
   title, year, poster, backdrop, onPrev, onNext,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,6 +53,8 @@ const MoviePlayer = ({
     setError(null);
     setState(null);
     resolveMoviebox({
+      tmdbId,
+      imdbId,
       title,
       year,
       mediaType: type,
@@ -67,7 +70,7 @@ const MoviePlayer = ({
       }
     });
     return () => { active = false; };
-  }, [title, year, type, season, episode, tmdbId, reloadKey]);
+  }, [title, year, type, season, episode, tmdbId, imdbId, reloadKey]);
 
   const toggleFullscreen = () => {
     const el = containerRef.current;
