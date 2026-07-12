@@ -26,27 +26,13 @@ interface ServerDef {
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-export type ServerId =
-  | "movies111"
-  | "hd"
-  | "pixaplay"
-  | "gomo"
-  | "nontongo"
-  | "mostream"
-  | "vidsrcto"
-  | "vidsrcxyz"
-  | "twoembed"
-  | "autoembed"
-  | "smashy"
-  | "moviesapi"
-  | "embedsu";
+export type ServerId = "movies111" | "smashystream";
 
-// Fast-first ordering. 111Movies is the primary Fast option, vidsrc.pm is
-// the reliable HD fallback. Extra sources are provided as backups.
+// Only two curated sources: 111Movies (Fast) and SmashyStream (HD).
 export const PLAYER_SERVERS: ServerDef[] = [
   {
     id: "movies111",
-    label: "111Movies",
+    label: "Fast Stream",
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
@@ -54,101 +40,13 @@ export const PLAYER_SERVERS: ServerDef[] = [
         : `https://111movies.com/movie/${id}`,
   },
   {
-    id: "hd",
-    label: "VidSrc",
+    id: "smashystream",
+    label: "HD Stream",
     badge: "HD",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.pm/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.pm/embed/movie/${id}`,
-  },
-  {
-    id: "gomo",
-    label: "GoMo",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://gomo.to/tv/${id}/${s}/${e}`
-        : `https://gomo.to/movie/${id}`,
-  },
-  {
-    id: "nontongo",
-    label: "Nontongo",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://www.nontongo.win/embed/tv/${id}/${s}/${e}`
-        : `https://www.nontongo.win/embed/movie/${id}`,
-  },
-  {
-    id: "mostream",
-    label: "Mostream",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://mostream.us/watch/tv/${id}-${s}-${e}`
-        : `https://mostream.us/watch/movie/${id}`,
-  },
-  {
-    id: "vidsrcto",
-    label: "VidSrc.to",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.to/embed/movie/${id}`,
-  },
-  {
-    id: "vidsrcxyz",
-    label: "VidSrc.xyz",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
-  },
-  {
-    id: "twoembed",
-    label: "2Embed",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
-        : `https://www.2embed.cc/embed/${id}`,
-  },
-  {
-    id: "autoembed",
-    label: "AutoEmbed",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`
-        : `https://player.autoembed.cc/embed/movie/${id}`,
-  },
-  {
-    id: "pixaplay",
-    label: "SmashyStream",
     build: (id, type, s, e) =>
       type === "tv"
         ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
         : `https://player.smashystream.com/playere.php?tmdb=${id}`,
-  },
-  {
-    id: "smashy",
-    label: "Smashy Alt",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
-  },
-  {
-    id: "moviesapi",
-    label: "MoviesAPI",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://moviesapi.club/tv/${id}-${s}-${e}`
-        : `https://moviesapi.club/movie/${id}`,
-  },
-  {
-    id: "embedsu",
-    label: "Embed.su",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://embed.su/embed/tv/${id}/${s}/${e}`
-        : `https://embed.su/embed/movie/${id}`,
   },
 ];
 
