@@ -1,5 +1,4 @@
 // Client resolver for direct HLS/MP4 playback (uses the vidsrc-stream edge function).
-import { supabase } from "@/integrations/supabase/client";
 
 export interface MovieboxPlayback {
   ok: boolean;
@@ -24,17 +23,6 @@ export interface ResolvePlaybackArgs {
 export async function resolveMoviebox(args: ResolvePlaybackArgs): Promise<MovieboxPlayback> {
   try {
     const id = args.imdbId || args.tmdbId;
-    const { data, error } = await supabase.functions.invoke("vidsrc-stream", {
-      method: "GET",
-      body: undefined,
-      headers: {},
-      // supabase-js passes query strings in the function name through to fetch.
-      // @ts-expect-error query string invoke is supported by supabase-js runtime
-      functionName: undefined,
-    });
-    void data;
-    void error;
-
     const base = import.meta.env.VITE_SUPABASE_URL;
     const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     const params = new URLSearchParams({ tmdbId: id, type: args.mediaType });
