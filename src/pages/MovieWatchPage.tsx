@@ -79,8 +79,8 @@ const MovieWatchPage = () => {
               <InlineAdRow count={4} />
             </div>
 
-            {/* Mobile-only 300x250 sponsored slot */}
-            <div className="mt-3 flex justify-center lg:hidden">
+            {/* Sponsored 300x250 slot — desktop only (hidden on phone) */}
+            <div className="mt-3 hidden lg:flex justify-center">
               <AdsterraIframeAd />
             </div>
 

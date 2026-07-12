@@ -26,27 +26,13 @@ interface ServerDef {
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-export type ServerId =
-  | "movies111"
-  | "hd"
-  | "pixaplay"
-  | "gomo"
-  | "nontongo"
-  | "mostream"
-  | "vidsrcto"
-  | "vidsrcxyz"
-  | "twoembed"
-  | "autoembed"
-  | "smashy"
-  | "moviesapi"
-  | "embedsu";
+export type ServerId = "movies111" | "smashystream";
 
-// Fast-first ordering. 111Movies is the primary Fast option, vidsrc.pm is
-// the reliable HD fallback. Extra sources are provided as backups.
+// Only two curated sources: 111Movies (Fast) and SmashyStream (HD).
 export const PLAYER_SERVERS: ServerDef[] = [
   {
     id: "movies111",
-    label: "111Movies",
+    label: "Fast Stream",
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
@@ -54,101 +40,13 @@ export const PLAYER_SERVERS: ServerDef[] = [
         : `https://111movies.com/movie/${id}`,
   },
   {
-    id: "hd",
-    label: "VidSrc",
+    id: "smashystream",
+    label: "HD Stream",
     badge: "HD",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.pm/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.pm/embed/movie/${id}`,
-  },
-  {
-    id: "gomo",
-    label: "GoMo",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://gomo.to/tv/${id}/${s}/${e}`
-        : `https://gomo.to/movie/${id}`,
-  },
-  {
-    id: "nontongo",
-    label: "Nontongo",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://www.nontongo.win/embed/tv/${id}/${s}/${e}`
-        : `https://www.nontongo.win/embed/movie/${id}`,
-  },
-  {
-    id: "mostream",
-    label: "Mostream",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://mostream.us/watch/tv/${id}-${s}-${e}`
-        : `https://mostream.us/watch/movie/${id}`,
-  },
-  {
-    id: "vidsrcto",
-    label: "VidSrc.to",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.to/embed/movie/${id}`,
-  },
-  {
-    id: "vidsrcxyz",
-    label: "VidSrc.xyz",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
-  },
-  {
-    id: "twoembed",
-    label: "2Embed",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
-        : `https://www.2embed.cc/embed/${id}`,
-  },
-  {
-    id: "autoembed",
-    label: "AutoEmbed",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://player.autoembed.cc/embed/tv/${id}/${s}/${e}`
-        : `https://player.autoembed.cc/embed/movie/${id}`,
-  },
-  {
-    id: "pixaplay",
-    label: "SmashyStream",
     build: (id, type, s, e) =>
       type === "tv"
         ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
         : `https://player.smashystream.com/playere.php?tmdb=${id}`,
-  },
-  {
-    id: "smashy",
-    label: "Smashy Alt",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
-  },
-  {
-    id: "moviesapi",
-    label: "MoviesAPI",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://moviesapi.club/tv/${id}-${s}-${e}`
-        : `https://moviesapi.club/movie/${id}`,
-  },
-  {
-    id: "embedsu",
-    label: "Embed.su",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://embed.su/embed/tv/${id}/${s}/${e}`
-        : `https://embed.su/embed/movie/${id}`,
   },
 ];
 
@@ -198,9 +96,11 @@ const MoviePlayer = ({
   const [playing, setPlaying] = useState(true);
   const [blocker, setBlocker] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(BLOCKER_STORAGE_KEY) === "1";
+      const v = localStorage.getItem(BLOCKER_STORAGE_KEY);
+      // Default to ON unless the user has explicitly disabled it.
+      return v === null ? true : v === "1";
     } catch {
-      return false;
+      return true;
     }
   });
   const [showApology, setShowApology] = useState<boolean>(() => {
@@ -628,44 +528,53 @@ const MoviePlayer = ({
         </button>
       </div>
 
-      {/* Server picker — dropdown on ALL breakpoints (works with TV remotes too) */}
+      {/* Source toggle — two curated streams only */}
       <div
         className="flex items-center gap-2 px-3 py-2"
         style={{ background: "#0A0A0A", borderTop: "1px solid rgba(255,255,255,0.05)" }}
       >
-        <label htmlFor={selectId} className="text-[10.5px] uppercase tracking-wider text-white/50 font-semibold">
+        <span className="text-[10.5px] uppercase tracking-wider text-white/50 font-semibold">
           Source
-        </label>
-        <div className="relative flex-1">
-          <select
-            id={selectId}
-            value={server.id}
-            onChange={(e) => {
-              const idx = PLAYER_SERVERS.findIndex((s) => s.id === (e.target.value as ServerId));
-              if (idx >= 0) selectServer(idx);
-            }}
-            className="w-full appearance-none bg-white/8 text-white text-[12px] pl-3 pr-8 py-2 rounded-lg border border-white/10 font-semibold focus:outline-none focus:ring-2 focus:ring-[#E50914]"
-          >
-            {PLAYER_SERVERS.map((s) => (
-              <option key={s.id} value={s.id} className="bg-[#1a1a1a]">
-                {s.label}
-                {s.badge ? ` — ${s.badge}` : ""}
-              </option>
-            ))}
-          </select>
-          {currentBadge && (
-            <span
-              className="absolute right-8 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-              style={{
-                background:
-                  currentBadge === "Fast" ? "rgba(34,197,94,0.2)" : "rgba(229,9,20,0.2)",
-                color: currentBadge === "Fast" ? "#22c55e" : "#E50914",
-                border: `1px solid ${currentBadge === "Fast" ? "rgba(34,197,94,0.4)" : "rgba(229,9,20,0.4)"}`,
-              }}
-            >
-              {currentBadge}
-            </span>
-          )}
+        </span>
+        <div className="flex flex-1 gap-1.5">
+          {PLAYER_SERVERS.map((s, i) => {
+            const active = i === serverIdx;
+            const isFast = s.badge === "Fast";
+            return (
+              <button
+                key={s.id}
+                onClick={() => selectServer(i)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-[#E50914]"
+                style={{
+                  background: active
+                    ? isFast
+                      ? "rgba(34,197,94,0.22)"
+                      : "rgba(229,9,20,0.22)"
+                    : "rgba(255,255,255,0.06)",
+                  border: `1px solid ${
+                    active
+                      ? isFast
+                        ? "rgba(34,197,94,0.55)"
+                        : "rgba(229,9,20,0.55)"
+                      : "rgba(255,255,255,0.1)"
+                  }`,
+                }}
+              >
+                <span>{s.label}</span>
+                {s.badge && (
+                  <span
+                    className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                    style={{
+                      background: isFast ? "rgba(34,197,94,0.25)" : "rgba(229,9,20,0.25)",
+                      color: isFast ? "#22c55e" : "#ff6b6b",
+                    }}
+                  >
+                    {s.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
