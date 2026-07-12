@@ -43,7 +43,7 @@ const NativeAd = ({
   desktopHeight?: number;
 }) => {
   // Mobile-first sizing. Iframe needs an explicit numeric height.
-  const h = height ?? (inline ? 110 : compact ? 130 : 180);
+  const h = height ?? (inline ? 96 : compact ? 130 : 180);
   // Desktop: taller slot so Adsterra fills the full creative and the
   // impression is counted as viewable.
   const dh = desktopHeight ?? (inline ? 260 : compact ? 280 : 320);
