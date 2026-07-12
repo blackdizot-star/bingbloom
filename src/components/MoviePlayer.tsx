@@ -7,7 +7,7 @@ import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
 
-export type ServerId = "hd" | "pixaplay";
+
 
 interface ServerDef {
   id: ServerId;
@@ -15,7 +15,9 @@ interface ServerDef {
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-// HD (vidsrc) is the default server. FastStream is the fallback.
+export type ServerId = "hd" | "pixaplay" | "movies111";
+
+// HD (vidsrc) is the default. FastStream + 111movies are fallbacks.
 export const PLAYER_SERVERS: ServerDef[] = [
   {
     id: "hd",
@@ -32,6 +34,14 @@ export const PLAYER_SERVERS: ServerDef[] = [
       type === "tv"
         ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
         : `https://player.smashystream.com/playere.php?tmdb=${id}`,
+  },
+  {
+    id: "movies111",
+    label: "Server 3 · 111Movies",
+    build: (id, type, s, e) =>
+      type === "tv"
+        ? `https://111movies.com/tv/${id}/${s}/${e}`
+        : `https://111movies.com/movie/${id}`,
   },
 ];
 
@@ -174,6 +184,12 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
             onLoad={handleLoad}
             allowFullScreen
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
+            /* sandbox blocks top-level redirects & pop-unders while keeping
+               scripts, playback, forms, presentation and popups (opened tabs
+               escape the sandbox so links still work). Omitting
+               allow-top-navigation is what stops the player from hijacking
+               the tab. */
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox allow-orientation-lock allow-pointer-lock"
             referrerPolicy="origin"
             title="BingBloom Player"
             style={{ border: 0 }}
