@@ -528,44 +528,53 @@ const MoviePlayer = ({
         </button>
       </div>
 
-      {/* Server picker — dropdown on ALL breakpoints (works with TV remotes too) */}
+      {/* Source toggle — two curated streams only */}
       <div
         className="flex items-center gap-2 px-3 py-2"
         style={{ background: "#0A0A0A", borderTop: "1px solid rgba(255,255,255,0.05)" }}
       >
-        <label htmlFor={selectId} className="text-[10.5px] uppercase tracking-wider text-white/50 font-semibold">
+        <span className="text-[10.5px] uppercase tracking-wider text-white/50 font-semibold">
           Source
-        </label>
-        <div className="relative flex-1">
-          <select
-            id={selectId}
-            value={server.id}
-            onChange={(e) => {
-              const idx = PLAYER_SERVERS.findIndex((s) => s.id === (e.target.value as ServerId));
-              if (idx >= 0) selectServer(idx);
-            }}
-            className="w-full appearance-none bg-white/8 text-white text-[12px] pl-3 pr-8 py-2 rounded-lg border border-white/10 font-semibold focus:outline-none focus:ring-2 focus:ring-[#E50914]"
-          >
-            {PLAYER_SERVERS.map((s) => (
-              <option key={s.id} value={s.id} className="bg-[#1a1a1a]">
-                {s.label}
-                {s.badge ? ` — ${s.badge}` : ""}
-              </option>
-            ))}
-          </select>
-          {currentBadge && (
-            <span
-              className="absolute right-8 top-1/2 -translate-y-1/2 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-              style={{
-                background:
-                  currentBadge === "Fast" ? "rgba(34,197,94,0.2)" : "rgba(229,9,20,0.2)",
-                color: currentBadge === "Fast" ? "#22c55e" : "#E50914",
-                border: `1px solid ${currentBadge === "Fast" ? "rgba(34,197,94,0.4)" : "rgba(229,9,20,0.4)"}`,
-              }}
-            >
-              {currentBadge}
-            </span>
-          )}
+        </span>
+        <div className="flex flex-1 gap-1.5">
+          {PLAYER_SERVERS.map((s, i) => {
+            const active = i === serverIdx;
+            const isFast = s.badge === "Fast";
+            return (
+              <button
+                key={s.id}
+                onClick={() => selectServer(i)}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-[#E50914]"
+                style={{
+                  background: active
+                    ? isFast
+                      ? "rgba(34,197,94,0.22)"
+                      : "rgba(229,9,20,0.22)"
+                    : "rgba(255,255,255,0.06)",
+                  border: `1px solid ${
+                    active
+                      ? isFast
+                        ? "rgba(34,197,94,0.55)"
+                        : "rgba(229,9,20,0.55)"
+                      : "rgba(255,255,255,0.1)"
+                  }`,
+                }}
+              >
+                <span>{s.label}</span>
+                {s.badge && (
+                  <span
+                    className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                    style={{
+                      background: isFast ? "rgba(34,197,94,0.25)" : "rgba(229,9,20,0.25)",
+                      color: isFast ? "#22c55e" : "#ff6b6b",
+                    }}
+                  >
+                    {s.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
