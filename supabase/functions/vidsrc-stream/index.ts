@@ -1,10 +1,12 @@
 // vidsrc-stream
-// Resolves a TMDB or IMDb id (movie / tv episode) into a playable source.
-// Always returns 200 with { ok, ... } so the client can read the body.
+// Resolves a TMDB or IMDb id (movie / tv episode) into a direct playable
+// HLS/MP4 source. No iframe/embed fallback is returned.
 //
 // Response shape:
-//   { ok: true, kind: "hls" | "embed", streamUrl, source, diagnostics }
+//   { ok: true, kind: "hls" | "mp4", streamUrl, source, diagnostics }
 //   { ok: false, error, diagnostics }
+
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +23,7 @@ const TMDB_KEY = Deno.env.get("TMDB_API_KEY") || "";
 interface Diag {
   input_id?: string;
   resolved_tmdb_id?: string;
+  imdb_id?: string | null;
   attempted: { source: string; ok: boolean; reason?: string }[];
   ms?: number;
 }
@@ -93,6 +96,40 @@ function respond(payload: Record<string, unknown>) {
   });
 }
 
+function proxied(reqUrl: URL, target: string): string {
+  const p = new URL(`https://${reqUrl.hostname}/functions/v1/proxy`);
+  p.searchParams.set("any", "1");
+  p.searchParams.set("url", target);
+  return p.toString();
+}
+
+async function storeStream(
+  tmdbId: string,
+  type: "movie" | "tv",
+  source: string,
+  streamUrl: string,
+  season?: string,
+  episode?: string,
+) {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!supabaseUrl || !serviceKey) return;
+    const db = createClient(supabaseUrl, serviceKey);
+    await db.rpc("record_stream_source", {
+      p_tmdb_id: tmdbId,
+      p_media_type: type,
+      p_server: source.slice(0, 50),
+      p_url: streamUrl.slice(0, 2000),
+      p_working: true,
+      p_season: type === "tv" ? Number(season || 1) : null,
+      p_episode: type === "tv" ? Number(episode || 1) : null,
+    });
+  } catch (e) {
+    console.warn("stream cache write failed", e instanceof Error ? e.message : e);
+  }
+}
+
 // ---------- Convert IMDb -> TMDB if needed ----------
 async function resolveTmdbId(
   rawId: string,
@@ -112,7 +149,180 @@ async function resolveTmdbId(
   }
 }
 
-// ---------- Try to scrape vidsrc.xyz for a direct .m3u8 ----------
+async function resolveExternalIds(
+  rawId: string,
+  type: "movie" | "tv",
+): Promise<{ tmdbId: string | null; imdbId: string | null }> {
+  if (rawId.startsWith("tt")) {
+    return { tmdbId: await resolveTmdbId(rawId, type), imdbId: rawId };
+  }
+  if (!TMDB_KEY) return { tmdbId: rawId, imdbId: null };
+  try {
+    const r = await fetch(`https://api.themoviedb.org/3/${type}/${rawId}/external_ids?api_key=${TMDB_KEY}`);
+    if (!r.ok) return { tmdbId: rawId, imdbId: null };
+    const data = await r.json();
+    return { tmdbId: rawId, imdbId: data?.imdb_id || null };
+  } catch {
+    return { tmdbId: rawId, imdbId: null };
+  }
+}
+
+function absoluteUrl(value: string, base: string): string {
+  if (value.startsWith("//")) return `https:${value}`;
+  return new URL(value, base).toString();
+}
+
+async function fetchText(url: string, referer: string): Promise<{ url: string; text: string } | null> {
+  try {
+    const r = await fetch(url, {
+      headers: {
+        "User-Agent": UA,
+        Referer: referer,
+        "Accept-Language": "en-US,en;q=0.9",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+      redirect: "follow",
+    });
+    if (!r.ok) return null;
+    return { url: r.url, text: await r.text() };
+  } catch {
+    return null;
+  }
+}
+
+async function resolveVsembed(
+  id: string,
+  type: "movie" | "tv",
+  season?: string,
+  episode?: string,
+): Promise<string | null> {
+  const start = type === "tv"
+    ? `https://vsembed.ru/embed/tv/${id}/${season}/${episode}/`
+    : `https://vsembed.ru/embed/movie/${id}/`;
+  const inner = await fetchText(start, "https://vidsrc.to/");
+  if (!inner) return null;
+  const rcpRaw = extractFirstIframe(inner.text) || extractProrcpPath(inner.text);
+  if (!rcpRaw) return await extractPlayerStream(inner.text) || extractDirectMedia(inner.text);
+  const rcp = await fetchText(absoluteUrl(rcpRaw, inner.url), inner.url);
+  if (!rcp) return null;
+  const prorcpRaw = extractProrcpPath(rcp.text);
+  const player = prorcpRaw ? await fetchText(absoluteUrl(prorcpRaw, rcp.url), rcp.url) : rcp;
+  return player ? await extractPlayerStream(player.text) || extractDirectMedia(player.text) : null;
+}
+
+function extractFirstIframe(html: string): string | null {
+  return html.match(/<iframe[^>]+src=["']([^"']+)["']/i)?.[1] || null;
+}
+
+function extractProrcpPath(html: string): string | null {
+  return html.match(/src\s*:\s*["']([^"']*\/prorcp\/[^"']+)["']/i)?.[1] ||
+    html.match(/<iframe[^>]+src=["']([^"']*\/prorcp\/[^"']+)["']/i)?.[1] ||
+    null;
+}
+
+function extractDirectMedia(html: string): string | null {
+  return html.match(/https?:\/\/[^"'\s<>]+\.m3u8[^"'\s<>]*/i)?.[0]?.replace(/&amp;/g, "&") ||
+    html.match(/https?:\/\/[^"'\s<>]+\.(?:mp4|webm|mov)(?:\?[^"'\s<>]*)?/i)?.[0]?.replace(/&amp;/g, "&") ||
+    null;
+}
+
+async function fillPlayerTokens(masterUrls: string): Promise<string> {
+  let out = masterUrls;
+  if (out.includes("__TOKENPG__")) {
+    try {
+      const token = await fetch("https://app2.putgate.com/generate.php", {
+        headers: { "User-Agent": UA, Referer: "https://cloudorchestranova.com/" },
+      }).then((r) => r.ok ? r.text() : "");
+      if (token) out = out.replaceAll("__TOKENPG__", token.trim());
+    } catch { /* ignore */ }
+  }
+  if (out.includes("__TOKEN__")) {
+    try {
+      const token = await fetch("https://veldtvolition.website/generate.php", {
+        headers: { "User-Agent": UA, Referer: "https://cloudorchestranova.com/" },
+      }).then((r) => r.ok ? r.text() : "");
+      if (token) out = out.replaceAll("__TOKEN__", token.trim());
+    } catch { /* ignore */ }
+  }
+  return out;
+}
+
+async function extractPlayerStream(html: string): Promise<string | null> {
+  const master = html.match(/var\s+master_urls\s*=\s*"([^"]+)"/i)?.[1] ||
+    html.match(/file\s*:\s*"([^"]+\.m3u8[^"]*)"/i)?.[1] ||
+    null;
+  if (master) {
+    const filled = await fillPlayerTokens(master);
+    const candidates = filled.split(/\s+or\s+/i).map((s) => s.trim()).filter(Boolean);
+    return candidates.find((u) => u.includes(".m3u8") && !u.includes("__TOKEN")) || null;
+  }
+  const direct = extractDirectMedia(html);
+  if (!direct || direct.includes("__TOKEN")) return null;
+  return direct;
+}
+
+async function resolveVidSrcTo(
+  id: string,
+  type: "movie" | "tv",
+  season?: string,
+  episode?: string,
+): Promise<string | null> {
+  const start = type === "tv"
+    ? `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`
+    : `https://vidsrc.to/embed/movie/${id}`;
+  const outer = await fetchText(start, "https://vidsrc.to/");
+  if (!outer) return null;
+  const innerRaw = extractFirstIframe(outer.text);
+  if (!innerRaw) return extractDirectMedia(outer.text);
+  const innerUrl = absoluteUrl(innerRaw, outer.url);
+  const inner = await fetchText(innerUrl, start);
+  if (!inner) return null;
+  const rcpRaw = extractFirstIframe(inner.text) || extractProrcpPath(inner.text);
+  if (!rcpRaw) return extractPlayerStream(inner.text);
+  const rcpUrl = absoluteUrl(rcpRaw, inner.url);
+  const rcp = await fetchText(rcpUrl, inner.url);
+  if (!rcp) return null;
+  const prorcpRaw = extractProrcpPath(rcp.text);
+  const playerUrl = prorcpRaw ? absoluteUrl(prorcpRaw, rcp.url) : rcp.url;
+  const player = prorcpRaw ? await fetchText(playerUrl, rcp.url) : rcp;
+  if (!player) return null;
+  return await extractPlayerStream(player.text);
+}
+
+async function resolveVidSrcSbs(
+  tmdbId: string,
+  type: "movie" | "tv",
+  season?: string,
+  episode?: string,
+): Promise<string | null> {
+  const start = type === "tv"
+    ? `https://vidsrc.sbs/embed/series/${tmdbId}/${season}/${episode}`
+    : `https://vidsrc.sbs/embed/movie/${tmdbId}`;
+  const outer = await fetchText(start, "https://vidsrc.sbs/");
+  if (!outer) return null;
+  return await extractPlayerStream(outer.text) || extractDirectMedia(outer.text);
+}
+
+async function resolveVidScrPm(
+  id: string,
+  type: "movie" | "tv",
+  season?: string,
+  episode?: string,
+): Promise<string | null> {
+  const start = type === "tv"
+    ? `https://vidscr.pm/embed/tv/${id}/${season}/${episode}`
+    : `https://vidscr.pm/embed/movie/${id}`;
+  const outer = await fetchText(start, "https://vidscr.pm/");
+  if (!outer) return null;
+  const direct = extractDirectMedia(outer.text) || await extractPlayerStream(outer.text);
+  if (direct) return direct;
+  const innerRaw = extractFirstIframe(outer.text) || extractProrcpPath(outer.text);
+  if (!innerRaw) return null;
+  const inner = await fetchText(absoluteUrl(innerRaw, outer.url), start);
+  return inner ? await extractPlayerStream(inner.text) || extractDirectMedia(inner.text) : null;
+}
+
+// ---------- Legacy direct scrape kept as a low priority last attempt ----------
 async function scrapeVidsrcXyz(
   tmdbId: string,
   type: "movie" | "tv",
@@ -148,43 +358,6 @@ async function scrapeVidsrcXyz(
   }
 }
 
-// ---------- Embed-URL fallback (always works in an iframe) ----------
-const EMBED_DOMAINS = [
-  "vidsrc.pm",
-  "vidsrc.to",
-  "vidsrc.xyz",
-  "vidsrc.net",
-  "vidsrc.in",
-  "vidsrc.cc",
-  "2embed.cc",
-  "autoembed.co",
-] as const;
-
-function embedUrl(
-  tmdbId: string,
-  type: "movie" | "tv",
-  season?: string,
-  episode?: string,
-  domain: string = "vidsrc.pm",
-): string {
-  // 2embed and autoembed have different URL shapes
-  if (domain === "2embed.cc") {
-    return type === "tv"
-      ? `https://www.2embed.cc/embedtv/${tmdbId}&s=${season}&e=${episode}`
-      : `https://www.2embed.cc/embed/${tmdbId}`;
-  }
-  if (domain === "autoembed.co") {
-    return type === "tv"
-      ? `https://player.autoembed.cc/embed/tv/${tmdbId}/${season}/${episode}?autoplay=1`
-      : `https://player.autoembed.cc/embed/movie/${tmdbId}?autoplay=1`;
-  }
-  // vidsrc.* family
-  if (type === "tv") {
-    return `https://${domain}/embed/tv/${tmdbId}/${season}/${episode}?autoplay=1`;
-  }
-  return `https://${domain}/embed/movie/${tmdbId}?autoplay=1`;
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -199,13 +372,8 @@ Deno.serve(async (req) => {
     const type = (url.searchParams.get("type") || "movie") as "movie" | "tv";
     const season = url.searchParams.get("season") || undefined;
     const episode = url.searchParams.get("episode") || undefined;
-    const requestedDomain = url.searchParams.get("domain") || "vidsrc.pm";
-    const forceEmbed = url.searchParams.get("forceEmbed") === "1";
     const download = url.searchParams.get("download") === "true" || url.searchParams.get("download") === "1";
     const proxy = url.searchParams.get("proxy") === "1";
-    const domain = (EMBED_DOMAINS as readonly string[]).includes(requestedDomain)
-      ? requestedDomain
-      : "vidsrc.pm";
 
 
     diag.input_id = rawId;
@@ -262,8 +430,10 @@ Deno.serve(async (req) => {
     }
 
 
-    // 1) Resolve to numeric TMDB id
-    const tmdbId = await resolveTmdbId(rawId, type);
+    // 1) Resolve to numeric TMDB id and IMDb id where possible
+    const ids = await resolveExternalIds(rawId, type);
+    const tmdbId = ids.tmdbId;
+    const imdbId = ids.imdbId;
     if (!tmdbId) {
       diag.attempted.push({
         source: "tmdb-find",
@@ -272,53 +442,49 @@ Deno.serve(async (req) => {
           ? "IMDb→TMDB lookup failed (check TMDB_API_KEY)"
           : "Invalid id",
       });
-      // Fall back to embed using raw id — vidsrc.to also accepts IMDb ids
-      const fallback = embedUrl(rawId, type, season, episode, domain);
       diag.ms = Date.now() - t0;
-      return respond({
-        ok: true,
-        kind: "embed",
-        streamUrl: fallback,
-        source: `${domain} (embed, raw id)`,
-        diagnostics: diag,
-      });
+      return respond({ ok: false, error: "TMDB lookup failed", diagnostics: diag });
     }
     diag.resolved_tmdb_id = tmdbId;
+    diag.imdb_id = imdbId;
 
-    // 2) Try direct HLS scrape unless caller asked to skip
-    if (!forceEmbed) {
-      const hls = await scrapeVidsrcXyz(tmdbId, type, season, episode);
-      if (hls) {
-        diag.attempted.push({ source: "vidsrc.xyz", ok: true });
+    const attempts: { name: string; run: () => Promise<string | null> }[] = [
+      ...(imdbId ? [{ name: "VidScr PM", run: () => resolveVidScrPm(imdbId, type, season, episode) }] : []),
+      ...(imdbId ? [{ name: "VSEmbed direct", run: () => resolveVsembed(imdbId, type, season, episode) }] : []),
+      { name: "VidSrc.to", run: () => resolveVidSrcTo(imdbId || tmdbId, type, season, episode) },
+      { name: "VidSrc.sbs", run: () => resolveVidSrcSbs(tmdbId, type, season, episode) },
+      { name: "VidSrc.xyz", run: () => scrapeVidsrcXyz(tmdbId, type, season, episode) },
+    ];
+
+    for (const attempt of attempts) {
+      try {
+        const stream = await attempt.run();
+        if (!stream) {
+          diag.attempted.push({ source: attempt.name, ok: false, reason: "no direct HLS/MP4 found" });
+          continue;
+        }
+        const proxiedStream = proxied(url, stream);
+        await storeStream(tmdbId, type, attempt.name, proxiedStream, season, episode);
+        diag.attempted.push({ source: attempt.name, ok: true });
         diag.ms = Date.now() - t0;
         return respond({
           ok: true,
-          kind: "hls",
-          streamUrl: hls,
-          source: "vidsrc.xyz",
+          kind: stream.split("?")[0].toLowerCase().endsWith(".mp4") ? "mp4" : "hls",
+          streamUrl: proxiedStream,
+          source: attempt.name,
           diagnostics: diag,
         });
+      } catch (e) {
+        diag.attempted.push({
+          source: attempt.name,
+          ok: false,
+          reason: e instanceof Error ? e.message : String(e),
+        });
       }
-      diag.attempted.push({
-        source: "vidsrc.xyz",
-        ok: false,
-        reason: "no m3u8 in page",
-      });
-    } else {
-      diag.attempted.push({ source: "hls-skip", ok: true, reason: "forceEmbed" });
     }
 
-    // 3) Embed fallback (iframe) — always returns something playable
-    const fallback = embedUrl(tmdbId, type, season, episode, domain);
-    diag.attempted.push({ source: `${domain} (embed)`, ok: true });
     diag.ms = Date.now() - t0;
-    return respond({
-      ok: true,
-      kind: "embed",
-      streamUrl: fallback,
-      source: `${domain} (embed)`,
-      diagnostics: diag,
-    });
+    return respond({ ok: false, error: "No direct playable HLS/MP4 stream found", diagnostics: diag });
   } catch (err) {
     diag.ms = Date.now() - t0;
     return respond({
