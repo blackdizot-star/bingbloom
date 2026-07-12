@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Play } from "lucide-react";
-import { useEffect, useLayoutEffect, useState } from "react";
-import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
+import { useEffect, useLayoutEffect } from "react";
+import MoviePlayer from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
 import AdsterraIframeAd from "@/components/AdsterraIframeAd";
