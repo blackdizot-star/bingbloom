@@ -184,6 +184,12 @@ const MoviePlayer = ({ tmdbId, type = "movie", season = 1, episode = 1, serverId
             onLoad={handleLoad}
             allowFullScreen
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
+            /* sandbox blocks top-level redirects & pop-unders while keeping
+               scripts, playback, forms, presentation and popups (opened tabs
+               escape the sandbox so links still work). Omitting
+               allow-top-navigation is what stops the player from hijacking
+               the tab. */
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox allow-orientation-lock allow-pointer-lock"
             referrerPolicy="origin"
             title="BingBloom Player"
             style={{ border: 0 }}
