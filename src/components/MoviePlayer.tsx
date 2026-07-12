@@ -7,7 +7,7 @@ import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
 
-export type ServerId = "hd" | "pixaplay";
+
 
 interface ServerDef {
   id: ServerId;
