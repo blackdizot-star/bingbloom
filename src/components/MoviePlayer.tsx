@@ -66,7 +66,7 @@ interface Props {
   onNext?: () => void;
 }
 
-const PREROLL_SECONDS = 5;
+const PREROLL_SECONDS = 0;
 const BLOCKER_STORAGE_KEY = "bb_redirect_blocker";
 const APOLOGY_SESSION_KEY = "bb_player_apology_seen";
 
@@ -210,11 +210,32 @@ const MoviePlayer = ({
     );
   };
 
-  const toggleFullscreen = () => {
+  const toggleFullscreen = async () => {
     const el = containerRef.current;
     if (!el) return;
-    if (!document.fullscreenElement) el.requestFullscreen?.();
-    else document.exitFullscreen?.();
+    try {
+      if (!document.fullscreenElement) {
+        await el.requestFullscreen?.();
+        // Lock to landscape on mobile devices for proper video viewing.
+        try {
+          const orientation = (screen as any).orientation;
+          if (orientation && typeof orientation.lock === "function") {
+            await orientation.lock("landscape").catch(() => {});
+          }
+        } catch {
+          /* orientation API not supported */
+        }
+      } else {
+        try {
+          (screen as any).orientation?.unlock?.();
+        } catch {
+          /* ignore */
+        }
+        await document.exitFullscreen?.();
+      }
+    } catch {
+      /* fullscreen not permitted */
+    }
   };
 
   const togglePlayPause = () => {
