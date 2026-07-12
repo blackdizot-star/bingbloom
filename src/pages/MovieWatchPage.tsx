@@ -29,7 +29,7 @@ const MovieWatchPage = () => {
   const topRated = useTopRatedMovies();
   const suggestions = (similar.data && similar.data.length > 0 ? similar.data : recommended.data) || [];
   const cast = (data?.credits?.cast || []).slice(0, 15);
-  const [server, setServer] = useState<ServerId>("movies111");
+  
 
   useLayoutEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -65,8 +65,6 @@ const MovieWatchPage = () => {
               <MoviePlayer
                 tmdbId={tmdbId || ""}
                 type="movie"
-                serverId={server}
-                onServerChange={setServer}
                 title={data?.title}
                 year={year}
                 poster={data?.poster_path ? img(data.poster_path, "w500") : null}
