@@ -15,7 +15,9 @@ interface ServerDef {
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-// HD (vidsrc) is the default server. FastStream is the fallback.
+export type ServerId = "hd" | "pixaplay" | "movies111";
+
+// HD (vidsrc) is the default. FastStream + 111movies are fallbacks.
 export const PLAYER_SERVERS: ServerDef[] = [
   {
     id: "hd",
@@ -32,6 +34,14 @@ export const PLAYER_SERVERS: ServerDef[] = [
       type === "tv"
         ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
         : `https://player.smashystream.com/playere.php?tmdb=${id}`,
+  },
+  {
+    id: "movies111",
+    label: "Server 3 · 111Movies",
+    build: (id, type, s, e) =>
+      type === "tv"
+        ? `https://111movies.com/tv/${id}/${s}/${e}`
+        : `https://111movies.com/movie/${id}`,
   },
 ];
 
