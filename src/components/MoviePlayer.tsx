@@ -96,9 +96,11 @@ const MoviePlayer = ({
   const [playing, setPlaying] = useState(true);
   const [blocker, setBlocker] = useState<boolean>(() => {
     try {
-      return localStorage.getItem(BLOCKER_STORAGE_KEY) === "1";
+      const v = localStorage.getItem(BLOCKER_STORAGE_KEY);
+      // Default to ON unless the user has explicitly disabled it.
+      return v === null ? true : v === "1";
     } catch {
-      return false;
+      return true;
     }
   });
   const [showApology, setShowApology] = useState<boolean>(() => {
