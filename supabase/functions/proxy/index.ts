@@ -33,18 +33,24 @@ const ALLOWED_HOST_SUFFIXES = [
   "akamaized.net",
   "akamaihd.net",
   "amazonaws.com",
-  // MovieBox / Fast Downloads CDNs (require a videodownloader.site referer)
+  // MovieBox / Fast Downloads / player CDNs
   "hakunaymatata.com",
   "aoneroom.com",
   "valiw.com",
+  "netfilm.world",
+  "moviebox.ph",
+  "inmp4.com",
+  "streamable.com",
   // IPTV & HLS hosts (allow all https for IPTV-org, behind a query flag)
 ];
 
 // Hosts that only serve media when the request carries a specific Referer.
 const REFERER_OVERRIDES: { suffix: string; referer: string }[] = [
-  { suffix: "hakunaymatata.com", referer: "https://videodownloader.site/" },
-  { suffix: "aoneroom.com", referer: "https://videodownloader.site/" },
-  { suffix: "valiw.com", referer: "https://videodownloader.site/" },
+  { suffix: "hakunaymatata.com", referer: "https://moviebox.ph/" },
+  { suffix: "aoneroom.com", referer: "https://moviebox.ph/" },
+  { suffix: "valiw.com", referer: "https://moviebox.ph/" },
+  { suffix: "netfilm.world", referer: "https://netfilm.world/" },
+  { suffix: "inmp4.com", referer: "https://moviebox.ph/" },
 ];
 
 const UA =
