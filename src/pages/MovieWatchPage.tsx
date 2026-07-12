@@ -64,6 +64,7 @@ const MovieWatchPage = () => {
             <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0">
               <MoviePlayer
                 tmdbId={tmdbId || ""}
+                imdbId={data?.external_ids?.imdb_id || null}
                 type="movie"
                 title={data?.title}
                 year={year}
