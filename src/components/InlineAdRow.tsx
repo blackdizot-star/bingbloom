@@ -1,4 +1,6 @@
+import { useState } from "react";
 import NativeAd from "./NativeAd";
+import InAppBrowserSheet from "./InAppBrowserSheet";
 import { Play, Sparkles, Rocket, MousePointerClick } from "lucide-react";
 
 const SMARTLINK =
@@ -12,11 +14,13 @@ const CTAS = [
 ];
 
 /**
- * 4-up grid of native ads with glowing CTA buttons underneath each slot to
- * boost CTR. Mobile keeps 4 compact ads across; desktop uses taller slots
- * for full-impression viewability.
+ * 4-up grid of native ads with glowing CTA buttons underneath each slot.
+ * Clicks open the in-app browser sheet (with a fallback to a new tab if
+ * the destination refuses to be framed) so users stay inside BingBloom.
  */
 const InlineAdRow = ({ count = 4 }: { count?: number }) => {
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="px-[4%] my-3">
       <span className="block text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1">
@@ -27,11 +31,10 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
           const { label, Icon } = CTAS[i % CTAS.length];
           return (
             <div key={i} className="flex flex-col gap-1">
-              <NativeAd inline height={72} desktopHeight={240} />
-              <a
-                href={SMARTLINK}
-                target="_blank"
-                rel="noopener noreferrer sponsored"
+              <NativeAd inline height={96} desktopHeight={260} />
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
                 className="group relative flex items-center justify-center gap-0.5 md:gap-1.5 rounded-md px-1 py-1 md:px-2 md:py-1.5 text-[8.5px] md:text-[12px] font-semibold text-white overflow-hidden leading-none"
                 style={{
                   background:
@@ -51,7 +54,7 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
                       "linear-gradient(90deg,transparent,rgba(255,255,255,0.35),transparent)",
                   }}
                 />
-              </a>
+              </button>
             </div>
           );
         })}
@@ -60,6 +63,7 @@ const InlineAdRow = ({ count = 4 }: { count?: number }) => {
         0%,100% { box-shadow: 0 0 8px rgba(229,9,20,0.5), 0 0 14px rgba(229,9,20,0.2); }
         50%     { box-shadow: 0 0 14px rgba(229,9,20,0.85), 0 0 26px rgba(229,9,20,0.45); }
       }`}</style>
+      <InAppBrowserSheet open={open} onOpenChange={setOpen} url={SMARTLINK} title="Sponsored" />
     </div>
   );
 };
