@@ -89,6 +89,8 @@ const TvWatchPage = () => {
                 year={(data?.first_air_date || "").slice(0, 4)}
                 poster={data?.poster_path ? img(data.poster_path, "w500") : null}
                 backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
+                onPrev={goPrevEpisode}
+                onNext={goNextEpisode}
               />
             </div>
 
@@ -96,6 +98,12 @@ const TvWatchPage = () => {
             <div className="mt-2">
               <InlineAdRow count={4} />
             </div>
+
+            {/* Mobile-only 300x250 sponsored slot */}
+            <div className="mt-3 flex justify-center lg:hidden">
+              <AdsterraIframeAd />
+            </div>
+
 
             {data && (
               <div className="px-4 pb-4 lg:px-0">
