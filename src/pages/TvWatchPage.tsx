@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Check, ChevronDown } from "lucide-react";
 import { useEffect, useLayoutEffect, useState, useMemo } from "react";
-import MoviePlayer from "@/components/MoviePlayer";
+import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
 import AdsterraIframeAd from "@/components/AdsterraIframeAd";
@@ -19,7 +19,7 @@ const TvWatchPage = () => {
   const seasonNum = Number(season || 1);
   const episodeNum = Number(episode || 1);
   const [activeSeason, setActiveSeason] = useState<number>(seasonNum);
-  
+  const [server, setServer] = useState<ServerId>("movies111");
   useEffect(() => setActiveSeason(seasonNum), [seasonNum]);
   const seasonQuery = useTvSeason(tmdbId, activeSeason);
   const seasons = (data?.seasons || []).filter((s: any) => s.season_number > 0);
@@ -80,10 +80,11 @@ const TvWatchPage = () => {
             <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0">
               <MoviePlayer
                 tmdbId={tmdbId || ""}
-                imdbId={data?.external_ids?.imdb_id || null}
                 type="tv"
                 season={seasonNum}
                 episode={episodeNum}
+                serverId={server}
+                onServerChange={setServer}
                 title={data?.name}
                 year={(data?.first_air_date || "").slice(0, 4)}
                 poster={data?.poster_path ? img(data.poster_path, "w500") : null}

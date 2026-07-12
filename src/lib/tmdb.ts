@@ -100,9 +100,9 @@ export const Documentary = {
 
 // Detail fetchers
 export const movieDetail = (id: string | number) =>
-  tmdb<any>(`/movie/${id}`, { append_to_response: "credits,reviews,videos,recommendations,similar,external_ids" });
+  tmdb<any>(`/movie/${id}`, { append_to_response: "credits,reviews,videos,recommendations,similar" });
 export const tvDetail = (id: string | number) =>
-  tmdb<any>(`/tv/${id}`, { append_to_response: "credits,reviews,videos,recommendations,similar,external_ids" });
+  tmdb<any>(`/tv/${id}`, { append_to_response: "credits,reviews,videos,recommendations,similar" });
 export const tvSeason = (id: string | number, season: number) =>
   tmdb<any>(`/tv/${id}/season/${season}`);
 

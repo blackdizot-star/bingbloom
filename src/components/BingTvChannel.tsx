@@ -63,6 +63,8 @@ const BingTvChannel = () => {
               key={current.id}
               tmdbId={String(current.id)}
               type="movie"
+              serverId="smashystream"
+              onServerChange={() => {}}
               title={current.title}
               year={(current.release_date || "").slice(0, 4)}
               poster={current.poster_path ? img(current.poster_path, "w500") : null}
