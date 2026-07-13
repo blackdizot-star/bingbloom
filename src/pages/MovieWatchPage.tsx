@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
-import AdsterraIframeAd from "@/components/AdsterraIframeAd";
+
 
 import TmdbRow from "@/components/TmdbRow";
 import Footer from "@/components/Footer";
@@ -176,7 +176,6 @@ const MovieWatchPage = () => {
                   ))}
                 </div>
               </div>
-              <AdsterraIframeAd />
             </div>
           </aside>
         </div>
