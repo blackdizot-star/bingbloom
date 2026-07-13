@@ -177,10 +177,10 @@ export async function fetchIptvChannels(): Promise<IptvChannel[]> {
   );
   const candidates = (curated.length > 0 ? curated : preferred).slice(0, MAX_CANDIDATES);
   const verified = await validateChannels(candidates);
-  const base = verified.length > 0 ? verified : VERIFIED_FALLBACK_CHANNELS;
+  const base = (verified.length > 0 ? verified : VERIFIED_FALLBACK_CHANNELS).map(applyOfficialLogo);
   // Prepend curated sports channels (deduped by URL) so the page always has a sports lineup.
   const seenUrls = new Set(base.map((c) => c.url));
-  const sports = CURATED_SPORTS_CHANNELS.filter((c) => !seenUrls.has(c.url));
+  const sports = CURATED_SPORTS_CHANNELS.filter((c) => !seenUrls.has(c.url)).map(applyOfficialLogo);
   return [...sports, ...base];
 }
 
