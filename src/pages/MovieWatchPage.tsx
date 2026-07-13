@@ -51,7 +51,7 @@ const MovieWatchPage = () => {
         description={data?.overview?.slice(0, 160) || "Stream movies in HD on BingBloom."}
         type="video.movie"
       />
-      <div className="flex-1 max-w-[1400px] mx-auto w-full">
+      <div className="flex-1 max-w-[1180px] mx-auto w-full">
         <header className="sticky top-0 z-30 flex items-center gap-3 px-3 h-11 bg-[#0A0A0A]/95 backdrop-blur border-b border-white/5">
           <Link to={tmdbId ? `/movie/${tmdbId}` : "/home"} className="p-1.5 -ml-1 rounded-full hover:bg-white/10">
             <ArrowLeft className="w-4 h-4 text-white" />
@@ -59,9 +59,9 @@ const MovieWatchPage = () => {
           <h1 className="text-[13px] font-semibold text-white truncate">{data?.title || "Watch"}</h1>
         </header>
 
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6 lg:px-4 lg:pt-3">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
           <div className="min-w-0">
-            <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0">
+            <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
               <MoviePlayer
                 tmdbId={tmdbId || ""}
                 type="movie"
@@ -72,16 +72,6 @@ const MovieWatchPage = () => {
                 poster={data?.poster_path ? img(data.poster_path, "w500") : null}
                 backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
               />
-            </div>
-
-            {/* Sponsor row directly beneath the player */}
-            <div className="mt-2">
-              <InlineAdRow count={4} />
-            </div>
-
-            {/* Sponsored 300x250 slot — desktop only (hidden on phone) */}
-            <div className="mt-3 hidden lg:flex justify-center">
-              <AdsterraIframeAd />
             </div>
 
             {data && (
