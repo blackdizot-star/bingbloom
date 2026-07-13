@@ -66,8 +66,13 @@ const AdBanner = ({ format, className = "", label = true }: AdBannerProps) => {
       )}
       <div
         ref={ref}
-        className="relative overflow-hidden rounded-md max-w-full"
-        style={{ width: cfg.width, height: cfg.height, maxWidth: "100%" }}
+        className="relative overflow-hidden rounded-md max-w-full mx-auto"
+        style={{
+          width: cfg.width,
+          height: cfg.height,
+          maxWidth: cfg.width > 468 ? 468 : "100%",
+          maxHeight: cfg.height > 250 ? 250 : cfg.height,
+        }}
       />
     </div>
   );
