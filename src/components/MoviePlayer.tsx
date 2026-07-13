@@ -470,49 +470,15 @@ const MoviePlayer = ({
         </div>
       </div>
 
-      {/* Prev / Play-Pause / Next controls */}
+      {/* Compact source toggle */}
       <div
-        className="flex items-center justify-center gap-2 px-3 py-2"
+        className="flex items-center gap-2 px-3 py-1.5"
         style={{ background: "#0A0A0A", borderTop: "1px solid rgba(255,255,255,0.05)" }}
       >
-        <button
-          onClick={handlePrev}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-md text-[11px] font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#E50914]"
-          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}
-          title={onPrev ? "Previous episode" : "Previous server"}
-        >
-          <SkipBack className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Prev</span>
-        </button>
-        <button
-          onClick={togglePlayPause}
-          className="flex items-center gap-1 px-4 py-1.5 rounded-md text-[11px] font-semibold text-white focus:outline-none focus:ring-2 focus:ring-white"
-          style={{ background: "#E50914" }}
-          title="Play/Pause"
-        >
-          {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-          <span>{playing ? "Pause" : "Play"}</span>
-        </button>
-        <button
-          onClick={handleNext}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-md text-[11px] font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#E50914]"
-          style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }}
-          title={onNext ? "Next episode" : "Next server"}
-        >
-          <span className="hidden sm:inline">Next</span>
-          <SkipForward className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* Source toggle — two curated streams only */}
-      <div
-        className="flex items-center gap-2 px-3 py-2"
-        style={{ background: "#0A0A0A", borderTop: "1px solid rgba(255,255,255,0.05)" }}
-      >
-        <span className="text-[10.5px] uppercase tracking-wider text-white/50 font-semibold">
+        <span className="text-[9px] uppercase tracking-wider text-white/45 font-semibold">
           Source
         </span>
-        <div className="flex flex-1 gap-1.5">
+        <div className="flex gap-1">
           {PLAYER_SERVERS.map((s, i) => {
             const active = i === serverIdx;
             const isFast = s.badge === "Fast";
@@ -520,34 +486,23 @@ const MoviePlayer = ({
               <button
                 key={s.id}
                 onClick={() => selectServer(i)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-[#E50914]"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white transition focus:outline-none"
                 style={{
                   background: active
                     ? isFast
-                      ? "rgba(34,197,94,0.22)"
-                      : "rgba(229,9,20,0.22)"
+                      ? "rgba(34,197,94,0.25)"
+                      : "rgba(229,9,20,0.25)"
                     : "rgba(255,255,255,0.06)",
                   border: `1px solid ${
                     active
                       ? isFast
-                        ? "rgba(34,197,94,0.55)"
-                        : "rgba(229,9,20,0.55)"
+                        ? "rgba(34,197,94,0.6)"
+                        : "rgba(229,9,20,0.6)"
                       : "rgba(255,255,255,0.1)"
                   }`,
                 }}
               >
-                <span>{s.label}</span>
-                {s.badge && (
-                  <span
-                    className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                    style={{
-                      background: isFast ? "rgba(34,197,94,0.25)" : "rgba(229,9,20,0.25)",
-                      color: isFast ? "#22c55e" : "#ff6b6b",
-                    }}
-                  >
-                    {s.badge}
-                  </span>
-                )}
+                {s.label}
               </button>
             );
           })}
