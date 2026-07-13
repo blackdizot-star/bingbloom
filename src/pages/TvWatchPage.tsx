@@ -1,10 +1,9 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Download, Check, ChevronDown } from "lucide-react";
-import { useEffect, useLayoutEffect, useState, useMemo } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ArrowLeft, Check, ChevronDown } from "lucide-react";
+import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
-import AdsterraIframeAd from "@/components/AdsterraIframeAd";
 
 import TmdbRow from "@/components/TmdbRow";
 import Footer from "@/components/Footer";
@@ -14,7 +13,6 @@ import { recordContinue } from "@/components/TmdbContinueRow";
 
 const TvWatchPage = () => {
   const { tmdbId, season, episode } = useParams<{ tmdbId: string; season: string; episode: string }>();
-  const navigate = useNavigate();
   const { data } = useTvDetail(tmdbId);
   const seasonNum = Number(season || 1);
   const episodeNum = Number(episode || 1);
@@ -28,25 +26,13 @@ const TvWatchPage = () => {
   const popular = usePopularTv();
   const topRated = useTopRatedTv();
 
-  const currentSeasonEpisodes = useTvSeason(tmdbId, seasonNum);
-  const epCount = currentSeasonEpisodes.data?.episodes?.length || 0;
-
-  const goPrevEpisode = useMemo(() => {
-    if (episodeNum > 1) return () => navigate(`/watch/tv/${tmdbId}/${seasonNum}/${episodeNum - 1}`);
-    if (seasonNum > 1) return () => navigate(`/watch/tv/${tmdbId}/${seasonNum - 1}/1`);
-    return undefined;
-  }, [tmdbId, seasonNum, episodeNum, navigate]);
-
-  const goNextEpisode = useMemo(() => {
-    if (epCount && episodeNum < epCount) return () => navigate(`/watch/tv/${tmdbId}/${seasonNum}/${episodeNum + 1}`);
-    // Best-effort: try next season episode 1
-    const hasNextSeason = seasons.some((s: any) => s.season_number === seasonNum + 1);
-    if (hasNextSeason) return () => navigate(`/watch/tv/${tmdbId}/${seasonNum + 1}/1`);
-    return undefined;
-  }, [tmdbId, seasonNum, episodeNum, epCount, seasons, navigate]);
+  const activeEpRef = useRef<HTMLAnchorElement>(null);
 
   useLayoutEffect(() => { window.scrollTo(0, 0); }, []);
 
+  useEffect(() => {
+    activeEpRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [seasonQuery.data, episodeNum]);
 
   useEffect(() => {
     if (data) {
@@ -65,7 +51,7 @@ const TvWatchPage = () => {
         description={data?.overview?.slice(0, 160) || "Stream TV episodes in HD on BingBloom."}
         type="video.episode"
       />
-      <div className="flex-1 max-w-[1400px] mx-auto w-full">
+      <div className="flex-1 max-w-[1180px] mx-auto w-full">
         <header className="sticky top-0 z-30 flex items-center gap-3 px-3 h-11 bg-[#0A0A0A]/95 backdrop-blur border-b border-white/5">
           <Link to={tmdbId ? `/tv/${tmdbId}` : "/home"} className="p-1.5 -ml-1 rounded-full hover:bg-white/10">
             <ArrowLeft className="w-4 h-4 text-white" />
@@ -75,9 +61,9 @@ const TvWatchPage = () => {
           </h1>
         </header>
 
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6 lg:px-4 lg:pt-3">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
           <div className="min-w-0">
-            <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-none lg:mx-0">
+            <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
               <MoviePlayer
                 tmdbId={tmdbId || ""}
                 type="tv"
@@ -89,20 +75,9 @@ const TvWatchPage = () => {
                 year={(data?.first_air_date || "").slice(0, 4)}
                 poster={data?.poster_path ? img(data.poster_path, "w500") : null}
                 backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
-                onPrev={goPrevEpisode}
-                onNext={goNextEpisode}
               />
             </div>
 
-            {/* Sponsor row directly beneath the player */}
-            <div className="mt-2">
-              <InlineAdRow count={4} />
-            </div>
-
-            {/* Sponsored 300x250 slot — desktop only (hidden on phone) */}
-            <div className="mt-3 hidden lg:flex justify-center">
-              <AdsterraIframeAd />
-            </div>
 
 
             {data && (
@@ -201,10 +176,8 @@ const TvWatchPage = () => {
           </div>
 
           {/* Desktop sidebar — episode list (YouTube-style) */}
-          <aside className="hidden lg:block w-[340px] shrink-0 pt-1">
+          <aside className="hidden lg:block w-[320px] shrink-0 pt-1">
             <div className="sticky top-14 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto pr-1">
-              <AdsterraIframeAd />
-
               {seasons.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -233,18 +206,24 @@ const TvWatchPage = () => {
                           const isPlaying = activeSeason === seasonNum && ep.episode_number === episodeNum;
                           return (
                             <Link
+                              ref={isPlaying ? activeEpRef : undefined}
                               key={ep.id}
                               to={`/watch/tv/${data!.id}/${activeSeason}/${ep.episode_number}`}
                               className={`flex gap-2 p-1.5 rounded-lg group ${isPlaying ? "bg-[#E50914]/15 border border-[#E50914]/40" : "hover:bg-white/5 border border-transparent"}`}
                             >
-                              <div className="relative w-[110px] aspect-video rounded-md overflow-hidden bg-white/5 shrink-0">
+                              <div className="relative w-[140px] aspect-video rounded-md overflow-hidden bg-white/5 shrink-0">
                                 {ep.still_path && (
                                   <img src={img(ep.still_path, "w300")} alt={ep.name} loading="lazy" className="w-full h-full object-cover" />
                                 )}
                                 <span className="absolute top-1 left-1 text-[9px] font-extrabold text-white bg-black/60 px-1 rounded">E{ep.episode_number}</span>
+                                {isPlaying && (
+                                  <span className="absolute bottom-1 right-1 grid place-items-center w-4 h-4 rounded-full bg-[#E50914]">
+                                    <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                                  </span>
+                                )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className={`text-[11.5px] font-semibold leading-snug line-clamp-2 ${isPlaying ? "text-[#E50914]" : "text-white group-hover:text-[#E50914]"}`}>
+                                <p className={`text-[12px] font-semibold leading-snug line-clamp-2 ${isPlaying ? "text-[#E50914]" : "text-white group-hover:text-[#E50914]"}`}>
                                   {ep.name || `Episode ${ep.episode_number}`}
                                 </p>
                                 <p className="text-[10px] text-white/50 mt-0.5">
@@ -257,8 +236,6 @@ const TvWatchPage = () => {
                   </div>
                 </div>
               )}
-
-              <AdsterraIframeAd />
             </div>
           </aside>
         </div>

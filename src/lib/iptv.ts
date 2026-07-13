@@ -1,5 +1,12 @@
-// IPTV-org M3U parser + thetvapp.to channel directory.
+// IPTV-org M3U parser + curated official-logo overrides.
 // Source: https://iptv-org.github.io/iptv/index.m3u (CORS-enabled)
+
+import cnnLogo from "@/assets/livetv/cnn.png.asset.json";
+import bbcLogo from "@/assets/livetv/bbc.png.asset.json";
+import foxLogo from "@/assets/livetv/foxnews.png.asset.json";
+import msnbcLogo from "@/assets/livetv/msnbc.png.asset.json";
+import cnbcLogo from "@/assets/livetv/cnbc.png.asset.json";
+import bloombergLogo from "@/assets/livetv/bloomberg.png.asset.json";
 
 export interface IptvChannel {
   name: string;
@@ -8,6 +15,21 @@ export interface IptvChannel {
   group?: string;
   country?: string;
 }
+
+// Official-logo overrides keyed by lowercased channel-name substring match.
+export const OFFICIAL_LOGOS: Array<{ match: RegExp; url: string }> = [
+  { match: /\bcnn\b/i, url: cnnLogo.url },
+  { match: /\bbbc\b/i, url: bbcLogo.url },
+  { match: /fox\s*news/i, url: foxLogo.url },
+  { match: /\bmsnbc\b/i, url: msnbcLogo.url },
+  { match: /\bcnbc\b/i, url: cnbcLogo.url },
+  { match: /bloomberg/i, url: bloombergLogo.url },
+];
+
+export const applyOfficialLogo = (channel: IptvChannel): IptvChannel => {
+  const hit = OFFICIAL_LOGOS.find((o) => o.match.test(channel.name));
+  return hit ? { ...channel, logo: hit.url } : channel;
+};
 
 // Free-TV/IPTV is community-curated. We validate playlist entries before showing them
 // so the page only lists channels with reachable HLS manifests.
@@ -155,10 +177,10 @@ export async function fetchIptvChannels(): Promise<IptvChannel[]> {
   );
   const candidates = (curated.length > 0 ? curated : preferred).slice(0, MAX_CANDIDATES);
   const verified = await validateChannels(candidates);
-  const base = verified.length > 0 ? verified : VERIFIED_FALLBACK_CHANNELS;
+  const base = (verified.length > 0 ? verified : VERIFIED_FALLBACK_CHANNELS).map(applyOfficialLogo);
   // Prepend curated sports channels (deduped by URL) so the page always has a sports lineup.
   const seenUrls = new Set(base.map((c) => c.url));
-  const sports = CURATED_SPORTS_CHANNELS.filter((c) => !seenUrls.has(c.url));
+  const sports = CURATED_SPORTS_CHANNELS.filter((c) => !seenUrls.has(c.url)).map(applyOfficialLogo);
   return [...sports, ...base];
 }
 

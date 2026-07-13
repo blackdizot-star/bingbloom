@@ -10,7 +10,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import OfflineBanner from "@/components/OfflineBanner";
 import WhatsAppPopup from "@/components/WhatsAppPopup";
 import AdConsent from "@/components/AdConsent";
-import SponsorPopup from "@/components/SponsorPopup";
+
 import MaintenanceNotice from "@/components/MaintenanceNotice";
 
 import HomePage from "./pages/HomePage";
@@ -136,7 +136,6 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SponsorPopup />
         <MaintenanceNotice />
         
         
