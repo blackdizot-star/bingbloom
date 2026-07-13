@@ -1,6 +1,6 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Download, Check, ChevronDown } from "lucide-react";
-import { useEffect, useLayoutEffect, useState, useMemo, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ArrowLeft, Check, ChevronDown } from "lucide-react";
+import { useEffect, useLayoutEffect, useState, useRef } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
@@ -13,7 +13,6 @@ import { recordContinue } from "@/components/TmdbContinueRow";
 
 const TvWatchPage = () => {
   const { tmdbId, season, episode } = useParams<{ tmdbId: string; season: string; episode: string }>();
-  const navigate = useNavigate();
   const { data } = useTvDetail(tmdbId);
   const seasonNum = Number(season || 1);
   const episodeNum = Number(episode || 1);
@@ -27,13 +26,13 @@ const TvWatchPage = () => {
   const popular = usePopularTv();
   const topRated = useTopRatedTv();
 
-  const currentSeasonEpisodes = useTvSeason(tmdbId, seasonNum);
-  const epCount = currentSeasonEpisodes.data?.episodes?.length || 0;
-
   const activeEpRef = useRef<HTMLAnchorElement>(null);
 
   useLayoutEffect(() => { window.scrollTo(0, 0); }, []);
 
+  useEffect(() => {
+    activeEpRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [seasonQuery.data, episodeNum]);
 
   useEffect(() => {
     if (data) {
