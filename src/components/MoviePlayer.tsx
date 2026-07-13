@@ -6,10 +6,6 @@ import {
   CloudDownload,
   Shield,
   ShieldOff,
-  SkipBack,
-  SkipForward,
-  Play,
-  Pause,
   X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -238,85 +234,22 @@ const MoviePlayer = ({
     }
   };
 
-  const togglePlayPause = () => {
-    setPlaying((p) => !p);
-    try {
-      iframeRef.current?.contentWindow?.postMessage(
-        { action: playing ? "pause" : "play" },
-        "*",
-      );
-    } catch {
-      /* cross-origin postMessage best-effort */
-    }
-  };
-
-  const handlePrev = () => {
-    if (onPrev) return onPrev();
-    selectServer(serverIdx - 1);
-  };
-  const handleNext = () => {
-    if (onNext) return onNext();
-    selectServer(serverIdx + 1);
-  };
-
-  const toggleBlocker = () => {
-    setBlocker((b) => {
-      const nv = !b;
-      try {
-        localStorage.setItem(BLOCKER_STORAGE_KEY, nv ? "1" : "0");
-      } catch {
-        /* ignore */
-      }
-      return nv;
-    });
-    // Force iframe reload with new sandbox
-    setResolvedSrc((s) => s);
-  };
-
-  const dismissApology = () => {
-    setShowApology(false);
-    try {
-      sessionStorage.setItem(APOLOGY_SESSION_KEY, "1");
-    } catch {
-      /* ignore */
-    }
-  };
-
-  // Keyboard + D-pad shortcuts. Space/Enter → play/pause, arrows → prev/next,
-  // F → fullscreen, Esc → exit fullscreen. preventDefault stops page scroll.
+  // Keyboard shortcuts: F fullscreen, Esc exit.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      // Ignore when user is typing in an input
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
-      switch (e.key) {
-        case " ":
-        case "Enter":
-          e.preventDefault();
-          togglePlayPause();
-          break;
-        case "ArrowLeft":
-          e.preventDefault();
-          handlePrev();
-          break;
-        case "ArrowRight":
-          e.preventDefault();
-          handleNext();
-          break;
-        case "f":
-        case "F":
-          e.preventDefault();
-          toggleFullscreen();
-          break;
-        case "Escape":
-          if (document.fullscreenElement) document.exitFullscreen?.();
-          break;
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === "Escape" && document.fullscreenElement) {
+        document.exitFullscreen?.();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverIdx, onPrev, onNext, playing]);
+  }, []);
 
   // Kill TV/WebView auto-scroll when the iframe steals focus after mount.
   useEffect(() => {
