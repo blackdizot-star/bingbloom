@@ -177,10 +177,8 @@ const TvWatchPage = () => {
           </div>
 
           {/* Desktop sidebar — episode list (YouTube-style) */}
-          <aside className="hidden lg:block w-[340px] shrink-0 pt-1">
+          <aside className="hidden lg:block w-[320px] shrink-0 pt-1">
             <div className="sticky top-14 space-y-4 max-h-[calc(100vh-4rem)] overflow-y-auto pr-1">
-              <AdsterraIframeAd />
-
               {seasons.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -209,18 +207,24 @@ const TvWatchPage = () => {
                           const isPlaying = activeSeason === seasonNum && ep.episode_number === episodeNum;
                           return (
                             <Link
+                              ref={isPlaying ? activeEpRef : undefined}
                               key={ep.id}
                               to={`/watch/tv/${data!.id}/${activeSeason}/${ep.episode_number}`}
                               className={`flex gap-2 p-1.5 rounded-lg group ${isPlaying ? "bg-[#E50914]/15 border border-[#E50914]/40" : "hover:bg-white/5 border border-transparent"}`}
                             >
-                              <div className="relative w-[110px] aspect-video rounded-md overflow-hidden bg-white/5 shrink-0">
+                              <div className="relative w-[140px] aspect-video rounded-md overflow-hidden bg-white/5 shrink-0">
                                 {ep.still_path && (
                                   <img src={img(ep.still_path, "w300")} alt={ep.name} loading="lazy" className="w-full h-full object-cover" />
                                 )}
                                 <span className="absolute top-1 left-1 text-[9px] font-extrabold text-white bg-black/60 px-1 rounded">E{ep.episode_number}</span>
+                                {isPlaying && (
+                                  <span className="absolute bottom-1 right-1 grid place-items-center w-4 h-4 rounded-full bg-[#E50914]">
+                                    <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                                  </span>
+                                )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className={`text-[11.5px] font-semibold leading-snug line-clamp-2 ${isPlaying ? "text-[#E50914]" : "text-white group-hover:text-[#E50914]"}`}>
+                                <p className={`text-[12px] font-semibold leading-snug line-clamp-2 ${isPlaying ? "text-[#E50914]" : "text-white group-hover:text-[#E50914]"}`}>
                                   {ep.name || `Episode ${ep.episode_number}`}
                                 </p>
                                 <p className="text-[10px] text-white/50 mt-0.5">
@@ -233,8 +237,6 @@ const TvWatchPage = () => {
                   </div>
                 </div>
               )}
-
-              <AdsterraIframeAd />
             </div>
           </aside>
         </div>
