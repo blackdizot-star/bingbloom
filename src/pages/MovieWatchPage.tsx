@@ -144,9 +144,8 @@ const MovieWatchPage = () => {
           </div>
 
           {/* Desktop sidebar — YouTube-style suggestions column */}
-          <aside className="hidden lg:block w-[340px] shrink-0 pt-1">
+          <aside className="hidden lg:block w-[320px] shrink-0 pt-1">
             <div className="sticky top-14 space-y-4">
-              <AdsterraIframeAd />
               <div>
                 <h3 className="text-[13px] font-semibold text-white mb-2">Up Next</h3>
                 <div className="space-y-2">
