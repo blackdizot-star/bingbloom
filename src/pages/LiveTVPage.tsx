@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Hls from "hls.js";
-import { Radio, Loader2, Tv, Search, Star, ChevronLeft, Maximize2 } from "lucide-react";
+import { Radio, Tv, Search, Star, ChevronLeft, Globe2 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import { useQuery } from "@tanstack/react-query";
@@ -45,18 +45,24 @@ const HlsPlayer = ({ src }: { src: string }) => {
     };
   }, [proxyUrl]);
 
-  const enterFullscreen = () => {
+  const enterFullscreen = async () => {
     const v = videoRef.current as any;
     if (!v) return;
-    const req = v.requestFullscreen || v.webkitEnterFullscreen || v.webkitRequestFullscreen;
-    req?.call(v);
-    // Lock orientation when possible (Android/Chromium)
-    const orientation: any = (screen as any).orientation;
-    orientation?.lock?.("landscape").catch(() => {});
+    try {
+      const req = v.requestFullscreen || v.webkitEnterFullscreen || v.webkitRequestFullscreen;
+      await req?.call(v);
+      try {
+        await (screen as any).orientation?.lock?.("landscape");
+      } catch {
+        /* ignore */
+      }
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
-    <div className="relative w-full aspect-video bg-black">
+    <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden">
       <video
         ref={videoRef}
         controls
@@ -65,7 +71,7 @@ const HlsPlayer = ({ src }: { src: string }) => {
         className="w-full h-full"
       />
       {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-destructive-foreground text-sm px-4 text-center">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white text-sm px-4 text-center">
           {error}
         </div>
       )}
@@ -73,19 +79,68 @@ const HlsPlayer = ({ src }: { src: string }) => {
   );
 };
 
+// Animated CSS globe placeholder used while nothing is playing.
+const GlobeVisual = () => (
+  <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10"
+    style={{ background: "radial-gradient(ellipse at center, #0b1a2e 0%, #050810 70%, #000 100%)" }}
+  >
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div
+        className="relative w-[62%] max-w-[380px] aspect-square rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle at 35% 30%, #1e3a5f 0%, #0f2137 40%, #05101f 75%, #000 100%)",
+          boxShadow:
+            "0 0 60px rgba(59,130,246,0.25), inset -30px -30px 80px rgba(0,0,0,0.85), inset 20px 20px 60px rgba(80,140,220,0.15)",
+          animation: "globe-rot 40s linear infinite",
+        }}
+      >
+        {/* Meridians */}
+        {[0, 30, 60, 90, 120, 150].map((deg) => (
+          <div
+            key={`m-${deg}`}
+            className="absolute inset-0 rounded-full border border-cyan-400/10"
+            style={{ transform: `rotateY(${deg}deg)` }}
+          />
+        ))}
+        {/* Parallels */}
+        {[-60, -30, 0, 30, 60].map((lat) => (
+          <div
+            key={`p-${lat}`}
+            className="absolute left-0 right-0 mx-auto border-t border-cyan-400/10"
+            style={{
+              top: `${50 + lat / 2}%`,
+              height: 1,
+              width: `${Math.cos((lat * Math.PI) / 180) * 100}%`,
+            }}
+          />
+        ))}
+        <div
+          className="absolute inset-0 rounded-full pointer-events-none"
+          style={{ boxShadow: "inset 0 0 100px rgba(0,0,0,0.6)" }}
+        />
+      </div>
+    </div>
+    <div className="absolute bottom-4 left-0 right-0 text-center">
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur border border-white/10">
+        <Globe2 className="w-3.5 h-3.5 text-cyan-300" />
+        <span className="text-[11px] text-white/80 font-semibold">Select a channel to start streaming</span>
+      </div>
+    </div>
+    <style>{`@keyframes globe-rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+  </div>
+);
+
 interface NumberedChannel extends IptvChannel {
   number: number;
 }
 
 const FAV_KEY = "livetv:favorites";
 
-const PAGE_SIZE = 18; // list rows per page
-
 const LiveTVPage = () => {
   const [activeChannel, setActiveChannel] = useState<NumberedChannel | null>(null);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
-  const [page, setPage] = useState(1);
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
@@ -98,16 +153,12 @@ const LiveTVPage = () => {
     localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
   }, [favorites]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [activeCategory, search]);
-
   const toggleFav = (url: string) => {
     setFavorites((f) => (f.includes(url) ? f.filter((u) => u !== url) : [url, ...f]));
   };
 
   const iptv = useQuery({
-    queryKey: ["iptv", "verified-streams", "v2"],
+    queryKey: ["iptv", "verified-streams", "v3"],
     queryFn: fetchIptvChannels,
     staleTime: 1000 * 60 * 10,
     retry: 2,
@@ -115,19 +166,18 @@ const LiveTVPage = () => {
 
   const { numbered, byCategory, categories } = useMemo(() => {
     const list = iptv.data ?? [];
-    const numbered: NumberedChannel[] = list.map((c, i) => ({
-      ...c,
-      number: i + 1,
-    }));
+    const numbered: NumberedChannel[] = list.map((c, i) => ({ ...c, number: i + 1 }));
     const byCategory = new Map<string, NumberedChannel[]>();
     for (const c of numbered) {
       const k = c.group || "Other";
-      const arr = byCategory.get(k) ?? [];
-      arr.push(c);
-      byCategory.set(k, arr);
+      byCategory.set(k, [...(byCategory.get(k) ?? []), c]);
     }
     const favs = numbered.filter((c) => favorites.includes(c.url));
-    const categories = ["All", ...(favs.length ? ["★ Favorites"] : []), ...Array.from(byCategory.keys()).sort()];
+    const categories = [
+      "All",
+      ...(favs.length ? ["★ Favorites"] : []),
+      ...Array.from(byCategory.keys()).sort(),
+    ];
     if (favs.length) byCategory.set("★ Favorites", favs);
     byCategory.set("All", numbered);
     return { numbered, byCategory, categories };
@@ -141,241 +191,230 @@ const LiveTVPage = () => {
     return base.filter((c) => c.name.toLowerCase().includes(q));
   }, [activeCategory, byCategory, numbered, search]);
 
-  // ===== PLAYER VIEW =====
-  if (activeChannel) {
-    return (
-      <AppLayout>
-        <SEO title={`${activeChannel.name} – Live TV – BingBloom`} description={`Watch ${activeChannel.name} live now on BingBloom.`} />
-        <div className="min-h-[calc(100vh-3.5rem)]" style={{ background: "#0A0A0A" }}>
-          {/* Header */}
-          <div className="sticky top-12 md:top-14 z-30 flex items-center gap-2 px-3 py-2.5 bg-[#0A0A0A]/95 backdrop-blur border-b border-white/5">
-            <button
-              onClick={() => setActiveChannel(null)}
-              className="w-9 h-9 grid place-items-center rounded-full hover:bg-white/5 text-white"
-              aria-label="Back to channels"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse text-white" style={{ background: "#E50914" }}>
-              Live
-            </span>
-            <span className="text-sm font-bold text-white truncate flex-1">{activeChannel.name}</span>
-            <button
-              onClick={() => toggleFav(activeChannel.url)}
-              className="w-9 h-9 grid place-items-center rounded-full hover:bg-white/5"
-              aria-label="Favorite"
-            >
-              <Star className={`w-4 h-4 ${favorites.includes(activeChannel.url) ? "fill-yellow-400 text-yellow-400" : "text-white/60"}`} />
-            </button>
-          </div>
-
-          {/* Player */}
-          <HlsPlayer src={activeChannel.url} />
-
-          {/* Channel meta */}
-          <div className="px-4 py-3 flex items-center gap-3 border-b border-white/5">
-            <div className="w-12 h-12 rounded-lg bg-[#1F1F1F] grid place-items-center overflow-hidden flex-shrink-0">
-              {activeChannel.logo ? (
-                <img src={activeChannel.logo} alt={activeChannel.name} className="max-w-full max-h-full object-contain" />
-              ) : (
-                <Tv className="w-5 h-5 text-white/40" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate">{activeChannel.name}</p>
-              <p className="text-[10px] text-white/50 truncate">
-                {activeChannel.country ? `${activeChannel.country} · ` : ""}{activeChannel.group || "Live channel"} · #{activeChannel.number}
-              </p>
-            </div>
-          </div>
-
-          {/* Programme Lineup */}
-          <ProgrammeLineup channelName={activeChannel.name} group={activeChannel.group} />
-        </div>
-      </AppLayout>
-    );
-  }
-
-  // ===== LIST/GRID VIEW =====
   return (
     <AppLayout>
       <SEO
-        title="Live TV – BingBloom"
-        description="Watch 80+ live TV channels from around the world — news, sports, entertainment, music and more, streamed free on BingBloom."
+        title={activeChannel ? `${activeChannel.name} – Live TV – BingBloom` : "Live TV – BingBloom"}
+        description="Watch global live TV channels — news, sports, entertainment and more — free on BingBloom."
       />
-      <div className="px-4 pt-4 pb-10 max-w-[1400px] mx-auto" style={{ background: "#0A0A0A" }}>
-        {/* Title */}
-        <div className="flex items-center gap-2 mb-3">
-          <Radio className="w-4 h-4" style={{ color: "#E50914" }} />
-          <h1 className="text-lg font-bold text-white">Live TV</h1>
-          <span className="ml-1 text-[10px] text-white/45">{numbered.length} channels</span>
-        </div>
-
-        {/* Search */}
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search channels…"
-            className="w-full pl-9 pr-3 py-2 rounded-lg text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#E50914]/60 border border-white/5"
-            style={{ background: "#1F1F1F" }}
-          />
-        </div>
-
-        {/* Category chips */}
-        {!iptv.isLoading && categories.length > 0 && (
-          <div className="overflow-x-auto whitespace-nowrap scrollbar-hide -mx-4 px-4 mb-4">
-            <div className="inline-flex gap-2">
-              {categories.map((cat) => {
-                const active = activeCategory === cat;
-                return (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all ${
-                      active ? "text-white" : "text-white/70 hover:text-white"
-                    }`}
-                    style={{
-                      background: active ? "#E50914" : "#1F1F1F",
-                      border: active ? "1px solid #E50914" : "1px solid rgba(255,255,255,0.05)",
-                    }}
-                  >
-                    {cat}
-                    <span className="ml-1 opacity-60">({byCategory.get(cat)?.length ?? 0})</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {iptv.isLoading && (
-          <div className="space-y-2">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-3 p-2.5 rounded-xl animate-pulse"
-                style={{ background: "#1F1F1F", border: "1px solid rgba(255,255,255,0.06)" }}
+      <div className="min-h-[calc(100vh-3.5rem)]" style={{ background: "#0A0A0A" }}>
+        <div className="max-w-[1400px] mx-auto w-full px-3 md:px-4 pt-3 pb-8">
+          {/* Header */}
+          <div className="flex items-center gap-2 mb-3">
+            {activeChannel && (
+              <button
+                onClick={() => setActiveChannel(null)}
+                className="w-8 h-8 grid place-items-center rounded-full hover:bg-white/5 text-white"
+                aria-label="Back"
               >
-                <div className="w-12 h-12 rounded-lg bg-white/5 flex-shrink-0" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3 rounded bg-white/10 w-2/3" />
-                  <div className="h-2 rounded bg-white/5 w-1/3" />
-                </div>
-              </div>
-            ))}
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            )}
+            <Radio className="w-4 h-4" style={{ color: "#E50914" }} />
+            <h1 className="text-lg font-bold text-white">Live TV</h1>
+            <span className="ml-1 text-[10px] text-white/45">{numbered.length} channels</span>
           </div>
-        )}
-        {iptv.isError && (
-          <p className="text-sm text-center py-10" style={{ color: "#E50914" }}>
-            Failed to load channels. Please try again.
-          </p>
-        )}
 
-        {/* List of channels */}
-        {!iptv.isLoading && (() => {
-          const totalPages = Math.max(1, Math.ceil(visibleChannels.length / PAGE_SIZE));
-          const safePage = Math.min(page, totalPages);
-          const start = (safePage - 1) * PAGE_SIZE;
-          const pageChannels = visibleChannels.slice(start, start + PAGE_SIZE);
-          const maxButtons = 5;
-          let firstBtn = Math.max(1, safePage - 2);
-          let lastBtn = Math.min(totalPages, firstBtn + maxButtons - 1);
-          firstBtn = Math.max(1, lastBtn - maxButtons + 1);
-          const pages: number[] = [];
-          for (let p = firstBtn; p <= lastBtn; p++) pages.push(p);
-          return (
-            <>
-              <div className="space-y-2">
-                {pageChannels.map((c) => {
-                  const isFav = favorites.includes(c.url);
-                  return (
-                    <div
-                      key={`${c.url}-${c.number}`}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => setActiveChannel(c)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setActiveChannel(c);
-                        }
-                      }}
-                      className="group w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition hover:bg-white/[0.04] cursor-pointer"
-                      style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
+          <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-5">
+            {/* Left: Player or Globe */}
+            <div className="min-w-0">
+              {activeChannel ? (
+                <>
+                  <div className="flex items-center gap-2 px-1 py-2">
+                    <span
+                      className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse text-white"
+                      style={{ background: "#E50914" }}
                     >
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden grid place-items-center bg-black/40 flex-shrink-0">
-                        {c.logo ? (
-                          <img src={c.logo} alt={c.name} loading="lazy" className="max-w-full max-h-full object-contain p-1" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-                        ) : (
-                          <Tv className="w-5 h-5 text-white/40" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-1 py-[1px] rounded text-[8px] font-bold uppercase tracking-wider text-white animate-pulse" style={{ background: "#E50914" }}>Live</span>
-                          <p className="text-[13px] font-bold text-white truncate">{c.name}</p>
-                        </div>
-                        <p className="text-[10.5px] text-white/50 truncate mt-0.5">
-                          {c.group || "Live"}{c.country ? ` · ${c.country}` : ""} · #{c.number}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); toggleFav(c.url); }}
-                        className="w-8 h-8 grid place-items-center rounded-full hover:bg-white/5 flex-shrink-0"
-                        aria-label="Favorite"
-                      >
-                        <Star className={`w-4 h-4 ${isFav ? "fill-yellow-400 text-yellow-400" : "text-white/35"}`} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-
-
-              {visibleChannels.length === 0 && (
-                <p className="text-center text-xs text-white/50 py-10">No channels match.</p>
-              )}
-
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-1.5 mt-6 flex-wrap">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={safePage === 1}
-                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white disabled:opacity-30"
-                    style={{ background: "#1F1F1F", border: "1px solid rgba(255,255,255,0.08)" }}
-                  >
-                    « Prev
-                  </button>
-                  {pages.map((p) => (
+                      Live
+                    </span>
+                    <span className="text-sm font-bold text-white truncate flex-1">
+                      {activeChannel.name}
+                    </span>
                     <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className="w-9 h-9 rounded-lg text-[12px] font-bold text-white"
-                      style={{
-                        background: p === safePage ? "#E50914" : "#1F1F1F",
-                        border: p === safePage ? "1px solid #E50914" : "1px solid rgba(255,255,255,0.08)",
-                        boxShadow: p === safePage ? "0 0 12px rgba(229,9,20,0.5)" : "none",
-                      }}
+                      onClick={() => toggleFav(activeChannel.url)}
+                      className="w-8 h-8 grid place-items-center rounded-full hover:bg-white/5"
+                      aria-label="Favorite"
                     >
-                      {p}
+                      <Star
+                        className={`w-4 h-4 ${
+                          favorites.includes(activeChannel.url)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-white/60"
+                        }`}
+                      />
                     </button>
-                  ))}
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={safePage === totalPages}
-                    className="px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white disabled:opacity-30"
-                    style={{ background: "#1F1F1F", border: "1px solid rgba(255,255,255,0.08)" }}
-                  >
-                    Next »
-                  </button>
-                </div>
+                  </div>
+                  <HlsPlayer src={activeChannel.url} />
+                  <div className="px-1 py-3 flex items-center gap-3 border-b border-white/5">
+                    <div className="w-12 h-12 rounded-lg bg-[#1F1F1F] grid place-items-center overflow-hidden flex-shrink-0">
+                      {activeChannel.logo ? (
+                        <img
+                          src={activeChannel.logo}
+                          alt={activeChannel.name}
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      ) : (
+                        <Tv className="w-5 h-5 text-white/40" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{activeChannel.name}</p>
+                      <p className="text-[10px] text-white/50 truncate">
+                        {activeChannel.country ? `${activeChannel.country} · ` : ""}
+                        {activeChannel.group || "Live channel"} · #{activeChannel.number}
+                      </p>
+                    </div>
+                  </div>
+                  <ProgrammeLineup channelName={activeChannel.name} group={activeChannel.group} />
+                </>
+              ) : (
+                <GlobeVisual />
               )}
-            </>
-          );
-        })()}
+            </div>
+
+            {/* Right sidebar: search + categories + channels */}
+            <aside className="mt-4 lg:mt-0">
+              <div className="lg:sticky lg:top-14 space-y-3">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search channels…"
+                    className="w-full pl-9 pr-3 py-2 rounded-lg text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#E50914]/60 border border-white/5"
+                    style={{ background: "#1F1F1F" }}
+                  />
+                </div>
+
+                {/* Category chips */}
+                {!iptv.isLoading && categories.length > 0 && (
+                  <div className="overflow-x-auto whitespace-nowrap scrollbar-hide">
+                    <div className="inline-flex gap-1.5">
+                      {categories.map((cat) => {
+                        const active = activeCategory === cat;
+                        return (
+                          <button
+                            key={cat}
+                            onClick={() => setActiveCategory(cat)}
+                            className={`px-2.5 py-1 rounded-full text-[10.5px] font-semibold transition-all ${
+                              active ? "text-white" : "text-white/70 hover:text-white"
+                            }`}
+                            style={{
+                              background: active ? "#E50914" : "#1F1F1F",
+                              border: active
+                                ? "1px solid #E50914"
+                                : "1px solid rgba(255,255,255,0.05)",
+                            }}
+                          >
+                            {cat}
+                            <span className="ml-1 opacity-60">
+                              ({byCategory.get(cat)?.length ?? 0})
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Channel list */}
+                <div className="space-y-1.5 max-h-[70vh] overflow-y-auto pr-1">
+                  {iptv.isLoading &&
+                    Array.from({ length: 10 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-3 p-2 rounded-lg animate-pulse"
+                        style={{ background: "#1F1F1F" }}
+                      >
+                        <div className="w-10 h-10 rounded-md bg-white/5 flex-shrink-0" />
+                        <div className="flex-1 space-y-1.5">
+                          <div className="h-3 rounded bg-white/10 w-2/3" />
+                          <div className="h-2 rounded bg-white/5 w-1/3" />
+                        </div>
+                      </div>
+                    ))}
+
+                  {!iptv.isLoading &&
+                    visibleChannels.map((c) => {
+                      const isFav = favorites.includes(c.url);
+                      const isActive = activeChannel?.url === c.url;
+                      return (
+                        <div
+                          key={`${c.url}-${c.number}`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setActiveChannel(c)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setActiveChannel(c);
+                            }
+                          }}
+                          className={`group w-full flex items-center gap-2.5 p-2 rounded-lg text-left cursor-pointer transition ${
+                            isActive
+                              ? "bg-[#E50914]/15 border border-[#E50914]/40"
+                              : "hover:bg-white/[0.05] border border-white/[0.06]"
+                          }`}
+                          style={{ background: isActive ? undefined : "#141414" }}
+                        >
+                          <div className="relative w-10 h-10 rounded-md overflow-hidden grid place-items-center bg-black/40 flex-shrink-0">
+                            {c.logo ? (
+                              <img
+                                src={c.logo}
+                                alt={c.name}
+                                loading="lazy"
+                                className="max-w-full max-h-full object-contain p-1"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <Tv className="w-4 h-4 text-white/40" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="px-1 py-[1px] rounded text-[8px] font-bold uppercase tracking-wider text-white animate-pulse"
+                                style={{ background: "#E50914" }}
+                              >
+                                Live
+                              </span>
+                              <p className="text-[12px] font-bold text-white truncate">{c.name}</p>
+                            </div>
+                            <p className="text-[10px] text-white/50 truncate mt-0.5">
+                              {c.group || "Live"}
+                              {c.country ? ` · ${c.country}` : ""} · #{c.number}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleFav(c.url);
+                            }}
+                            className="w-7 h-7 grid place-items-center rounded-full hover:bg-white/5 flex-shrink-0"
+                            aria-label="Favorite"
+                          >
+                            <Star
+                              className={`w-3.5 h-3.5 ${
+                                isFav ? "fill-yellow-400 text-yellow-400" : "text-white/35"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      );
+                    })}
+
+                  {!iptv.isLoading && visibleChannels.length === 0 && (
+                    <p className="text-center text-xs text-white/50 py-8">No channels match.</p>
+                  )}
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
