@@ -94,7 +94,7 @@ const DownloadPage = () => {
                 {data && (data.backdrop_path || data.poster_path) && (
                   <>
                     <img
-                      src={img(data.backdrop_path, "w1280") || img(data.poster_path, "w780")}
+                      src={img(data.backdrop_path, "w780") || img(data.poster_path, "w780")}
                       alt=""
                       className="absolute inset-0 w-full h-full object-cover opacity-40"
                     />
