@@ -234,6 +234,28 @@ const MoviePlayer = ({
     }
   };
 
+  const toggleBlocker = () => {
+    setBlocker((b) => {
+      const nv = !b;
+      try {
+        localStorage.setItem(BLOCKER_STORAGE_KEY, nv ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
+      return nv;
+    });
+    setResolvedSrc((s) => s);
+  };
+
+  const dismissApology = () => {
+    setShowApology(false);
+    try {
+      sessionStorage.setItem(APOLOGY_SESSION_KEY, "1");
+    } catch {
+      /* ignore */
+    }
+  };
+
   // Keyboard shortcuts: F fullscreen, Esc exit.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
