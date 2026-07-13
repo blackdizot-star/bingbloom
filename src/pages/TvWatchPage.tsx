@@ -1,10 +1,9 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Check, ChevronDown } from "lucide-react";
-import { useEffect, useLayoutEffect, useState, useMemo } from "react";
+import { useEffect, useLayoutEffect, useState, useMemo, useRef } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
-import AdsterraIframeAd from "@/components/AdsterraIframeAd";
 
 import TmdbRow from "@/components/TmdbRow";
 import Footer from "@/components/Footer";
@@ -31,19 +30,7 @@ const TvWatchPage = () => {
   const currentSeasonEpisodes = useTvSeason(tmdbId, seasonNum);
   const epCount = currentSeasonEpisodes.data?.episodes?.length || 0;
 
-  const goPrevEpisode = useMemo(() => {
-    if (episodeNum > 1) return () => navigate(`/watch/tv/${tmdbId}/${seasonNum}/${episodeNum - 1}`);
-    if (seasonNum > 1) return () => navigate(`/watch/tv/${tmdbId}/${seasonNum - 1}/1`);
-    return undefined;
-  }, [tmdbId, seasonNum, episodeNum, navigate]);
-
-  const goNextEpisode = useMemo(() => {
-    if (epCount && episodeNum < epCount) return () => navigate(`/watch/tv/${tmdbId}/${seasonNum}/${episodeNum + 1}`);
-    // Best-effort: try next season episode 1
-    const hasNextSeason = seasons.some((s: any) => s.season_number === seasonNum + 1);
-    if (hasNextSeason) return () => navigate(`/watch/tv/${tmdbId}/${seasonNum + 1}/1`);
-    return undefined;
-  }, [tmdbId, seasonNum, episodeNum, epCount, seasons, navigate]);
+  const activeEpRef = useRef<HTMLAnchorElement>(null);
 
   useLayoutEffect(() => { window.scrollTo(0, 0); }, []);
 
