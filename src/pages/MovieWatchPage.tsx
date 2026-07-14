@@ -71,8 +71,11 @@ const MovieWatchPage = () => {
                 year={year}
                 poster={data?.poster_path ? img(data.poster_path, "w500") : null}
                 backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
+                onNext={suggestions[0] ? () => { window.location.href = `/watch/movie/${suggestions[0].id}`; } : undefined}
+                nextItem={suggestions[0] ? { title: suggestions[0].title, poster: suggestions[0].poster_path ? img(suggestions[0].poster_path, "w200") : null, subtitle: (suggestions[0].release_date || "").slice(0,4) } : null}
               />
             </div>
+
 
             {data && (
               <div className="px-4 pb-4 lg:px-0">

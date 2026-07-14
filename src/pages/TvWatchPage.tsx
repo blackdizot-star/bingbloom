@@ -64,19 +64,28 @@ const TvWatchPage = () => {
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
           <div className="min-w-0">
             <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
-              <MoviePlayer
-                tmdbId={tmdbId || ""}
-                type="tv"
-                season={seasonNum}
-                episode={episodeNum}
-                serverId={server}
-                onServerChange={setServer}
-                title={data?.name}
-                year={(data?.first_air_date || "").slice(0, 4)}
-                poster={data?.poster_path ? img(data.poster_path, "w500") : null}
-                backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
-              />
+              {(() => {
+                const eps = seasonQuery.data?.episodes || [];
+                const nextEp = eps.find((e: any) => e.episode_number === episodeNum + 1);
+                return (
+                  <MoviePlayer
+                    tmdbId={tmdbId || ""}
+                    type="tv"
+                    season={seasonNum}
+                    episode={episodeNum}
+                    serverId={server}
+                    onServerChange={setServer}
+                    title={data?.name}
+                    year={(data?.first_air_date || "").slice(0, 4)}
+                    poster={data?.poster_path ? img(data.poster_path, "w500") : null}
+                    backdrop={data?.backdrop_path ? img(data.backdrop_path, "w780") : null}
+                    onNext={nextEp ? () => { window.location.href = `/watch/tv/${tmdbId}/${seasonNum}/${episodeNum + 1}`; } : undefined}
+                    nextItem={nextEp ? { title: nextEp.name || `Episode ${nextEp.episode_number}`, poster: nextEp.still_path ? img(nextEp.still_path, "w300") : null, subtitle: `S${seasonNum} E${nextEp.episode_number}` } : null}
+                  />
+                );
+              })()}
             </div>
+
 
 
 
