@@ -473,7 +473,13 @@ const MoviePlayer = ({
             <Maximize2 className="w-3 h-3" />
           </button>
         </div>
+
+        {/* Up Next card (bottom-right) */}
+        {nextItem && onNext && preroll <= 0 && (
+          <UpNextCard item={nextItem} onNext={onNext} />
+        )}
       </div>
+
 
       {/* Compact source toggle */}
       <div
@@ -540,4 +546,65 @@ const MoviePlayer = ({
   );
 };
 
+// Up Next floating card with 5s auto-play countdown that starts when the user
+// clicks "Start countdown" (iframe players can't broadcast `ended` reliably).
+const UpNextCard = ({
+  item,
+  onNext,
+}: {
+  item: { title: string; poster?: string | null; subtitle?: string };
+  onNext: () => void;
+}) => {
+  const [counting, setCounting] = useState(false);
+  const [n, setN] = useState(5);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    if (!counting) return;
+    if (n <= 0) {
+      onNext();
+      return;
+    }
+    const t = setTimeout(() => setN((v) => v - 1), 1000);
+    return () => clearTimeout(t);
+  }, [counting, n, onNext]);
+
+  if (dismissed) return null;
+
+  return (
+    <div
+      className="absolute bottom-3 right-3 z-30 flex items-center gap-2 rounded-lg p-2 pointer-events-auto max-w-[260px]"
+      style={{ background: "rgba(10,10,10,0.92)", border: "1px solid rgba(229,9,20,0.5)", backdropFilter: "blur(8px)" }}
+    >
+      {item.poster && (
+        <img src={item.poster} alt="" className="w-10 h-14 rounded object-cover flex-shrink-0" />
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="text-[9px] font-bold uppercase tracking-wider text-[#E50914]">Up Next</p>
+        <p className="text-[11px] font-semibold text-white truncate">{item.title}</p>
+        {item.subtitle && <p className="text-[9px] text-white/50 truncate">{item.subtitle}</p>}
+        <div className="flex gap-1 mt-1">
+          <button
+            onClick={() => (counting ? onNext() : setCounting(true))}
+            className="text-[9.5px] font-semibold text-white px-2 py-0.5 rounded"
+            style={{ background: "#E50914" }}
+          >
+            {counting ? `Playing in ${n}s — Play now` : "Play next"}
+          </button>
+          <button
+            onClick={() => {
+              setCounting(false);
+              setDismissed(true);
+            }}
+            className="text-[9.5px] text-white/70 px-1.5 py-0.5"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default MoviePlayer;
+
