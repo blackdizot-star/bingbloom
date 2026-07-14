@@ -265,7 +265,7 @@ const LiveTVPage = () => {
                       />
                     </button>
                   </div>
-                  <HlsPlayer src={activeChannel.url} />
+                  <LiveChannelPlayer channel={activeChannel} />
                   <div className="px-1 py-3 flex items-center gap-3 border-b border-white/5">
                     <div className="w-12 h-12 rounded-lg bg-[#1F1F1F] grid place-items-center overflow-hidden flex-shrink-0">
                       {activeChannel.logo ? (
