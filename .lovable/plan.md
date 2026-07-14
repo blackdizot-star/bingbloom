@@ -1,62 +1,55 @@
-# Full Overhaul Plan — 10 Tasks
+# 10-Task Implementation Plan
 
-All ten tasks will be implemented in a single build pass. Each task lists what changes and which files are touched.
+## Task 1 — Remove ad CTA buttons
+In `src/components/InlineAdRow.tsx`, delete the entire glowing CTA button block (Watch Now / Learn More / Try It Out / Tap to Open), the `CTAS` array, the `InAppBrowserSheet` mount, `SMARTLINK` constant, and the `<style>` keyframes. Keep only the `NativeAd` grid and "Sponsored" label.
 
-## 1. Remove the "How BingBloom Stays Free" sponsor CTA popup
-Delete the entire `SponsorPopup` intro/thanks dialog while keeping every other ad slot on the site intact.
-- Remove the `<SponsorPopup />` mount from `src/App.tsx` (or wherever it's rendered).
-- Delete `src/components/SponsorPopup.tsx`.
-- Leave `NativeAd`, `InlineAdRow`, `AdsterraIframeAd`, and `AdBanner` untouched — only the popup goes away.
+## Task 2 — Guarantee ad fill (retry until served)
+Update `src/components/AdsterraIframeAd.tsx` and `src/components/NativeAd.tsx` to:
+- Retry the iframe/script mount every 8s if the container's `iframe`/child has 0 height (fallback fill detection)
+- Add `key={rot}` remount every 30s instead of 45s
+- Preload the Adsterra invoke script on first paint
+- On mount failure or blank frame, swap to a secondary Adsterra key (add `AD_KEY_ALT`) so a slot never stays empty
+Log `[Ad] filled` / `[Ad] refilled` for verification.
 
-## 2. Remove the 300×250 banner from the player pages
-Drop the standalone 300×250 `AdsterraIframeAd` block that sits between the player and the movie/TV title on both watch pages, and also remove it from the desktop sidebar so the sidebar starts directly with "Up Next" / "Episodes".
-- `src/pages/MovieWatchPage.tsx`: remove the `hidden lg:flex justify-center` `<AdsterraIframeAd />` block and both sidebar `<AdsterraIframeAd />` instances.
-- `src/pages/TvWatchPage.tsx`: same removals (main column + sidebar top and bottom).
+## Task 3 — YouTube live channels source
+Extend `src/lib/iptv.ts` with a new exported `fetchYouTubeLiveChannels()` returning `IptvChannel[]`. Hardcode the curated list (handle → `https://www.youtube.com/@<handle>/live` — resolved through a new edge function `youtube-live-resolver` that uses `yt-dlp`-style HTML scrape to return the current `.m3u8` HLS URL, cached 5 min). Channels: CazeTV, AlJazeeraEnglish, NASA, LinusTechTips, nprmusic, AirlineVideosLive, BigJetTV, JellesMarbleRuns, KittenAcademy, LofiGirl, FreiGilson, PastorJerryEze, BBCNews, SkyNews, CBSNews, NBCNews, FoxNews, Bloomberg, CheddarNews, TED, LiveModeTV, WillowbyCricbuzz, AFTV, footballdaily, Copa90, SkySports, Thogden. Group: `News`, `Sports`, `Music`, `Space`, `Tech`, `Entertainment`.
 
-## 3. Shrink banner ads on desktop so they're visible but not huge
-Cap the desktop rendered size of every banner slot to a tasteful width and center it, keeping mobile untouched.
-- `src/components/AdsterraIframeAd.tsx`, `src/components/AdBanner.tsx`, `src/components/InlineAdRow.tsx`: wrap the ad frame in a container with `max-w-[336px] lg:max-w-[468px] mx-auto` and constrain heights (`h-[100px] lg:h-[90px]`) so oversized 728×90 / 300×600 fills don't blow up desktop pages.
+## Task 4 — YouTube resolver edge function
+Create `supabase/functions/youtube-live-resolver/index.ts`. Input: `?handle=CazeTV`. Fetches `https://www.youtube.com/@<handle>/live`, extracts `hlsManifestUrl` from the ytInitialPlayerResponse JSON, returns `{ url, title, thumbnail }`. CORS enabled, 5-min in-memory cache. Falls back to embed iframe URL if HLS extraction fails.
 
-## 4. Remove the Prev / Pause / Next control buttons from the player
-The player will no longer render the custom prev, play/pause, next overlay row (iframe sources have their own controls). Fullscreen and blocker/server toggles stay.
-- `src/components/MoviePlayer.tsx`: delete the bottom control bar containing `SkipBack`, `Play/Pause`, `SkipForward`; remove `togglePlayPause`, `handlePrev`, `handleNext`, `playing` state, and the corresponding key bindings for Space/Enter/Arrows. Keep `F` fullscreen and `Esc`.
-- `src/pages/TvWatchPage.tsx`: stop passing `onPrev` / `onNext` to `MoviePlayer` and drop the `goPrevEpisode` / `goNextEpisode` memos.
+## Task 5 — Live TV player supports HLS + YouTube embed fallback
+In `LiveTVPage.tsx`, change `HlsPlayer` to `LiveChannelPlayer` that:
+- If `channel.kind === 'youtube'` and HLS resolution fails → render `<iframe src="https://www.youtube.com/embed/live_stream?channel=<id>&autoplay=1" allow="autoplay; fullscreen">`
+- Otherwise use current HLS logic
+- Overlay the channel logo in the top-left of the player at 40px height while it loads (`PlayerBrandLoader` pattern).
 
-## 5. Restore the small compact source-toggle buttons
-Return the old small pill toggle for "Fast Stream" / "HD Stream" instead of the large two-button row currently in the player.
-- `src/components/MoviePlayer.tsx`: replace the current large full-width buttons with a compact inline pill group (`text-[10px]`, `px-2 py-1`, rounded-full) matching the previous small style, positioned in the top-left overlay of the player.
+## Task 6 — Merge & validate channels, prioritize working ones
+In `fetchIptvChannels`, merge IPTV-org list + YouTube list. Add a lightweight HEAD validator (through proxy) that runs in the background per channel; channels that fail are demoted to the bottom and tagged `offline`. Only channels with `status === 'ok'` show first. Cache validation results in `localStorage` for 30 min. Sports/News groups pinned to the top.
 
-## 6. Remove ads between the player and the title, and tighten desktop width
-Delete the sponsor `InlineAdRow` block that sits directly beneath the player above the title, and slightly reduce the desktop player max width so the page feels less oversized.
-- `src/pages/MovieWatchPage.tsx` and `src/pages/TvWatchPage.tsx`: remove the `<div className="mt-2"><InlineAdRow count={4} /></div>` block that sits between the player and the metadata. Change the outer wrapper from `max-w-[1400px]` to `max-w-[1180px]` and the sidebar column from `340px` to `320px`; change the player column wrapper's `lg:max-w-none` to `lg:max-w-[820px]` so the video isn't stretched.
+## Task 7 — Full-world map globe visual
+Replace the CSS spinning-orb `GlobeVisual` in `LiveTVPage.tsx` with an SVG world map (equirectangular). Use a lightweight inline SVG (natural-earth simplified) stored at `src/assets/world-map.svg` with country paths in `#1e3a5f` on `#050810`, animated shimmer overlay. Add small pulsing dots at approx lat/lng for each channel's country. Layout mirrors tvgarden.world: full-bleed map on left, sticky right sidebar with search + country/category chips + channel list (already close — refine spacing and add hovering tooltips).
 
-## 7. Redesign the Downloads page to match the player layout
-`DownloadPage` gets a player-style shell: a big media hero on the left (like the player), and a right sidebar with "Suggested Downloads" mimicking the player's "Up Next" list.
-- `src/pages/DownloadPage.tsx`: rebuild as a two-column layout (`lg:grid lg:grid-cols-[minmax(0,1fr)_320px]`). Left column: sticky backdrop hero + Offline Downloader card. Right column: sticky "Suggested Downloads" list built from `useTrendingMovies` / `useTrendingTv` with the same card styling as the watch page's Up Next items, each linking to `/download/movie/:id`.
+## Task 8 — Autoplay-next countdown for movies & TV episodes
+In `src/components/MoviePlayer.tsx`, add an `onEnded` handler and expose an `onNext` prop. When the underlying `<iframe>` cannot fire `ended`, poll `postMessage` from the frame; also expose a manual timer that starts when user clicks "Finished". When `ended`:
+- Show a bottom-right card: next item poster, title, "Playing in 5…4…3…" countdown, "Play now" and "Cancel" buttons.
+- After 5s auto-invoke `onNext()`.
+Wire `TvWatchPage.tsx` to advance to the next episode (`episodeNumber + 1`, roll over to next season via TMDB `season/{n+1}` fetch). Wire `MovieWatchPage.tsx` to advance to the first recommended movie from `PlayerRecommendations`.
 
-## 8. Redesign Live TV as a globe + sidebar, add official logos, use iptv-org for streams
-Replace the current search+chip+list UI with a split view: a rotating globe / world visual on the left and a right sidebar of countries/channels with real logos. Streams come from `iptv-org/iptv` country playlists and are validated to guarantee playback.
-- Save the uploaded logos as Lovable assets (CNN, BBC, Fox News, MSNBC, CNBC, Bloomberg) under `src/assets/livetv/` via `lovable-assets`, then map channel names → local logos in a `CHANNEL_LOGOS` dictionary in `src/lib/iptv.ts`.
-- `src/lib/iptv.ts`: pull from `https://iptv-org.github.io/iptv/index.country.<code>.m3u` for a curated set of countries (US, GB, KE, ZA, DE, FR, IN, JP, BR, AU) plus categories (News, Sports, Documentary). Validate each stream via the existing proxy validator; drop ones that don't return HLS. Attach official logos when the channel name matches the map.
-- `src/pages/LiveTVPage.tsx`: rebuild as `lg:grid lg:grid-cols-[minmax(0,1fr)_360px]`. Left: an animated CSS globe (radial-gradient sphere + slow rotation, subtle grid overlay). Right: sticky sidebar with country tabs at the top and a scroll list of channels using the official logos. Selecting a channel activates the existing `HlsPlayer` in place of the globe (same "one plays, others stay on the right" pattern as the movie/TV watch pages).
-- The player view keeps `ProgrammeLineup` below the video.
+## Task 9 — TV/channel logo on player + home
+- On the Live TV player overlay, show `activeChannel.logo` top-left (48×48, rounded, backdrop blur) for the first 4s of playback and on pause.
+- On `HomePage.tsx`, add a `LiveTvRow` (already exists) that surfaces the top 12 validated channels using their logos (uploaded assets in `src/assets/livetv/*`). Ensure the uploaded logos (`cnn`, `bbc`, `foxnews`, `msnbc`, `cnbc`, `bloomberg`) are wired into the channel objects by matching `name.toLowerCase().includes(...)` in the merge step of Task 6.
 
-## 9. Ensure all ads still render across the app
-After removing the sponsor popup and the 300×250 slots, verify every remaining ad still initializes.
-- Confirm `InlineAdRow` still renders inside `HomePage` and both watch pages (below cast + between rows), `AdBanner` inside `AppLayout` footer strip, and `AdsterraIframeAd` inside the sidebars that keep it (none on watch pages after task 2 — keep it in `HomePage`/`LibraryPage` if already present).
-- Add a `useEffect` mount log guard in `AdsterraIframeAd` to `console.debug` when it mounts, so we can validate visually.
-
-## 10. TV player right-side "now playing / up next" parity
-Make the TV watch page's right sidebar behave exactly like the movie watch page: currently-playing episode highlighted at top, the rest listed below in the same card style, sticky under the header. The mobile horizontal episode strip stays.
-- `src/pages/TvWatchPage.tsx`: ensure the sidebar list auto-scrolls the active episode into view on mount (`useEffect` + `scrollIntoView({ block: "nearest" })`), matches the movie sidebar's card metrics (`w-[140px] aspect-video` thumb, `text-[12px]` title), and stays sticky with `top-14`.
-
----
+## Task 10 — Verify build & ad fill
+- `bunx tsgo --noEmit` for typecheck.
+- Playwright headless smoke:
+  1. `/live-tv` — assert ≥30 channels render, click CazeTV, screenshot player.
+  2. `/` — assert LiveTvRow shows logos.
+  3. `/watch/movie/<id>` — assert no CTA buttons in ad row; wait for `[Ad] filled` console log.
+- Deploy `youtube-live-resolver` function.
+- Manual verify ad slots on mobile viewport (390×547) — no empty gray boxes after 10s.
 
 ## Technical notes
-
-- **No backend changes** — everything is frontend edits. Supabase functions and tables stay as they are.
-- **Assets** — the six network logos the user attached (CNN, BBC, Fox News, MSNBC, CNBC, Bloomberg) are added via the Lovable assets CLI so they're CDN-hosted, not committed as binaries.
-- **IPTV streams** — validation reuses the existing `supabase/functions/proxy` edge function; no new function needed.
-- **Ad sizing** — no third-party SDK changes; only the outer `<div>` sizing wrappers change so the network-served creatives are constrained.
-- **Removed files**: `src/components/SponsorPopup.tsx`.
-- **Edited files**: `src/App.tsx`, `src/components/MoviePlayer.tsx`, `src/components/AdsterraIframeAd.tsx`, `src/components/AdBanner.tsx`, `src/components/InlineAdRow.tsx`, `src/pages/MovieWatchPage.tsx`, `src/pages/TvWatchPage.tsx`, `src/pages/DownloadPage.tsx`, `src/pages/LiveTVPage.tsx`, `src/lib/iptv.ts`.
+- No schema changes; new edge function only.
+- Ad refill loop must not exceed 1 network request per 8s per slot.
+- YouTube HLS extraction is best-effort; embed iframe is the guaranteed fallback so channels always play.
+- World map SVG kept under 40KB to stay inline.
