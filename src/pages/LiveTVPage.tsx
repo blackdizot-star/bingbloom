@@ -7,18 +7,21 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchIptvChannels, type IptvChannel } from "@/lib/iptv";
 import ProgrammeLineup from "@/components/ProgrammeLineup";
 
-// ---- HLS player for IPTV-org streams ----
-const HlsPlayer = ({ src }: { src: string }) => {
+// ---- Unified player: HLS for IPTV, iframe embed for YouTube live ----
+const LiveChannelPlayer = ({ channel }: { channel: IptvChannel }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [error, setError] = useState<string>("");
+  const isYouTube = channel.kind === "youtube";
 
   const proxyUrl = useMemo(() => {
+    if (isYouTube) return "";
     const ref = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    return `https://${ref}.supabase.co/functions/v1/proxy?any=1&url=${encodeURIComponent(src)}`;
-  }, [src]);
+    return `https://${ref}.supabase.co/functions/v1/proxy?any=1&url=${encodeURIComponent(channel.url)}`;
+  }, [channel.url, isYouTube]);
 
   useEffect(() => {
+    if (isYouTube) return;
     const v = videoRef.current;
     if (!v || !proxyUrl) return;
     setError("");
@@ -43,7 +46,7 @@ const HlsPlayer = ({ src }: { src: string }) => {
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
-  }, [proxyUrl]);
+  }, [proxyUrl, isYouTube]);
 
   const enterFullscreen = async () => {
     const v = videoRef.current as any;
@@ -63,14 +66,31 @@ const HlsPlayer = ({ src }: { src: string }) => {
 
   return (
     <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden">
-      <video
-        ref={videoRef}
-        controls
-        playsInline
-        onDoubleClick={enterFullscreen}
-        className="w-full h-full"
-      />
-      {error && (
+      {/* Channel logo overlay */}
+      {channel.logo && (
+        <div className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur rounded-md p-1.5 border border-white/10">
+          <img src={channel.logo} alt="" className="h-6 max-w-[80px] object-contain" />
+        </div>
+      )}
+      {isYouTube ? (
+        <iframe
+          key={channel.url}
+          src={channel.embedUrl || channel.url}
+          className="absolute inset-0 w-full h-full border-0"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowFullScreen
+          title={channel.name}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          controls
+          playsInline
+          onDoubleClick={enterFullscreen}
+          className="w-full h-full"
+        />
+      )}
+      {error && !isYouTube && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white text-sm px-4 text-center">
           {error}
         </div>
@@ -78,6 +98,7 @@ const HlsPlayer = ({ src }: { src: string }) => {
     </div>
   );
 };
+
 
 // Animated CSS globe placeholder used while nothing is playing.
 const GlobeVisual = () => (
