@@ -185,8 +185,11 @@ export async function fetchIptvChannels(): Promise<IptvChannel[]> {
   // Prepend curated sports channels (deduped by URL) so the page always has a sports lineup.
   const seenUrls = new Set(base.map((c) => c.url));
   const sports = CURATED_SPORTS_CHANNELS.filter((c) => !seenUrls.has(c.url)).map(applyOfficialLogo);
-  return [...sports, ...base];
+  const { buildYouTubeChannels } = await import("./youtubeLive");
+  const yt = buildYouTubeChannels();
+  return [...yt, ...sports, ...base];
 }
+
 
 // thetvapp.to passive embed channel directory
 export interface TvAppChannel {
