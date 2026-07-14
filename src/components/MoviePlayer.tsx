@@ -60,7 +60,10 @@ interface Props {
   /** Optional episode navigation (TV). If provided, Prev/Next buttons cycle episodes. */
   onPrev?: () => void;
   onNext?: () => void;
+  /** Next item preview shown in bottom-right "Up Next" card. */
+  nextItem?: { title: string; poster?: string | null; subtitle?: string } | null;
 }
+
 
 const PREROLL_SECONDS = 0;
 const BLOCKER_STORAGE_KEY = "bb_redirect_blocker";
@@ -79,7 +82,9 @@ const MoviePlayer = ({
   backdrop,
   onPrev,
   onNext,
+  nextItem,
 }: Props) => {
+
   const initialIdx = Math.max(
     0,
     PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "movies111")),
