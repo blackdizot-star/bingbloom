@@ -14,7 +14,11 @@ export interface IptvChannel {
   logo?: string;
   group?: string;
   country?: string;
+  kind?: "hls" | "youtube";
+  handle?: string;
+  embedUrl?: string;
 }
+
 
 // Official-logo overrides keyed by lowercased channel-name substring match.
 export const OFFICIAL_LOGOS: Array<{ match: RegExp; url: string }> = [
@@ -181,8 +185,11 @@ export async function fetchIptvChannels(): Promise<IptvChannel[]> {
   // Prepend curated sports channels (deduped by URL) so the page always has a sports lineup.
   const seenUrls = new Set(base.map((c) => c.url));
   const sports = CURATED_SPORTS_CHANNELS.filter((c) => !seenUrls.has(c.url)).map(applyOfficialLogo);
-  return [...sports, ...base];
+  const { buildYouTubeChannels } = await import("./youtubeLive");
+  const yt = buildYouTubeChannels();
+  return [...yt, ...sports, ...base];
 }
+
 
 // thetvapp.to passive embed channel directory
 export interface TvAppChannel {

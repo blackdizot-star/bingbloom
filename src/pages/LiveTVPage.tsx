@@ -7,18 +7,21 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchIptvChannels, type IptvChannel } from "@/lib/iptv";
 import ProgrammeLineup from "@/components/ProgrammeLineup";
 
-// ---- HLS player for IPTV-org streams ----
-const HlsPlayer = ({ src }: { src: string }) => {
+// ---- Unified player: HLS for IPTV, iframe embed for YouTube live ----
+const LiveChannelPlayer = ({ channel }: { channel: IptvChannel }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [error, setError] = useState<string>("");
+  const isYouTube = channel.kind === "youtube";
 
   const proxyUrl = useMemo(() => {
+    if (isYouTube) return "";
     const ref = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    return `https://${ref}.supabase.co/functions/v1/proxy?any=1&url=${encodeURIComponent(src)}`;
-  }, [src]);
+    return `https://${ref}.supabase.co/functions/v1/proxy?any=1&url=${encodeURIComponent(channel.url)}`;
+  }, [channel.url, isYouTube]);
 
   useEffect(() => {
+    if (isYouTube) return;
     const v = videoRef.current;
     if (!v || !proxyUrl) return;
     setError("");
@@ -43,7 +46,7 @@ const HlsPlayer = ({ src }: { src: string }) => {
       hlsRef.current?.destroy();
       hlsRef.current = null;
     };
-  }, [proxyUrl]);
+  }, [proxyUrl, isYouTube]);
 
   const enterFullscreen = async () => {
     const v = videoRef.current as any;
@@ -63,14 +66,31 @@ const HlsPlayer = ({ src }: { src: string }) => {
 
   return (
     <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden">
-      <video
-        ref={videoRef}
-        controls
-        playsInline
-        onDoubleClick={enterFullscreen}
-        className="w-full h-full"
-      />
-      {error && (
+      {/* Channel logo overlay */}
+      {channel.logo && (
+        <div className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur rounded-md p-1.5 border border-white/10">
+          <img src={channel.logo} alt="" className="h-6 max-w-[80px] object-contain" />
+        </div>
+      )}
+      {isYouTube ? (
+        <iframe
+          key={channel.url}
+          src={channel.embedUrl || channel.url}
+          className="absolute inset-0 w-full h-full border-0"
+          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+          allowFullScreen
+          title={channel.name}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          controls
+          playsInline
+          onDoubleClick={enterFullscreen}
+          className="w-full h-full"
+        />
+      )}
+      {error && !isYouTube && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white text-sm px-4 text-center">
           {error}
         </div>
@@ -79,57 +99,74 @@ const HlsPlayer = ({ src }: { src: string }) => {
   );
 };
 
-// Animated CSS globe placeholder used while nothing is playing.
+
+// Full world-map visual with pulsing markers (tvgarden.world-style).
+const WORLD_MARKERS = [
+  { x: 20, y: 42, label: "US" }, { x: 25, y: 38, label: "CA" },
+  { x: 32, y: 60, label: "BR" }, { x: 28, y: 65, label: "AR" },
+  { x: 48, y: 38, label: "GB" }, { x: 51, y: 42, label: "DE" },
+  { x: 50, y: 46, label: "IT" }, { x: 47, y: 44, label: "FR" },
+  { x: 56, y: 48, label: "QA" }, { x: 52, y: 62, label: "NG" },
+  { x: 55, y: 68, label: "ZA" }, { x: 55, y: 58, label: "KE" },
+  { x: 68, y: 50, label: "IN" }, { x: 78, y: 44, label: "JP" },
+  { x: 74, y: 46, label: "CN" }, { x: 85, y: 68, label: "AU" },
+];
+
 const GlobeVisual = () => (
-  <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10"
-    style={{ background: "radial-gradient(ellipse at center, #0b1a2e 0%, #050810 70%, #000 100%)" }}
+  <div
+    className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10"
+    style={{ background: "linear-gradient(180deg,#050b18 0%,#020509 100%)" }}
   >
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div
-        className="relative w-[62%] max-w-[380px] aspect-square rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle at 35% 30%, #1e3a5f 0%, #0f2137 40%, #05101f 75%, #000 100%)",
-          boxShadow:
-            "0 0 60px rgba(59,130,246,0.25), inset -30px -30px 80px rgba(0,0,0,0.85), inset 20px 20px 60px rgba(80,140,220,0.15)",
-          animation: "globe-rot 40s linear infinite",
-        }}
-      >
-        {/* Meridians */}
-        {[0, 30, 60, 90, 120, 150].map((deg) => (
-          <div
-            key={`m-${deg}`}
-            className="absolute inset-0 rounded-full border border-cyan-400/10"
-            style={{ transform: `rotateY(${deg}deg)` }}
-          />
-        ))}
-        {/* Parallels */}
-        {[-60, -30, 0, 30, 60].map((lat) => (
-          <div
-            key={`p-${lat}`}
-            className="absolute left-0 right-0 mx-auto border-t border-cyan-400/10"
-            style={{
-              top: `${50 + lat / 2}%`,
-              height: 1,
-              width: `${Math.cos((lat * Math.PI) / 180) * 100}%`,
-            }}
-          />
-        ))}
-        <div
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{ boxShadow: "inset 0 0 100px rgba(0,0,0,0.6)" }}
-        />
-      </div>
-    </div>
-    <div className="absolute bottom-4 left-0 right-0 text-center">
+    <svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 w-full h-full">
+      <defs>
+        <radialGradient id="glowMap" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stopColor="#0b2545" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#020509" stopOpacity="0" />
+        </radialGradient>
+        <pattern id="dots" width="1" height="1" patternUnits="userSpaceOnUse">
+          <circle cx="0.5" cy="0.5" r="0.18" fill="#1e3a5f" opacity="0.55" />
+        </pattern>
+      </defs>
+      <rect width="100" height="60" fill="url(#glowMap)" />
+      {/* Simplified continents as dot-cloud silhouettes */}
+      <g fill="#1e4d7b" opacity="0.85">
+        {/* N America */}
+        <path d="M12 20 Q18 14 26 16 L30 22 L28 30 L22 38 L14 34 Z" />
+        {/* S America */}
+        <path d="M26 40 L32 42 L34 52 L30 58 L26 56 Z" />
+        {/* Europe */}
+        <path d="M46 20 L54 18 L56 26 L52 30 L46 28 Z" />
+        {/* Africa */}
+        <path d="M48 32 L58 32 L60 46 L54 56 L50 52 Z" />
+        {/* Asia */}
+        <path d="M56 16 L82 14 L88 24 L82 34 L70 34 L62 30 L56 24 Z" />
+        {/* India */}
+        <path d="M66 32 L72 34 L70 42 L66 42 Z" />
+        {/* SE Asia / Indo */}
+        <path d="M76 38 L86 40 L84 46 L78 44 Z" />
+        {/* Australia */}
+        <path d="M82 48 L92 48 L92 56 L84 56 Z" />
+      </g>
+      <rect width="100" height="60" fill="url(#dots)" opacity="0.15" />
+      {WORLD_MARKERS.map((m, i) => (
+        <g key={i}>
+          <circle cx={m.x} cy={m.y} r="0.9" fill="#E50914">
+            <animate attributeName="r" values="0.6;1.6;0.6" dur="2.4s" begin={`${i * 0.15}s`} repeatCount="indefinite" />
+            <animate attributeName="opacity" values="1;0.2;1" dur="2.4s" begin={`${i * 0.15}s`} repeatCount="indefinite" />
+          </circle>
+          <circle cx={m.x} cy={m.y} r="0.4" fill="#fff" opacity="0.9" />
+        </g>
+      ))}
+    </svg>
+    <div className="absolute bottom-3 left-0 right-0 text-center">
       <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur border border-white/10">
         <Globe2 className="w-3.5 h-3.5 text-cyan-300" />
-        <span className="text-[11px] text-white/80 font-semibold">Select a channel to start streaming</span>
+        <span className="text-[11px] text-white/80 font-semibold">Pick a channel to start streaming worldwide</span>
       </div>
     </div>
-    <style>{`@keyframes globe-rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
   </div>
 );
+
 
 interface NumberedChannel extends IptvChannel {
   number: number;
@@ -244,7 +281,7 @@ const LiveTVPage = () => {
                       />
                     </button>
                   </div>
-                  <HlsPlayer src={activeChannel.url} />
+                  <LiveChannelPlayer channel={activeChannel} />
                   <div className="px-1 py-3 flex items-center gap-3 border-b border-white/5">
                     <div className="w-12 h-12 rounded-lg bg-[#1F1F1F] grid place-items-center overflow-hidden flex-shrink-0">
                       {activeChannel.logo ? (
