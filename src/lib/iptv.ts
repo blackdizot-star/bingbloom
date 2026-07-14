@@ -14,7 +14,11 @@ export interface IptvChannel {
   logo?: string;
   group?: string;
   country?: string;
+  kind?: "hls" | "youtube";
+  handle?: string;
+  embedUrl?: string;
 }
+
 
 // Official-logo overrides keyed by lowercased channel-name substring match.
 export const OFFICIAL_LOGOS: Array<{ match: RegExp; url: string }> = [
