@@ -404,7 +404,7 @@ const MoviePlayer = ({
             aria-label="Fullscreen"
             className="grid place-items-center h-7 w-7 rounded-md text-foreground hover:bg-foreground/10 border border-border/60"
           >
-            <Maximize2 className="w-3.5 h-3.5" />
+            <Expand className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
