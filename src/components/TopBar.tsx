@@ -79,8 +79,8 @@ const TopBar = () => {
             <span className="hidden sm:inline text-base font-extrabold text-gradient-bb tracking-tight">BingBloom</span>
           </Link>
 
-          {/* Desktop horizontal nav */}
-          <nav className="hidden md:flex items-center gap-0.5 ml-4 flex-1 overflow-x-auto scrollbar-hide">
+          {/* Desktop horizontal nav — centered */}
+          <nav className="hidden md:flex items-center gap-0.5 mx-auto overflow-x-auto scrollbar-hide">
             {primaryNav.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
@@ -102,7 +102,7 @@ const TopBar = () => {
           {/* Desktop search input */}
           <form
             onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
-            className="hidden md:flex md:ml-auto md:w-64"
+            className="hidden md:flex md:w-56"
           >
             <div className="flex w-full items-center rounded-full bg-secondary/70 px-3 py-1.5 ring-1 ring-transparent focus-within:ring-primary">
               <Search className="mr-2 h-3.5 w-3.5 text-foreground/60" />

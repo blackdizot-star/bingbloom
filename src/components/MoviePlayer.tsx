@@ -4,9 +4,6 @@ import {
   Maximize2,
   WifiOff,
   CloudDownload,
-  Shield,
-  ShieldOff,
-  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { recordStream, getCachedStream } from "@/lib/streamCache";
@@ -57,17 +54,10 @@ interface Props {
   year?: string;
   poster?: string | null;
   backdrop?: string | null;
-  /** Optional episode navigation (TV). If provided, Prev/Next buttons cycle episodes. */
   onPrev?: () => void;
   onNext?: () => void;
-  /** Next item preview shown in bottom-right "Up Next" card. */
   nextItem?: { title: string; poster?: string | null; subtitle?: string } | null;
 }
-
-
-const PREROLL_SECONDS = 0;
-const BLOCKER_STORAGE_KEY = "bb_redirect_blocker";
-const APOLOGY_SESSION_KEY = "bb_player_apology_seen";
 
 const MoviePlayer = ({
   tmdbId,
@@ -84,7 +74,6 @@ const MoviePlayer = ({
   onNext,
   nextItem,
 }: Props) => {
-
   const initialIdx = Math.max(
     0,
     PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "movies111")),
@@ -93,24 +82,7 @@ const MoviePlayer = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [resolvedSrc, setResolvedSrc] = useState<string>("");
-  const [preroll, setPreroll] = useState<number>(PREROLL_SECONDS);
-  const [playing, setPlaying] = useState(true);
-  const [blocker, setBlocker] = useState<boolean>(() => {
-    try {
-      const v = localStorage.getItem(BLOCKER_STORAGE_KEY);
-      // Default to ON unless the user has explicitly disabled it.
-      return v === null ? true : v === "1";
-    } catch {
-      return true;
-    }
-  });
-  const [showApology, setShowApology] = useState<boolean>(() => {
-    try {
-      return sessionStorage.getItem(APOLOGY_SESSION_KEY) !== "1";
-    } catch {
-      return true;
-    }
-  });
+  const [ended, setEnded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -137,11 +109,10 @@ const MoviePlayer = ({
   const server = PLAYER_SERVERS[serverIdx];
   const builtSrc = server.build(tmdbId, type, season, episode);
 
-  // Reset pre-roll whenever a new server/episode is chosen
   useEffect(() => {
-    setPreroll(PREROLL_SECONDS);
     setLoading(true);
     setError(false);
+    setEnded(false);
     setResolvedSrc("");
     let active = true;
     (async () => {
@@ -161,15 +132,8 @@ const MoviePlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [builtSrc]);
 
-  // Pre-roll countdown
   useEffect(() => {
-    if (preroll <= 0) return;
-    const t = setTimeout(() => setPreroll((p) => Math.max(0, p - 1)), 1000);
-    return () => clearTimeout(t);
-  }, [preroll]);
-
-  useEffect(() => {
-    if (!resolvedSrc || preroll > 0) return;
+    if (!resolvedSrc) return;
     clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       setError(true);
@@ -185,7 +149,7 @@ const MoviePlayer = ({
     }, 15000);
     return () => clearTimeout(timerRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolvedSrc, preroll]);
+  }, [resolvedSrc]);
 
   const selectServer = useCallback(
     (idx: number) => {
@@ -217,14 +181,13 @@ const MoviePlayer = ({
     try {
       if (!document.fullscreenElement) {
         await el.requestFullscreen?.();
-        // Lock to landscape on mobile devices for proper video viewing.
         try {
           const orientation = (screen as any).orientation;
           if (orientation && typeof orientation.lock === "function") {
             await orientation.lock("landscape").catch(() => {});
           }
         } catch {
-          /* orientation API not supported */
+          /* ignore */
         }
       } else {
         try {
@@ -236,28 +199,6 @@ const MoviePlayer = ({
       }
     } catch {
       /* fullscreen not permitted */
-    }
-  };
-
-  const toggleBlocker = () => {
-    setBlocker((b) => {
-      const nv = !b;
-      try {
-        localStorage.setItem(BLOCKER_STORAGE_KEY, nv ? "1" : "0");
-      } catch {
-        /* ignore */
-      }
-      return nv;
-    });
-    setResolvedSrc((s) => s);
-  };
-
-  const dismissApology = () => {
-    setShowApology(false);
-    try {
-      sessionStorage.setItem(APOLOGY_SESSION_KEY, "1");
-    } catch {
-      /* ignore */
     }
   };
 
@@ -278,9 +219,23 @@ const MoviePlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Kill TV/WebView auto-scroll when the iframe steals focus after mount.
+  // Listen for postMessage 'ended' events from iframe players
   useEffect(() => {
-    if (preroll > 0 || !resolvedSrc) return;
+    const onMsg = (e: MessageEvent) => {
+      const data = e.data;
+      if (!data) return;
+      const t = typeof data === "string" ? data : data.type || data.event || data.action;
+      if (typeof t === "string" && /ended|complete|finish/i.test(t)) {
+        setEnded(true);
+      }
+    };
+    window.addEventListener("message", onMsg);
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+
+  // Prevent iframe scroll-jack
+  useEffect(() => {
+    if (!resolvedSrc) return;
     const anchorY = window.scrollY;
     let lastUserInput = 0;
     const markUser = () => {
@@ -289,13 +244,11 @@ const MoviePlayer = ({
     window.addEventListener("wheel", markUser, { passive: true });
     window.addEventListener("touchstart", markUser, { passive: true });
     const onScroll = () => {
-      // If a scroll happens without recent user input, snap back.
       if (Date.now() - lastUserInput > 200) {
         window.scrollTo({ top: anchorY, behavior: "auto" });
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    // Focus the wrapper without scrolling to it.
     try {
       containerRef.current?.focus({ preventScroll: true } as FocusOptions);
     } catch {
@@ -312,33 +265,26 @@ const MoviePlayer = ({
       window.removeEventListener("wheel", markUser);
       window.removeEventListener("touchstart", markUser);
     };
-  }, [preroll, resolvedSrc]);
+  }, [resolvedSrc]);
 
-  // Sandbox: strict by default (no top-navigation). Blocker ON strips popups too.
-  const sandboxAttr = blocker
-    ? "allow-scripts allow-same-origin allow-forms"
-    : "allow-scripts allow-same-origin allow-forms allow-popups allow-presentation";
-
-  const currentBadge = server.badge;
-
-  const selectId = useMemo(() => `bb-server-${Math.random().toString(36).slice(2, 8)}`, []);
+  // Blocker default ON — no UI toggle. Strict sandbox strips popups.
+  const sandboxAttr = "allow-scripts allow-same-origin allow-forms";
 
   if (!online && !savedOffline) {
     return (
-      <div className="w-full" style={{ background: "#0A0A0A" }}>
+      <div className="w-full bg-background">
         <div className="relative w-full aspect-video overflow-hidden flex flex-col items-center justify-center gap-3 px-6 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/5">
-            <WifiOff className="h-6 w-6 text-white/70" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/5">
+            <WifiOff className="h-6 w-6 text-foreground/70" />
           </div>
-          <p className="text-white text-sm font-semibold">You're offline</p>
-          <p className="text-white/55 text-xs max-w-xs leading-relaxed">
+          <p className="text-foreground text-sm font-semibold">You're offline</p>
+          <p className="text-muted-foreground text-xs max-w-xs leading-relaxed">
             Connect to the internet to stream this title — or download movies while
             online to watch them anytime, even offline.
           </p>
           <Link
             to="/my-downloads"
-            className="mt-1 inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[11px] font-semibold text-white"
-            style={{ background: "#E50914" }}
+            className="mt-1 inline-flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-[11px] font-semibold text-primary-foreground bg-primary"
           >
             <CloudDownload className="h-3.5 w-3.5" /> Go to Downloads
           </Link>
@@ -348,17 +294,17 @@ const MoviePlayer = ({
   }
 
   return (
-    <div className="w-full" style={{ background: "#0A0A0A" }}>
+    <div className="w-full bg-background">
       <div
         ref={containerRef}
         tabIndex={-1}
-        className="relative w-full aspect-video overflow-hidden bb-player-shell outline-none"
+        className="relative w-full aspect-video overflow-hidden bb-player-shell outline-none bg-black"
         style={{ contain: "layout paint" }}
       >
-        {resolvedSrc && preroll <= 0 && (
+        {resolvedSrc && (
           <iframe
             ref={iframeRef}
-            key={`${resolvedSrc}::${blocker ? "b1" : "b0"}`}
+            key={resolvedSrc}
             src={resolvedSrc}
             className="absolute inset-0 w-full h-full"
             onLoad={handleLoad}
@@ -371,44 +317,12 @@ const MoviePlayer = ({
           />
         )}
 
-        {/* 5s pre-roll notice */}
-        {preroll > 0 && (
-          <div
-            className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 px-6 text-center"
-            style={{ background: "rgba(0,0,0,0.92)" }}
-          >
-            <div
-              className="grid place-items-center h-12 w-12 rounded-full"
-              style={{ background: "rgba(229,9,20,0.15)", border: "1px solid rgba(229,9,20,0.4)" }}
-            >
-              <span className="text-white font-bold text-lg">{preroll}</span>
-            </div>
-            <p className="text-white text-[12.5px] font-semibold max-w-sm leading-snug">
-              We've added more streaming sources
-            </p>
-            <p className="text-white/65 text-[11px] max-w-sm leading-relaxed">
-              A few sources may still try to redirect. Please bear with us while
-              we lock them down. Starting in {preroll}s…
-            </p>
-            <button
-              onClick={() => setPreroll(0)}
-              className="mt-1 rounded-md px-3 py-1.5 text-[11px] font-semibold text-white"
-              style={{ background: "#E50914" }}
-            >
-              Skip
-            </button>
-          </div>
-        )}
-
-        {loading && !error && preroll <= 0 && (
+        {loading && !error && (
           <PlayerBrandLoader variant="loading" label={`Loading ${server.label}…`} />
         )}
 
         {error && (
-          <div
-            className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 px-6 text-center"
-            style={{ background: "#0A0A0A" }}
-          >
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 px-6 text-center bg-black">
             <img
               src="/logo-compact.png"
               alt="BingBloom"
@@ -420,73 +334,24 @@ const MoviePlayer = ({
             </p>
             <button
               onClick={() => selectServer(serverIdx + 1)}
-              className="flex items-center gap-1.5 text-white text-[11px] px-3 py-1.5 rounded-md font-semibold pointer-events-auto"
-              style={{ background: "#E50914" }}
+              className="flex items-center gap-1.5 text-white text-[11px] px-3 py-1.5 rounded-md font-semibold pointer-events-auto bg-primary"
             >
               <RefreshCw className="w-3 h-3" /> Try next server
             </button>
           </div>
         )}
 
-        {/* One-time apology popup */}
-        {showApology && preroll <= 0 && (
-          <div className="absolute bottom-3 left-3 right-3 z-40 flex items-start gap-2 rounded-lg p-2.5 pointer-events-auto"
-            style={{ background: "rgba(10,10,10,0.95)", border: "1px solid rgba(229,9,20,0.4)" }}>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-[11px] font-semibold">We're sorry for occasional redirects</p>
-              <p className="text-white/65 text-[10px] leading-snug mt-0.5">
-                We've expanded to more sources. Some may still redirect — we're actively working on it.
-              </p>
-            </div>
-            <button
-              onClick={dismissApology}
-              className="text-white text-[10.5px] font-semibold px-2 py-1 rounded-md"
-              style={{ background: "#E50914" }}
-            >
-              Got it
-            </button>
-            <button onClick={dismissApology} className="p-1 text-white/60 hover:text-white">
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-        )}
-
-        <div className="absolute top-2 right-2 z-30 flex items-center gap-1.5 pointer-events-auto">
-          <button
-            onClick={toggleBlocker}
-            title={blocker ? "Redirect Blocker: ON" : "Redirect Blocker: OFF"}
-            className="flex items-center gap-1 p-1.5 rounded-md text-white backdrop-blur-md text-[10px] font-semibold"
-            style={{
-              background: blocker ? "rgba(229,9,20,0.75)" : "rgba(0,0,0,0.55)",
-              border: "1px solid rgba(255,255,255,0.15)",
-            }}
-          >
-            {blocker ? <Shield className="w-3 h-3" /> : <ShieldOff className="w-3 h-3" />}
-            <span className="hidden sm:inline">Blocker {blocker ? "ON" : "OFF"}</span>
-          </button>
-          <button
-            onClick={toggleFullscreen}
-            title="Fullscreen"
-            className="p-1.5 rounded-md text-white backdrop-blur-md"
-            style={{ background: "rgba(0,0,0,0.55)" }}
-          >
-            <Maximize2 className="w-3 h-3" />
-          </button>
-        </div>
-
-        {/* Up Next card (bottom-right) */}
-        {nextItem && onNext && preroll <= 0 && (
+        {/* Up Next card — only shows once we detect the video actually ended */}
+        {ended && nextItem && onNext && (
           <UpNextCard item={nextItem} onNext={onNext} />
         )}
       </div>
 
-
-      {/* Compact source toggle */}
+      {/* Single-row toolbar: Source pills + Download + Fullscreen */}
       <div
-        className="flex items-center gap-2 px-3 py-1.5"
-        style={{ background: "#0A0A0A", borderTop: "1px solid rgba(255,255,255,0.05)" }}
+        className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap"
       >
-        <span className="text-[9px] uppercase tracking-wider text-white/45 font-semibold">
+        <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
           Source
         </span>
         <div className="flex gap-1">
@@ -497,19 +362,19 @@ const MoviePlayer = ({
               <button
                 key={s.id}
                 onClick={() => selectServer(i)}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white transition focus:outline-none"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-foreground transition focus:outline-none"
                 style={{
                   background: active
                     ? isFast
                       ? "rgba(34,197,94,0.25)"
                       : "rgba(229,9,20,0.25)"
-                    : "rgba(255,255,255,0.06)",
+                    : "rgba(127,127,127,0.12)",
                   border: `1px solid ${
                     active
                       ? isFast
                         ? "rgba(34,197,94,0.6)"
                         : "rgba(229,9,20,0.6)"
-                      : "rgba(255,255,255,0.1)"
+                      : "rgba(127,127,127,0.2)"
                   }`,
                 }}
               >
@@ -518,36 +383,35 @@ const MoviePlayer = ({
             );
           })}
         </div>
-      </div>
 
-      {title && (
-        <div
-          className="flex items-center gap-2 px-3 py-2"
-          style={{ background: "#0A0A0A", borderTop: "1px solid rgba(255,255,255,0.05)" }}
-        >
-          <CloudDownload className="w-3.5 h-3.5 text-amber-400" />
-          <span className="text-[10.5px] text-white/55 flex-1">
-            Save this {type === "tv" ? "episode" : "movie"} for offline viewing
-          </span>
-          <DownloadButton
-            size="sm"
-            type={type}
-            tmdbId={tmdbId}
-            title={title}
-            year={year}
-            poster={poster}
-            backdrop={backdrop}
-            season={type === "tv" ? season : undefined}
-            episode={type === "tv" ? episode : undefined}
-          />
+        <div className="flex items-center gap-1.5 ml-auto">
+          {title && (
+            <DownloadButton
+              size="sm"
+              type={type}
+              tmdbId={tmdbId}
+              title={title}
+              year={year}
+              poster={poster}
+              backdrop={backdrop}
+              season={type === "tv" ? season : undefined}
+              episode={type === "tv" ? episode : undefined}
+            />
+          )}
+          <button
+            onClick={toggleFullscreen}
+            title="Fullscreen (F)"
+            aria-label="Fullscreen"
+            className="grid place-items-center h-7 w-7 rounded-md text-foreground hover:bg-foreground/10 border border-border/60"
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-// Up Next floating card with 5s auto-play countdown that starts when the user
-// clicks "Start countdown" (iframe players can't broadcast `ended` reliably).
 const UpNextCard = ({
   item,
   onNext,
@@ -555,19 +419,17 @@ const UpNextCard = ({
   item: { title: string; poster?: string | null; subtitle?: string };
   onNext: () => void;
 }) => {
-  const [counting, setCounting] = useState(false);
   const [n, setN] = useState(5);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    if (!counting) return;
     if (n <= 0) {
       onNext();
       return;
     }
     const t = setTimeout(() => setN((v) => v - 1), 1000);
     return () => clearTimeout(t);
-  }, [counting, n, onNext]);
+  }, [n, onNext]);
 
   if (dismissed) return null;
 
@@ -580,25 +442,21 @@ const UpNextCard = ({
         <img src={item.poster} alt="" className="w-10 h-14 rounded object-cover flex-shrink-0" />
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-bold uppercase tracking-wider text-[#E50914]">Up Next</p>
+        <p className="text-[9px] font-bold uppercase tracking-wider text-[#E50914]">Up Next in {n}s</p>
         <p className="text-[11px] font-semibold text-white truncate">{item.title}</p>
         {item.subtitle && <p className="text-[9px] text-white/50 truncate">{item.subtitle}</p>}
         <div className="flex gap-1 mt-1">
           <button
-            onClick={() => (counting ? onNext() : setCounting(true))}
-            className="text-[9.5px] font-semibold text-white px-2 py-0.5 rounded"
-            style={{ background: "#E50914" }}
+            onClick={() => onNext()}
+            className="text-[9.5px] font-semibold text-white px-2 py-0.5 rounded bg-primary"
           >
-            {counting ? `Playing in ${n}s — Play now` : "Play next"}
+            Play now
           </button>
           <button
-            onClick={() => {
-              setCounting(false);
-              setDismissed(true);
-            }}
+            onClick={() => setDismissed(true)}
             className="text-[9.5px] text-white/70 px-1.5 py-0.5"
           >
-            ✕
+            Cancel
           </button>
         </div>
       </div>
@@ -607,4 +465,3 @@ const UpNextCard = ({
 };
 
 export default MoviePlayer;
-
