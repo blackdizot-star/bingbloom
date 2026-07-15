@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   RefreshCw,
-  Maximize2,
+  Expand,
   WifiOff,
   CloudDownload,
 } from "lucide-react";
