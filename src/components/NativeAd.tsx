@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const ROTATE_MS = 30_000;
-const REFILL_CHECK_MS = 8_000;
+const ROTATE_MS = 5_000;
+const REFILL_CHECK_MS = 3_000;
 
 const AD_KEY = "0d460b18275609106dbf608190ecb46b";
 const AD_KEY_ALT = "2a559855d3a6c946481e0f960f0cf064";
