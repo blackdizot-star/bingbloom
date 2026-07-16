@@ -77,7 +77,16 @@ const MoviePlayer = ({
   const isBrokenCachedSource = (url: string) => {
     try {
       const host = new URL(url).hostname.replace(/^www\./, "");
-      return host === "111movies.com" || host === "111movies.net" || host === "player.vidlove.cc";
+      return (
+        host === "111movies.com" ||
+        host === "111movies.net" ||
+        host === "player.vidlove.cc" ||
+        host === "vidsrc.to" ||
+        host === "vidsrc.net" ||
+        host === "vidsrc.xyz" ||
+        host === "player.smashystream.com" ||
+        host === "smashystream.com"
+      );
     } catch {
       return true;
     }
