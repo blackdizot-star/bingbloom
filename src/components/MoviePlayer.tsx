@@ -29,8 +29,8 @@ export const PLAYER_SERVERS: ServerDef[] = [
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://111movies.net/tv/${id}/${s}/${e}`
-        : `https://111movies.net/movie/${id}`,
+        ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
+        : `https://vidsrc.to/embed/movie/${id}`,
   },
   {
     id: "smashystream",
@@ -74,6 +74,15 @@ const MoviePlayer = ({
   onNext,
   nextItem,
 }: Props) => {
+  const isBrokenCachedSource = (url: string) => {
+    try {
+      const host = new URL(url).hostname.replace(/^www\./, "");
+      return host === "111movies.com" || host === "111movies.net" || host === "player.vidlove.cc";
+    } catch {
+      return true;
+    }
+  };
+
   const initialIdx = Math.max(
     0,
     PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "movies111")),
@@ -124,7 +133,7 @@ const MoviePlayer = ({
         type === "tv" ? episode : undefined,
       );
       if (!active) return;
-      setResolvedSrc(cached?.url || builtSrc);
+      setResolvedSrc(cached && !isBrokenCachedSource(cached.url) ? cached.url : builtSrc);
     })();
     return () => {
       active = false;
