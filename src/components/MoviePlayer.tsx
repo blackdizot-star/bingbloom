@@ -29,8 +29,8 @@ export const PLAYER_SERVERS: ServerDef[] = [
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://111movies.net/tv/${id}/${s}/${e}`
-        : `https://111movies.net/movie/${id}`,
+        ? `https://111movies.com/tv/${id}/${s}/${e}`
+        : `https://111movies.com/movie/${id}`,
   },
   {
     id: "smashystream",
