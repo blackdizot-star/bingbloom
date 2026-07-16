@@ -78,14 +78,12 @@ const MoviePlayer = ({
     try {
       const host = new URL(url).hostname.replace(/^www\./, "");
       return (
-        host === "111movies.com" ||
-        host === "111movies.net" ||
-        host === "player.vidlove.cc" ||
         host === "vidsrc.to" ||
         host === "vidsrc.net" ||
         host === "vidsrc.xyz" ||
-        host === "player.smashystream.com" ||
-        host === "smashystream.com"
+        host === "vidlink.pro" ||
+        host === "vidfast.pro" ||
+        host === "vidfast.vc"
       );
     } catch {
       return true;
