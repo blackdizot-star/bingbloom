@@ -66,10 +66,10 @@ Deno.serve(async (req) => {
         }
       }
     }
-    const body = await upstream.text();
+    const body = await upstream!.text();
 
     return new Response(body, {
-      status: upstream.status,
+      status: upstream!.status,
       headers: {
         ...corsHeaders,
         "Content-Type": upstream.headers.get("content-type") || "application/json",
