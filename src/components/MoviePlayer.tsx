@@ -29,8 +29,8 @@ export const PLAYER_SERVERS: ServerDef[] = [
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}`
-        : `https://vidsrc.to/embed/movie/${id}`,
+        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
+        : `https://vidlink.pro/movie/${id}`,
   },
   {
     id: "smashystream",
@@ -38,8 +38,8 @@ export const PLAYER_SERVERS: ServerDef[] = [
     badge: "HD",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
+        ? `https://vidfast.pro/tv/${id}/${s}/${e}`
+        : `https://vidfast.pro/movie/${id}`,
   },
 ];
 
@@ -77,7 +77,16 @@ const MoviePlayer = ({
   const isBrokenCachedSource = (url: string) => {
     try {
       const host = new URL(url).hostname.replace(/^www\./, "");
-      return host === "111movies.com" || host === "111movies.net" || host === "player.vidlove.cc";
+      return (
+        host === "111movies.com" ||
+        host === "111movies.net" ||
+        host === "player.vidlove.cc" ||
+        host === "vidsrc.to" ||
+        host === "vidsrc.net" ||
+        host === "vidsrc.xyz" ||
+        host === "player.smashystream.com" ||
+        host === "smashystream.com"
+      );
     } catch {
       return true;
     }
