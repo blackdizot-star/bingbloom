@@ -25,21 +25,21 @@ export type ServerId = "movies111" | "smashystream";
 export const PLAYER_SERVERS: ServerDef[] = [
   {
     id: "movies111",
-    label: "Fast Stream",
+    label: "111 Movies",
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
-        : `https://vidlink.pro/movie/${id}`,
+        ? `https://111movies.com/tv/${id}/${s}/${e}`
+        : `https://111movies.com/movie/${id}`,
   },
   {
     id: "smashystream",
-    label: "HD Stream",
+    label: "Smashy Stream",
     badge: "HD",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://vidfast.pro/tv/${id}/${s}/${e}`
-        : `https://vidfast.pro/movie/${id}`,
+        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
+        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
   },
 ];
 
