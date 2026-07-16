@@ -34,7 +34,27 @@ Deno.serve(async (req) => {
     if (!params.has("language")) params.set("language", "en-US");
 
     const target = `${TMDB_BASE}${path}?${params.toString()}`;
-    const upstream = await fetch(target, { headers: { Accept: "application/json" } });
+
+    const fetchWithTimeout = async (ms: number) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), ms);
+      try {
+        return await fetch(target, {
+          headers: { Accept: "application/json" },
+          signal: ctrl.signal,
+        });
+      } finally {
+        clearTimeout(t);
+      }
+    };
+
+    let upstream: Response;
+    try {
+      upstream = await fetchWithTimeout(8000);
+    } catch {
+      // one quick retry on timeout / network blip
+      upstream = await fetchWithTimeout(8000);
+    }
     const body = await upstream.text();
 
     return new Response(body, {
