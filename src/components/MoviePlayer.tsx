@@ -25,21 +25,21 @@ export type ServerId = "movies111" | "smashystream";
 export const PLAYER_SERVERS: ServerDef[] = [
   {
     id: "movies111",
-    label: "Fast Stream",
+    label: "111 Movies",
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
-        : `https://vidlink.pro/movie/${id}`,
+        ? `https://111movies.com/tv/${id}/${s}/${e}`
+        : `https://111movies.com/movie/${id}`,
   },
   {
     id: "smashystream",
-    label: "HD Stream",
+    label: "Smashy Stream",
     badge: "HD",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://vidfast.pro/tv/${id}/${s}/${e}`
-        : `https://vidfast.pro/movie/${id}`,
+        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
+        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
   },
 ];
 
@@ -78,14 +78,12 @@ const MoviePlayer = ({
     try {
       const host = new URL(url).hostname.replace(/^www\./, "");
       return (
-        host === "111movies.com" ||
-        host === "111movies.net" ||
-        host === "player.vidlove.cc" ||
         host === "vidsrc.to" ||
         host === "vidsrc.net" ||
         host === "vidsrc.xyz" ||
-        host === "player.smashystream.com" ||
-        host === "smashystream.com"
+        host === "vidlink.pro" ||
+        host === "vidfast.pro" ||
+        host === "vidfast.vc"
       );
     } catch {
       return true;
