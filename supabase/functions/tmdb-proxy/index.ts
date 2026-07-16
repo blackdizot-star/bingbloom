@@ -34,42 +34,11 @@ Deno.serve(async (req) => {
     if (!params.has("language")) params.set("language", "en-US");
 
     const target = `${TMDB_BASE}${path}?${params.toString()}`;
-
-    const fetchWithTimeout = async (ms: number) => {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), ms);
-      try {
-        return await fetch(target, {
-          headers: { Accept: "application/json" },
-          signal: ctrl.signal,
-        });
-      } finally {
-        clearTimeout(t);
-      }
-    };
-
-    let upstream: Response | null = null;
-    for (let attempt = 0; attempt < 3 && !upstream; attempt++) {
-      try {
-        upstream = await fetchWithTimeout(15000);
-      } catch (err) {
-        if (attempt === 2) {
-          // Final attempt failed — return empty-but-valid TMDB-shaped payload
-          // so the client renders instead of showing an error screen.
-          const fallback = path.includes("/recommendations") || path.includes("/similar")
-            ? { page: 1, results: [], total_pages: 0, total_results: 0 }
-            : { error: "TMDB unavailable", fallback: true };
-          return new Response(JSON.stringify(fallback), {
-            status: 200,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      }
-    }
-    const body = await upstream!.text();
+    const upstream = await fetch(target, { headers: { Accept: "application/json" } });
+    const body = await upstream.text();
 
     return new Response(body, {
-      status: upstream!.status,
+      status: upstream.status,
       headers: {
         ...corsHeaders,
         "Content-Type": upstream.headers.get("content-type") || "application/json",

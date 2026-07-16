@@ -25,7 +25,7 @@ export type ServerId = "movies111" | "smashystream";
 export const PLAYER_SERVERS: ServerDef[] = [
   {
     id: "movies111",
-    label: "111 Movies",
+    label: "Fast Stream",
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
@@ -34,12 +34,12 @@ export const PLAYER_SERVERS: ServerDef[] = [
   },
   {
     id: "smashystream",
-    label: "Smashy Stream",
+    label: "HD Stream",
     badge: "HD",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://embed.smashystream.com/playere.php?tmdb=${id}`,
+        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
+        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
   },
 ];
 
@@ -74,22 +74,6 @@ const MoviePlayer = ({
   onNext,
   nextItem,
 }: Props) => {
-  const isBrokenCachedSource = (url: string) => {
-    try {
-      const host = new URL(url).hostname.replace(/^www\./, "");
-      return (
-        host === "vidsrc.to" ||
-        host === "vidsrc.net" ||
-        host === "vidsrc.xyz" ||
-        host === "vidlink.pro" ||
-        host === "vidfast.pro" ||
-        host === "vidfast.vc"
-      );
-    } catch {
-      return true;
-    }
-  };
-
   const initialIdx = Math.max(
     0,
     PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "movies111")),
@@ -140,7 +124,7 @@ const MoviePlayer = ({
         type === "tv" ? episode : undefined,
       );
       if (!active) return;
-      setResolvedSrc(cached && !isBrokenCachedSource(cached.url) ? cached.url : builtSrc);
+      setResolvedSrc(cached?.url || builtSrc);
     })();
     return () => {
       active = false;
