@@ -1,11 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   RefreshCw,
   Expand,
   WifiOff,
   CloudDownload,
-  Shield,
-  ShieldOff,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { recordStream, getCachedStream } from "@/lib/streamCache";
@@ -17,59 +15,31 @@ import PlayerBrandLoader from "@/components/PlayerBrandLoader";
 interface ServerDef {
   id: ServerId;
   label: string;
-  badge?: "Fast" | "HD" | "New" | "Alt";
-  // Per-source sandbox rules — some providers need popups allowed to play,
-  // others work best when locked down.
-  sandbox: string;
+  badge?: "Fast" | "HD" | "New";
   build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
 }
 
-export type ServerId = "smashystream" | "movies111" | "vidsrc" | "vidfast";
+export type ServerId = "movies111" | "smashystream";
 
-// Four curated sources. HD is default. Each uses its own iframe sandbox
-// so quirky providers still play.
+// Only two curated sources: 111Movies (Fast) and SmashyStream (HD).
 export const PLAYER_SERVERS: ServerDef[] = [
-  {
-    id: "smashystream",
-    label: "HD Stream",
-    badge: "HD",
-    sandbox: "allow-scripts allow-same-origin allow-forms allow-presentation",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
-  },
   {
     id: "movies111",
     label: "Fast Stream",
     badge: "Fast",
-    // 111movies needs popups + orientation to bootstrap its player.
-    sandbox:
-      "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-orientation-lock",
     build: (id, type, s, e) =>
       type === "tv"
         ? `https://111movies.com/tv/${id}/${s}/${e}`
         : `https://111movies.com/movie/${id}`,
   },
   {
-    id: "vidsrc",
-    label: "VidSrc",
-    badge: "Alt",
-    sandbox: "allow-scripts allow-same-origin allow-forms allow-presentation",
+    id: "smashystream",
+    label: "HD Stream",
+    badge: "HD",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
-  },
-  {
-    id: "vidfast",
-    label: "VidFast",
-    badge: "New",
-    sandbox: "allow-scripts allow-same-origin allow-forms allow-presentation",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://vidfast.pro/tv/${id}/${s}/${e}?autoPlay=true`
-        : `https://vidfast.pro/movie/${id}?autoPlay=true`,
+        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
+        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
   },
 ];
 
@@ -106,15 +76,13 @@ const MoviePlayer = ({
 }: Props) => {
   const initialIdx = Math.max(
     0,
-    PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "smashystream")),
+    PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "movies111")),
   );
   const [serverIdx, setServerIdx] = useState(initialIdx === -1 ? 0 : initialIdx);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [resolvedSrc, setResolvedSrc] = useState<string>("");
   const [ended, setEnded] = useState(false);
-  const [blockerOn, setBlockerOn] = useState(true);
-  const [showBlockerTip, setShowBlockerTip] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -138,12 +106,6 @@ const MoviePlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverId]);
 
-  // Auto-hide the blocker tip after 8s
-  useEffect(() => {
-    const t = setTimeout(() => setShowBlockerTip(false), 8000);
-    return () => clearTimeout(t);
-  }, []);
-
   const server = PLAYER_SERVERS[serverIdx];
   const builtSrc = server.build(tmdbId, type, season, episode);
 
@@ -162,15 +124,7 @@ const MoviePlayer = ({
         type === "tv" ? episode : undefined,
       );
       if (!active) return;
-      const cachedUrl = cached?.url;
-      const sameHost = (() => {
-        try {
-          return cachedUrl && new URL(cachedUrl).host === new URL(builtSrc).host;
-        } catch {
-          return false;
-        }
-      })();
-      setResolvedSrc(sameHost ? cachedUrl! : builtSrc);
+      setResolvedSrc(cached?.url || builtSrc);
     })();
     return () => {
       active = false;
@@ -248,6 +202,7 @@ const MoviePlayer = ({
     }
   };
 
+  // Keyboard shortcuts: F fullscreen, Esc exit.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
@@ -264,6 +219,7 @@ const MoviePlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Listen for postMessage 'ended' events from iframe players
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
       const data = e.data;
@@ -277,6 +233,7 @@ const MoviePlayer = ({
     return () => window.removeEventListener("message", onMsg);
   }, []);
 
+  // Prevent iframe scroll-jack
   useEffect(() => {
     if (!resolvedSrc) return;
     const anchorY = window.scrollY;
@@ -310,15 +267,8 @@ const MoviePlayer = ({
     };
   }, [resolvedSrc]);
 
-  // Sandbox is per-source. When blocker is ON, strip popup permissions to
-  // prevent redirects. When OFF, allow the provider's native behavior so
-  // stubborn embeds (e.g. 111movies) can actually play.
-  const sandboxAttr = blockerOn
-    ? server.sandbox
-        .split(" ")
-        .filter((t) => !t.startsWith("allow-popups") && t !== "allow-top-navigation")
-        .join(" ")
-    : `${server.sandbox} allow-popups allow-popups-to-escape-sandbox`;
+  // Blocker default ON — no UI toggle. Strict sandbox strips popups.
+  const sandboxAttr = "allow-scripts allow-same-origin allow-forms";
 
   if (!online && !savedOffline) {
     return (
@@ -354,7 +304,7 @@ const MoviePlayer = ({
         {resolvedSrc && (
           <iframe
             ref={iframeRef}
-            key={`${resolvedSrc}-${blockerOn ? "on" : "off"}`}
+            key={resolvedSrc}
             src={resolvedSrc}
             className="absolute inset-0 w-full h-full"
             onLoad={handleLoad}
@@ -391,57 +341,41 @@ const MoviePlayer = ({
           </div>
         )}
 
-        {/* Blocker instruction tip — appears briefly on load */}
-        {showBlockerTip && !error && (
-          <div
-            className="absolute top-2 left-2 right-2 z-30 flex items-start gap-2 rounded-lg px-3 py-2 text-[10.5px] text-white pointer-events-auto"
-            style={{ background: "rgba(10,10,10,0.85)", border: "1px solid rgba(229,9,20,0.55)", backdropFilter: "blur(6px)" }}
-          >
-            <Shield className="h-3.5 w-3.5 text-[#22c55e] flex-shrink-0 mt-0.5" />
-            <p className="leading-snug flex-1">
-              <span className="font-semibold">Ad blocker is ON</span> — keep it on to
-              avoid redirects. If the video won't play, tap the shield to turn it
-              OFF, then back ON once playing.
-            </p>
-            <button
-              onClick={() => setShowBlockerTip(false)}
-              className="text-white/60 text-[10px] font-semibold px-1"
-              aria-label="Dismiss"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
+        {/* Up Next card — only shows once we detect the video actually ended */}
         {ended && nextItem && onNext && (
           <UpNextCard item={nextItem} onNext={onNext} />
         )}
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
+      {/* Single-row toolbar: Source pills + Download + Fullscreen */}
+      <div
+        className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap"
+      >
         <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
           Source
         </span>
-        <div className="flex gap-1 flex-wrap">
+        <div className="flex gap-1">
           {PLAYER_SERVERS.map((s, i) => {
             const active = i === serverIdx;
-            const color =
-              s.badge === "HD"
-                ? "rgba(229,9,20,"
-                : s.badge === "Fast"
-                  ? "rgba(34,197,94,"
-                  : s.badge === "New"
-                    ? "rgba(59,130,246,"
-                    : "rgba(234,179,8,";
+            const isFast = s.badge === "Fast";
             return (
               <button
                 key={s.id}
                 onClick={() => selectServer(i)}
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-foreground transition focus:outline-none"
                 style={{
-                  background: active ? `${color}0.25)` : "rgba(127,127,127,0.12)",
-                  border: `1px solid ${active ? `${color}0.6)` : "rgba(127,127,127,0.2)"}`,
+                  background: active
+                    ? isFast
+                      ? "rgba(34,197,94,0.25)"
+                      : "rgba(229,9,20,0.25)"
+                    : "rgba(127,127,127,0.12)",
+                  border: `1px solid ${
+                    active
+                      ? isFast
+                        ? "rgba(34,197,94,0.6)"
+                        : "rgba(229,9,20,0.6)"
+                      : "rgba(127,127,127,0.2)"
+                  }`,
                 }}
               >
                 {s.label}
@@ -451,23 +385,6 @@ const MoviePlayer = ({
         </div>
 
         <div className="flex items-center gap-1.5 ml-auto">
-          <button
-            onClick={() => {
-              setBlockerOn((v) => !v);
-              setShowBlockerTip(false);
-            }}
-            title={blockerOn ? "Ad blocker ON — tap to disable" : "Ad blocker OFF — tap to enable"}
-            aria-label="Toggle ad blocker"
-            className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-[10px] font-semibold border transition"
-            style={{
-              background: blockerOn ? "rgba(34,197,94,0.18)" : "rgba(234,179,8,0.18)",
-              borderColor: blockerOn ? "rgba(34,197,94,0.55)" : "rgba(234,179,8,0.55)",
-              color: blockerOn ? "#22c55e" : "#eab308",
-            }}
-          >
-            {blockerOn ? <Shield className="w-3 h-3" /> : <ShieldOff className="w-3 h-3" />}
-            {blockerOn ? "Blocker: ON" : "Blocker: OFF"}
-          </button>
           {title && (
             <DownloadButton
               size="sm"
