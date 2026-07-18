@@ -29,8 +29,8 @@ export const PLAYER_SERVERS: ServerDef[] = [
     badge: "Fast",
     build: (id, type, s, e) =>
       type === "tv"
-        ? `https://111movies.com/tv/${id}/${s}/${e}`
-        : `https://111movies.com/movie/${id}`,
+        ? `https://vidlink.pro/tv/${id}/${s}/${e}`
+        : `https://vidlink.pro/movie/${id}`,
   },
   {
     id: "smashystream",
@@ -124,7 +124,17 @@ const MoviePlayer = ({
         type === "tv" ? episode : undefined,
       );
       if (!active) return;
-      setResolvedSrc(cached?.url || builtSrc);
+      // Prefer the freshly-built URL when the cached URL points to a different
+      // host than the current server build (e.g. after we switched providers).
+      const cachedUrl = cached?.url;
+      const sameHost = (() => {
+        try {
+          return cachedUrl && new URL(cachedUrl).host === new URL(builtSrc).host;
+        } catch {
+          return false;
+        }
+      })();
+      setResolvedSrc(sameHost ? cachedUrl! : builtSrc);
     })();
     return () => {
       active = false;
