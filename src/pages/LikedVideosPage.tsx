@@ -9,7 +9,7 @@ const LikedVideosPage = () => {
 
   return (
     <AppLayout>
-      <SEO title="Liked Videos – BingBloom" description="Videos you've liked on BingBloom — all your favourites in one place." />
+      <SEO title="Liked Videos – MovieNoir" description="Videos you've liked on MovieNoir — all your favourites in one place." />
       <div className="px-6 pt-6 pb-4">
         <h1 className="text-2xl font-bold text-foreground mb-1">Liked Videos</h1>
         <p className="text-sm text-muted-foreground">

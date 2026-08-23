@@ -9,7 +9,7 @@ const COLS = [
       { label: "Investor Relations", to: "/investors" },
       { label: "Jobs", to: "/jobs" },
       { label: "Media Center", to: "/media" },
-      { label: "Only on BingBloom", to: "/only-on-bingbloom" },
+      { label: "Only on MovieNoir", to: "/only-on-bingbloom" },
     ],
   },
   {
@@ -80,10 +80,10 @@ const Footer = () => (
       </div>
 
       <p className="mt-5 text-[10.5px] text-white/45">
-        BingBloom Inc. · 811 Grand St, Alameda, CA 94501, USA
+        MovieNoir Inc. · 811 Grand St, Alameda, CA 94501, USA
       </p>
       <p className="mt-1 text-[10.5px] text-white/40">
-        © {new Date().getFullYear()} BingBloom Inc. All rights reserved. Stream. Discover. Bloom.
+        © {new Date().getFullYear()} MovieNoir Inc. All rights reserved. Stream. Discover. Bloom.
       </p>
     </div>
   </footer>

@@ -15,11 +15,11 @@ const QuickAnswers = ({ title, year, runtime, rating, cast }: QuickAnswersProps)
   const items = [
     {
       q: `Where can I watch ${title} for free?`,
-      a: `You can watch ${title} for free on BingBloom — no subscription, no sign-up required. Press the Watch Now button above to start streaming.`,
+      a: `You can watch ${title} for free on MovieNoir — no subscription, no sign-up required. Press the Watch Now button above to start streaming.`,
     },
     {
       q: `Is ${title} on Netflix or other paid services?`,
-      a: `Availability on paid services changes frequently. ${title} is available right now on BingBloom for free, so you can skip the subscription juggle.`,
+      a: `Availability on paid services changes frequently. ${title} is available right now on MovieNoir for free, so you can skip the subscription juggle.`,
     },
     {
       q: `Who is in the cast of ${title}?`,

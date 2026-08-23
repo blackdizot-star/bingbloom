@@ -12,7 +12,7 @@ const BlogPost = () => {
   if (!post) {
     return (
       <AppLayout>
-        <SEO title="Post not found – BingBloom Blog" noindex />
+        <SEO title="Post not found – MovieNoir Blog" noindex />
         <div className="max-w-2xl mx-auto px-4 py-16 text-center">
           <h1 className="text-xl font-bold text-foreground mb-3">Post not found</h1>
           <Link to="/blog" className="text-primary text-sm font-semibold">← Back to blog</Link>
@@ -24,7 +24,7 @@ const BlogPost = () => {
   return (
     <AppLayout>
       <SEO
-        title={`${post.title} | BingBloom Blog`}
+        title={`${post.title} | MovieNoir Blog`}
         description={post.excerpt}
         type="article"
         image={post.cover}

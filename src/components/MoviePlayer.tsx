@@ -1,47 +1,21 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import {
-  RefreshCw,
-  Expand,
-  WifiOff,
-  CloudDownload,
-} from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { RefreshCw, Expand, WifiOff, CloudDownload } from "lucide-react";
 import { Link } from "react-router-dom";
-import { recordStream, getCachedStream } from "@/lib/streamCache";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
+import {
+  resolveMovieboxDownloads,
+  movieboxProxyUrl,
+  type MovieboxDownload,
+} from "@/lib/moviebox";
 
-interface ServerDef {
-  id: ServerId;
-  label: string;
-  badge?: "Fast" | "HD" | "New";
-  build: (tmdbId: string, type: "movie" | "tv", season?: number, episode?: number) => string;
-}
+// Single source: MovieBox (the first download source) is used directly as the
+// stream URL for the video player.
+export type ServerId = "moviebox";
 
-export type ServerId = "movies111" | "smashystream";
-
-// Only two curated sources: 111Movies (Fast) and SmashyStream (HD).
-export const PLAYER_SERVERS: ServerDef[] = [
-  {
-    id: "movies111",
-    label: "Fast Stream",
-    badge: "Fast",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://111movies.com/tv/${id}/${s}/${e}`
-        : `https://111movies.com/movie/${id}`,
-  },
-  {
-    id: "smashystream",
-    label: "HD Stream",
-    badge: "HD",
-    build: (id, type, s, e) =>
-      type === "tv"
-        ? `https://player.smashystream.com/playere.php?tmdb=${id}&season=${s}&episode=${e}`
-        : `https://player.smashystream.com/playere.php?tmdb=${id}`,
-  },
-];
+export const PLAYER_SERVERS = [{ id: "moviebox" as ServerId, label: "MovieNoir Stream" }];
 
 interface Props {
   tmdbId: string;
@@ -64,116 +38,77 @@ const MoviePlayer = ({
   type = "movie",
   season = 1,
   episode = 1,
-  serverId,
-  onServerChange,
   title,
   year,
   poster,
   backdrop,
-  onPrev,
   onNext,
   nextItem,
 }: Props) => {
-  const initialIdx = Math.max(
-    0,
-    PLAYER_SERVERS.findIndex((s) => s.id === (serverId || "movies111")),
-  );
-  const [serverIdx, setServerIdx] = useState(initialIdx === -1 ? 0 : initialIdx);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [resolvedSrc, setResolvedSrc] = useState<string>("");
+  const [streamUrl, setStreamUrl] = useState<string>("");
+  const [tracks, setTracks] = useState<{ lang: string; url: string }[]>([]);
+  const [qualities, setQualities] = useState<MovieboxDownload[]>([]);
   const [ended, setEnded] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
 
   useEffect(() => {
     let active = true;
-    isDownloaded(`${type}-${tmdbId}`).then((d) => {
-      if (active) setSavedOffline(d);
-    });
+    isDownloaded(`${type}-${tmdbId}`).then((d) => active && setSavedOffline(d));
     return () => {
       active = false;
     };
   }, [type, tmdbId]);
 
+  // Resolve the MovieBox MP4 and stream it directly.
   useEffect(() => {
-    if (!serverId) return;
-    const i = PLAYER_SERVERS.findIndex((s) => s.id === serverId);
-    if (i >= 0 && i !== serverIdx) setServerIdx(i);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverId]);
-
-  const server = PLAYER_SERVERS[serverIdx];
-  const builtSrc = server.build(tmdbId, type, season, episode);
-
-  useEffect(() => {
+    if (!title) return;
+    let active = true;
     setLoading(true);
     setError(false);
     setEnded(false);
-    setResolvedSrc("");
-    let active = true;
+    setStreamUrl("");
     (async () => {
-      const cached = await getCachedStream(
-        tmdbId,
-        type,
-        server.id,
-        type === "tv" ? season : undefined,
-        type === "tv" ? episode : undefined,
-      );
+      const res = await resolveMovieboxDownloads({
+        title,
+        year,
+        mediaType: type === "tv" ? "tv" : "movie",
+        season: type === "tv" ? season : 0,
+        episode: type === "tv" ? episode : 0,
+      });
       if (!active) return;
-      setResolvedSrc(cached?.url || builtSrc);
+      const list = (res.downloads || []).slice().sort((a, b) => b.resolution - a.resolution);
+      if (!res.ok || list.length === 0) {
+        setError(true);
+        setLoading(false);
+        return;
+      }
+      setQualities(list);
+      setTracks(res.captions || []);
+      setStreamUrl(movieboxProxyUrl(list[0].url));
+      setLoading(false);
     })();
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [builtSrc]);
+  }, [title, year, type, season, episode, attempt]);
 
-  useEffect(() => {
-    if (!resolvedSrc) return;
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      setError(true);
-      recordStream(
-        tmdbId,
-        type,
-        server.id,
-        resolvedSrc,
-        false,
-        type === "tv" ? season : undefined,
-        type === "tv" ? episode : undefined,
-      );
-    }, 15000);
-    return () => clearTimeout(timerRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resolvedSrc]);
-
-  const selectServer = useCallback(
-    (idx: number) => {
-      const i = ((idx % PLAYER_SERVERS.length) + PLAYER_SERVERS.length) % PLAYER_SERVERS.length;
-      setServerIdx(i);
-      onServerChange?.(PLAYER_SERVERS[i].id);
-    },
-    [onServerChange],
-  );
-
-  const handleLoad = () => {
-    clearTimeout(timerRef.current);
-    setLoading(false);
-    setError(false);
-    recordStream(
-      tmdbId,
-      type,
-      server.id,
-      resolvedSrc,
-      true,
-      type === "tv" ? season : undefined,
-      type === "tv" ? episode : undefined,
-    );
-  };
+  const pickQuality = useCallback((d: MovieboxDownload) => {
+    const v = videoRef.current;
+    const t = v?.currentTime || 0;
+    setStreamUrl(movieboxProxyUrl(d.url));
+    requestAnimationFrame(() => {
+      if (videoRef.current) {
+        videoRef.current.currentTime = t;
+        videoRef.current.play().catch(() => {});
+      }
+    });
+  }, []);
 
   const toggleFullscreen = async () => {
     const el = containerRef.current;
@@ -182,10 +117,8 @@ const MoviePlayer = ({
       if (!document.fullscreenElement) {
         await el.requestFullscreen?.();
         try {
-          const orientation = (screen as any).orientation;
-          if (orientation && typeof orientation.lock === "function") {
-            await orientation.lock("landscape").catch(() => {});
-          }
+          const o = (screen as any).orientation;
+          if (o?.lock) await o.lock("landscape").catch(() => {});
         } catch {
           /* ignore */
         }
@@ -198,11 +131,10 @@ const MoviePlayer = ({
         await document.exitFullscreen?.();
       }
     } catch {
-      /* fullscreen not permitted */
+      /* ignore */
     }
   };
 
-  // Keyboard shortcuts: F fullscreen, Esc exit.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
@@ -219,57 +151,6 @@ const MoviePlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Listen for postMessage 'ended' events from iframe players
-  useEffect(() => {
-    const onMsg = (e: MessageEvent) => {
-      const data = e.data;
-      if (!data) return;
-      const t = typeof data === "string" ? data : data.type || data.event || data.action;
-      if (typeof t === "string" && /ended|complete|finish/i.test(t)) {
-        setEnded(true);
-      }
-    };
-    window.addEventListener("message", onMsg);
-    return () => window.removeEventListener("message", onMsg);
-  }, []);
-
-  // Prevent iframe scroll-jack
-  useEffect(() => {
-    if (!resolvedSrc) return;
-    const anchorY = window.scrollY;
-    let lastUserInput = 0;
-    const markUser = () => {
-      lastUserInput = Date.now();
-    };
-    window.addEventListener("wheel", markUser, { passive: true });
-    window.addEventListener("touchstart", markUser, { passive: true });
-    const onScroll = () => {
-      if (Date.now() - lastUserInput > 200) {
-        window.scrollTo({ top: anchorY, behavior: "auto" });
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    try {
-      containerRef.current?.focus({ preventScroll: true } as FocusOptions);
-    } catch {
-      /* ignore */
-    }
-    const stop = setTimeout(() => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", markUser);
-      window.removeEventListener("touchstart", markUser);
-    }, 1500);
-    return () => {
-      clearTimeout(stop);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("wheel", markUser);
-      window.removeEventListener("touchstart", markUser);
-    };
-  }, [resolvedSrc]);
-
-  // Blocker default ON — no UI toggle. Strict sandbox strips popups.
-  const sandboxAttr = "allow-scripts allow-same-origin allow-forms";
-
   if (!online && !savedOffline) {
     return (
       <div className="w-full bg-background">
@@ -279,8 +160,8 @@ const MoviePlayer = ({
           </div>
           <p className="text-foreground text-sm font-semibold">You're offline</p>
           <p className="text-muted-foreground text-xs max-w-xs leading-relaxed">
-            Connect to the internet to stream this title — or download movies while
-            online to watch them anytime, even offline.
+            Connect to the internet to stream this title — or download titles while
+            online to watch them anytime.
           </p>
           <Link
             to="/my-downloads"
@@ -299,86 +180,66 @@ const MoviePlayer = ({
         ref={containerRef}
         tabIndex={-1}
         className="relative w-full aspect-video overflow-hidden bb-player-shell outline-none bg-black"
-        style={{ contain: "layout paint" }}
       >
-        {resolvedSrc && (
-          <iframe
-            ref={iframeRef}
-            key={resolvedSrc}
-            src={resolvedSrc}
-            className="absolute inset-0 w-full h-full"
-            onLoad={handleLoad}
-            allowFullScreen
-            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
-            sandbox={sandboxAttr}
-            referrerPolicy="no-referrer"
-            title="BingBloom Player"
-            style={{ border: 0 }}
-          />
+        {streamUrl && (
+          <video
+            ref={videoRef}
+            key={streamUrl}
+            src={streamUrl}
+            poster={backdrop || poster || undefined}
+            controls
+            autoPlay
+            playsInline
+            crossOrigin="anonymous"
+            className="absolute inset-0 w-full h-full bg-black"
+            onEnded={() => setEnded(true)}
+            onError={() => setError(true)}
+          >
+            {tracks.map((t) => (
+              <track key={t.url} kind="subtitles" srcLang={t.lang} label={t.lang} src={t.url} />
+            ))}
+          </video>
         )}
 
-        {loading && !error && (
-          <PlayerBrandLoader variant="loading" label={`Loading ${server.label}…`} />
-        )}
+        {loading && !error && <PlayerBrandLoader variant="loading" label="Loading stream…" />}
 
         {error && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 px-6 text-center bg-black">
-            <img
-              src="/logo-compact.png"
-              alt="BingBloom"
-              className="h-14 w-14 rounded-xl drop-shadow-[0_0_24px_rgba(229,9,20,0.55)]"
-            />
-            <p className="text-white text-sm font-semibold tracking-wide">Coming soon</p>
+            <img src="/logo-compact.png" alt="MovieNoir" className="h-14 w-14 rounded-xl" />
+            <p className="text-white text-sm font-semibold tracking-wide">Stream unavailable</p>
             <p className="text-white/55 text-[10.5px] max-w-xs leading-relaxed">
-              This title isn't streamable on {server.label} yet. Try another server.
+              We couldn't find a stream for this title right now.
             </p>
             <button
-              onClick={() => selectServer(serverIdx + 1)}
-              className="flex items-center gap-1.5 text-white text-[11px] px-3 py-1.5 rounded-md font-semibold pointer-events-auto bg-primary"
+              onClick={() => setAttempt((a) => a + 1)}
+              className="flex items-center gap-1.5 text-white text-[11px] px-3 py-1.5 rounded-md font-semibold bg-primary"
             >
-              <RefreshCw className="w-3 h-3" /> Try next server
+              <RefreshCw className="w-3 h-3" /> Try again
             </button>
           </div>
         )}
 
-        {/* Up Next card — only shows once we detect the video actually ended */}
-        {ended && nextItem && onNext && (
-          <UpNextCard item={nextItem} onNext={onNext} />
-        )}
+        {ended && nextItem && onNext && <UpNextCard item={nextItem} onNext={onNext} />}
       </div>
 
-      {/* Single-row toolbar: Source pills + Download + Fullscreen */}
-      <div
-        className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap"
-      >
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
         <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
-          Source
+          Quality
         </span>
         <div className="flex gap-1">
-          {PLAYER_SERVERS.map((s, i) => {
-            const active = i === serverIdx;
-            const isFast = s.badge === "Fast";
+          {qualities.slice(0, 4).map((q) => {
+            const active = streamUrl === movieboxProxyUrl(q.url);
             return (
               <button
-                key={s.id}
-                onClick={() => selectServer(i)}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-foreground transition focus:outline-none"
-                style={{
-                  background: active
-                    ? isFast
-                      ? "rgba(34,197,94,0.25)"
-                      : "rgba(229,9,20,0.25)"
-                    : "rgba(127,127,127,0.12)",
-                  border: `1px solid ${
-                    active
-                      ? isFast
-                        ? "rgba(34,197,94,0.6)"
-                        : "rgba(229,9,20,0.6)"
-                      : "rgba(127,127,127,0.2)"
-                  }`,
-                }}
+                key={q.url}
+                onClick={() => pickQuality(q)}
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold transition ${
+                  active
+                    ? "bg-primary/25 border border-primary/60 text-foreground"
+                    : "bg-foreground/10 border border-border text-foreground/80"
+                }`}
               >
-                {s.label}
+                {q.resolution}p
               </button>
             );
           })}
@@ -436,13 +297,19 @@ const UpNextCard = ({
   return (
     <div
       className="absolute bottom-3 right-3 z-30 flex items-center gap-2 rounded-lg p-2 pointer-events-auto max-w-[260px]"
-      style={{ background: "rgba(10,10,10,0.92)", border: "1px solid rgba(229,9,20,0.5)", backdropFilter: "blur(8px)" }}
+      style={{
+        background: "rgba(10,10,10,0.92)",
+        border: "1px solid rgba(255,45,143,0.5)",
+        backdropFilter: "blur(8px)",
+      }}
     >
       {item.poster && (
         <img src={item.poster} alt="" className="w-10 h-14 rounded object-cover flex-shrink-0" />
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-bold uppercase tracking-wider text-[#E50914]">Up Next in {n}s</p>
+        <p className="text-[9px] font-bold uppercase tracking-wider text-[#FF2D8F]">
+          Up Next in {n}s
+        </p>
         <p className="text-[11px] font-semibold text-white truncate">{item.title}</p>
         {item.subtitle && <p className="text-[9px] text-white/50 truncate">{item.subtitle}</p>}
         <div className="flex gap-1 mt-1">

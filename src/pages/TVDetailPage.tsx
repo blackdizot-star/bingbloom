@@ -66,14 +66,14 @@ const TVDetailPage = () => {
   return (
     <AppLayout>
       <SEO
-        title={`${data.name} – Watch on BingBloom`}
-        description={(data.overview || `Watch ${data.name} streaming on BingBloom. Episodes, cast, reviews and more.`).slice(0, 160)}
+        title={`${data.name} – Watch on MovieNoir`}
+        description={(data.overview || `Watch ${data.name} streaming on MovieNoir. Episodes, cast, reviews and more.`).slice(0, 160)}
         type="video.tv_show"
         image={img(data.backdrop_path, "w780") || undefined}
         jsonLd={{
           "@type": "TVSeries",
           name: data.name,
-          description: data.overview || `Watch ${data.name} on BingBloom.`,
+          description: data.overview || `Watch ${data.name} on MovieNoir.`,
           image: poster || undefined,
           datePublished: data.first_air_date || undefined,
           aggregateRating: data.vote_average > 0 ? {
@@ -127,7 +127,7 @@ const TVDetailPage = () => {
                 <Link
                   to={`/watch/tv/${data.id}/${activeSeason}/1`}
                   className="flex items-center gap-2 font-bold px-7 py-3 rounded-lg text-sm transition-transform hover:scale-105 shadow-xl"
-                  style={{ background: "#E50914", color: "#fff" }}
+                  style={{ background: "#FF2D8F", color: "#fff" }}
                 >
                   <Play className="w-4 h-4 fill-current" /> Play S{activeSeason} E1
                 </Link>
@@ -181,9 +181,9 @@ const TVDetailPage = () => {
                             {ep.still_path && (
                               <img src={img(ep.still_path, "w300")} alt={ep.name} className={`w-full h-full object-cover ${isPlaying ? "opacity-70" : ""}`} loading="lazy" />
                             )}
-                            <div className={`absolute inset-0 ${isPlaying ? "bg-gradient-to-b from-[#E50914]/30 via-transparent to-[#E50914]/40" : "bg-gradient-to-t from-black/70 to-transparent"}`} />
+                            <div className={`absolute inset-0 ${isPlaying ? "bg-gradient-to-b from-[#FF2D8F]/30 via-transparent to-[#FF2D8F]/40" : "bg-gradient-to-t from-black/70 to-transparent"}`} />
                             {isPlaying && (
-                              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-[#E50914] text-[8px] font-bold uppercase tracking-wide text-white shadow-lg">
+                              <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-[#FF2D8F] text-[8px] font-bold uppercase tracking-wide text-white shadow-lg">
                                 Currently Playing
                               </span>
                             )}
@@ -205,14 +205,14 @@ const TVDetailPage = () => {
                             </span>
                           </Link>
                           <div className="mt-1.5 flex items-start gap-1.5">
-                            <span className={`mt-0.5 w-3.5 h-3.5 rounded-full grid place-items-center flex-shrink-0 ${isPlaying ? "bg-[#E50914]" : "bg-white/15"}`}>
+                            <span className={`mt-0.5 w-3.5 h-3.5 rounded-full grid place-items-center flex-shrink-0 ${isPlaying ? "bg-[#FF2D8F]" : "bg-white/15"}`}>
                               {isPlaying && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
                             </span>
                             <div className="min-w-0">
-                              <p className={`text-[11px] font-bold leading-tight ${isPlaying ? "text-[#E50914]" : "text-white"}`}>
+                              <p className={`text-[11px] font-bold leading-tight ${isPlaying ? "text-[#FF2D8F]" : "text-white"}`}>
                                 S{activeSeason} E{ep.episode_number}
                               </p>
-                              <p className={`text-[10px] line-clamp-1 leading-tight ${isPlaying ? "text-[#E50914]/80" : "text-white/50"}`}>
+                              <p className={`text-[10px] line-clamp-1 leading-tight ${isPlaying ? "text-[#FF2D8F]/80" : "text-white/50"}`}>
                                 {ep.name}
                               </p>
                             </div>

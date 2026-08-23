@@ -71,7 +71,7 @@ const AnimePage = () => {
   return (
     <AppLayout>
       <SEO
-        title="Anime – BingBloom"
+        title="Anime – MovieNoir"
         description="25 anime collections — trending, top-rated, isekai, mecha, romance, slice of life, sports and more. Stream anime free."
       />
       <div className="px-[4%] pt-6 pb-2">

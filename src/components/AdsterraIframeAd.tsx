@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
  * Adsterra 300x250 iframe ad — medium rectangle, safe for both mobile and
  * desktop placement. Auto-rotates every 45s to keep impressions fresh.
  */
-const AD_KEY = "2a559855d3a6c946481e0f960f0cf064";
+const AD_KEY = "abc2c7fde6d68fc96757765c351d9dfc";
 const AD_W = 300;
 const AD_H = 250;
 const ROTATE_MS = 45_000;

@@ -34,7 +34,7 @@ const LibraryPage = () => {
 
   return (
     <AppLayout>
-      <SEO title="Library – BingBloom" description="All your saved content in one place — watchlist, liked videos and continue watching on BingBloom." />
+      <SEO title="Library – MovieNoir" description="All your saved content in one place — watchlist, liked videos and continue watching on MovieNoir." />
       <div className="px-4 sm:px-6 pt-4 pb-3">
         <h1 className="text-xl sm:text-2xl font-bold text-foreground">Library</h1>
         <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">All your saved content in one place</p>

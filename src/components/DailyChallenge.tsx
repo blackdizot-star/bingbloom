@@ -37,8 +37,8 @@ const DailyChallenge = () => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "BingBloom",
-          text: "Stream free movies, TV & live channels on BingBloom!",
+          title: "MovieNoir",
+          text: "Stream free movies, TV & live channels on MovieNoir!",
           url: window.location.origin,
         });
         complete("share");
@@ -53,7 +53,7 @@ const DailyChallenge = () => {
     {
       id: "share",
       icon: Share2,
-      title: "Share BingBloom with a friend",
+      title: "Share MovieNoir with a friend",
       prize: "Ad-free for 1 hour",
       action: { label: "Share", onClick: handleShare },
     },
@@ -91,7 +91,7 @@ const DailyChallenge = () => {
     <section className="px-[4%] my-4">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-[15px] font-bold text-foreground flex items-center gap-2">
-          <span className="w-1.5 h-4 rounded-sm bg-[#E50914]" />
+          <span className="w-1.5 h-4 rounded-sm bg-[#FF2D8F]" />
           Daily Challenges
         </h2>
         <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -108,11 +108,11 @@ const DailyChallenge = () => {
               className="min-w-[200px] max-w-[200px] rounded-xl border border-white/10 p-3 flex flex-col gap-2"
               style={{
                 background:
-                  "linear-gradient(140deg, rgba(229,9,20,0.18), rgba(20,20,20,0.85) 60%)",
+                  "linear-gradient(140deg, rgba(255,45,143,0.18), rgba(20,20,20,0.85) 60%)",
               }}
             >
               <div className="flex items-center justify-between">
-                <span className="grid place-items-center w-7 h-7 rounded-lg bg-[#E50914]/20 text-[#E50914]">
+                <span className="grid place-items-center w-7 h-7 rounded-lg bg-[#FF2D8F]/20 text-[#FF2D8F]">
                   <Icon className="w-3.5 h-3.5" />
                 </span>
                 {isDone && (
@@ -131,14 +131,14 @@ const DailyChallenge = () => {
                 <Link
                   to={c.action.href}
                   onClick={() => complete(c.id)}
-                  className="mt-auto text-center text-[11px] font-semibold py-1.5 rounded-md bg-white/10 hover:bg-[#E50914] hover:text-white transition"
+                  className="mt-auto text-center text-[11px] font-semibold py-1.5 rounded-md bg-white/10 hover:bg-[#FF2D8F] hover:text-white transition"
                 >
                   {isDone ? "Claimed" : c.action.label}
                 </Link>
               ) : (
                 <button
                   onClick={c.action.onClick}
-                  className="mt-auto text-center text-[11px] font-semibold py-1.5 rounded-md bg-white/10 hover:bg-[#E50914] hover:text-white transition"
+                  className="mt-auto text-center text-[11px] font-semibold py-1.5 rounded-md bg-white/10 hover:bg-[#FF2D8F] hover:text-white transition"
                 >
                   {isDone ? "Claimed" : c.action.label}
                 </button>

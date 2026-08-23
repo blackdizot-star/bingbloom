@@ -52,7 +52,7 @@ const WhatsAppPopup = () => {
               Follow us on WhatsApp
             </p>
             <p className="text-[11px] text-white/65 mt-1 leading-relaxed">
-              Get instant alerts when the site is down and receive the latest BingBloom updates.
+              Get instant alerts when the site is down and receive the latest MovieNoir updates.
             </p>
             <div className="mt-3 flex items-center gap-2">
               <a

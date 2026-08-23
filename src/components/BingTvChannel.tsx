@@ -43,8 +43,8 @@ const BingTvChannel = () => {
   return (
     <AppLayout>
       <SEO
-        title="Bing TV – 24/7 Free Movie Channel – BingBloom"
-        description="Bing TV is BingBloom's always-on movie channel — free, live, no sign-up. Tune in for popular films playing right now."
+        title="Bing TV – 24/7 Free Movie Channel – MovieNoir"
+        description="Bing TV is MovieNoir's always-on movie channel — free, live, no sign-up. Tune in for popular films playing right now."
         canonicalPath="/live/bing-tv"
       />
       <div className="min-h-[calc(100vh-3.5rem)]" style={{ background: "#0A0A0A" }}>
@@ -52,7 +52,7 @@ const BingTvChannel = () => {
           <Link to="/live-tv" className="w-9 h-9 grid place-items-center rounded-full hover:bg-white/5 text-white">
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse text-white" style={{ background: "#E50914" }}>Live</span>
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse text-white" style={{ background: "#FF2D8F" }}>Live</span>
           <img src={logo} alt="Bing TV" className="w-6 h-6 rounded" />
           <span className="text-sm font-bold text-white truncate flex-1">Bing TV</span>
         </div>
@@ -63,7 +63,7 @@ const BingTvChannel = () => {
               key={current.id}
               tmdbId={String(current.id)}
               type="movie"
-              serverId="smashystream"
+              serverId="moviebox"
               onServerChange={() => {}}
               title={current.title}
               year={(current.release_date || "").slice(0, 4)}
@@ -79,7 +79,7 @@ const BingTvChannel = () => {
 
         <div className="px-4 py-4 max-w-3xl mx-auto">
           <div className="flex items-center gap-2 mb-3">
-            <Radio className="w-4 h-4" style={{ color: "#E50914" }} />
+            <Radio className="w-4 h-4" style={{ color: "#FF2D8F" }} />
             <h2 className="text-sm font-bold text-white">Programme guide</h2>
             <span className="text-[10px] text-white/45">updates hourly</span>
           </div>
@@ -88,7 +88,7 @@ const BingTvChannel = () => {
               <div
                 key={i}
                 className="flex items-center gap-3 p-2.5 rounded-xl"
-                style={{ background: s.live ? "#1a0f10" : "#141414", border: `1px solid ${s.live ? "#E50914" : "rgba(255,255,255,0.06)"}` }}
+                style={{ background: s.live ? "#1a0f10" : "#141414", border: `1px solid ${s.live ? "#FF2D8F" : "rgba(255,255,255,0.06)"}` }}
               >
                 <div className="w-16 aspect-video rounded overflow-hidden bg-black flex-shrink-0">
                   {s.movie.backdrop_path && (
@@ -97,7 +97,7 @@ const BingTvChannel = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    {s.live && <span className="px-1 py-[1px] rounded text-[8px] font-bold uppercase text-white animate-pulse" style={{ background: "#E50914" }}>Now</span>}
+                    {s.live && <span className="px-1 py-[1px] rounded text-[8px] font-bold uppercase text-white animate-pulse" style={{ background: "#FF2D8F" }}>Now</span>}
                     <p className="text-[12.5px] font-bold text-white truncate">{s.movie.title}</p>
                   </div>
                   <p className="text-[10.5px] text-white/50 mt-0.5">

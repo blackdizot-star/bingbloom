@@ -5,7 +5,7 @@ import SEO from "@/components/SEO";
 
 const DownloadApkPage = () => (
   <AppLayout>
-    <SEO title="Download BingBloom APK" description="Download the BingBloom Android APK for direct installation on your device." />
+    <SEO title="Download MovieNoir APK" description="Download the MovieNoir Android APK for direct installation on your device." />
 
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-4 py-16">
       <div className="rounded-3xl border border-border/60 bg-card/90 p-6 shadow-2xl shadow-black/20 backdrop-blur">
@@ -14,14 +14,14 @@ const DownloadApkPage = () => (
             <Smartphone className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">BingBloom Android APK</p>
+            <p className="text-sm font-semibold text-foreground">MovieNoir Android APK</p>
             <p className="text-xs text-muted-foreground">Direct installer for supported Android devices</p>
           </div>
         </div>
 
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Download the latest BingBloom APK</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Download the latest MovieNoir APK</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          Install BingBloom directly on Android without the Play Store. The APK is signed for release and includes the latest streaming experience, offline support, and download features.
+          Install MovieNoir directly on Android without the Play Store. The APK is signed for release and includes the latest streaming experience, offline support, and download features.
         </p>
 
         <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-border/50 bg-background/70 p-4 sm:flex-row sm:items-center sm:justify-between">

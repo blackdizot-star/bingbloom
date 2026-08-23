@@ -29,7 +29,7 @@ const MovieWatchPage = () => {
   const topRated = useTopRatedMovies();
   const suggestions = (similar.data && similar.data.length > 0 ? similar.data : recommended.data) || [];
   const cast = (data?.credits?.cast || []).slice(0, 15);
-  const [server, setServer] = useState<ServerId>("movies111");
+  const [server, setServer] = useState<ServerId>("moviebox");
 
   useLayoutEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -47,8 +47,8 @@ const MovieWatchPage = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#0A0A0A" }}>
       <SEO
-        title={data ? `Watch ${data.title} – BingBloom` : "Watch Movie – BingBloom"}
-        description={data?.overview?.slice(0, 160) || "Stream movies in HD on BingBloom."}
+        title={data ? `Watch ${data.title} – MovieNoir` : "Watch Movie – MovieNoir"}
+        description={data?.overview?.slice(0, 160) || "Stream movies in HD on MovieNoir."}
         type="video.movie"
       />
       <div className="flex-1 max-w-[1180px] mx-auto w-full">
@@ -99,7 +99,7 @@ const MovieWatchPage = () => {
                         {(m.backdrop_path || m.poster_path) && (
                           <img src={img(m.backdrop_path || m.poster_path, "w300")} alt={m.title} loading="lazy" className="w-full h-full object-cover" />
                         )}
-                        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+                        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#FF2D8F]">
                           <Play className="w-2.5 h-2.5 text-white fill-white" />
                         </span>
                       </Link>
@@ -162,12 +162,12 @@ const MovieWatchPage = () => {
                         {(m.backdrop_path || m.poster_path) && (
                           <img src={img(m.backdrop_path || m.poster_path, "w300")} alt={m.title} loading="lazy" className="w-full h-full object-cover" />
                         )}
-                        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#FF2D8F] opacity-0 group-hover:opacity-100 transition-opacity">
                           <Play className="w-2.5 h-2.5 text-white fill-white" />
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-semibold text-white leading-snug line-clamp-2 group-hover:text-[#E50914]">
+                        <p className="text-[12px] font-semibold text-white leading-snug line-clamp-2 group-hover:text-[#FF2D8F]">
                           {m.title}
                         </p>
                         <p className="text-[10px] text-white/50 mt-1">

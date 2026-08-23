@@ -1,11 +1,10 @@
 import { useMemo } from "react";
 
-const AD_KEY = "0d460b18275609106dbf608190ecb46b";
+const AD_KEY = "abc2c7fde6d68fc96757765c351d9dfc";
 const CONTAINER_ID = `container-${AD_KEY}`;
 
 /**
- * Simple Adsterra native banner — mount the invoke script inside an isolated
- * iframe with `srcDoc` and let Adsterra fill it. No rotation, no refill logic.
+ * Adsterra native banner — mounted inside an isolated iframe with `srcDoc`.
  */
 const buildSrcDoc = (heightPx: number) => `<!doctype html>
 <html><head><meta charset="utf-8"/>
@@ -17,8 +16,8 @@ const buildSrcDoc = (heightPx: number) => `<!doctype html>
   a{color:inherit;}
 </style>
 </head><body>
-<div id="${CONTAINER_ID}"></div>
 <script async data-cfasync="false" src="https://disturbknockedcaterpillar.com/${AD_KEY}/invoke.js"><\/script>
+<div id="${CONTAINER_ID}"></div>
 </body></html>`;
 
 const NativeAd = ({

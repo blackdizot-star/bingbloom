@@ -15,8 +15,8 @@ const AnimationPage = () => {
   return (
     <AppLayout>
       <SEO
-        title="Animation – BingBloom"
-        description="Animated movies and series for every age. Stream Pixar, anime classics, family animation and adult animated shows on BingBloom."
+        title="Animation – MovieNoir"
+        description="Animated movies and series for every age. Stream Pixar, anime classics, family animation and adult animated shows on MovieNoir."
       />
       <div className="px-[4%] pt-6 pb-4">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Animation</h1>

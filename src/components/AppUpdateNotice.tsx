@@ -20,7 +20,7 @@ const AppUpdateNotice = () => {
   const handleOpen = () => {
     window.open(UPDATE_URL, "_blank", "noopener,noreferrer");
     if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-      new Notification("BingBloom update", {
+      new Notification("MovieNoir update", {
         body: "Join our WhatsApp channel for the latest APK and app news.",
         icon: "/logo-compact.png",
       });
@@ -39,7 +39,7 @@ const AppUpdateNotice = () => {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-2 text-sm">
         <div className="flex items-center gap-2">
           <BellRing className="h-4 w-4 text-primary" />
-          <span className="font-medium text-foreground">New BingBloom update is live.</span>
+          <span className="font-medium text-foreground">New MovieNoir update is live.</span>
         </div>
         <div className="flex items-center gap-2">
           <button

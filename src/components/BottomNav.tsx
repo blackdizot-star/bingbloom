@@ -26,13 +26,13 @@ const BottomNav = () => {
               <Link
                 to={t.to}
                 className={`relative flex min-h-[44px] flex-col items-center justify-center gap-0.5 px-0.5 pt-1.5 pb-1 text-[9px] font-medium transition ${
-                  active ? "text-[#E50914]" : "text-white/60"
+                  active ? "text-[#FF2D8F]" : "text-white/60"
                 }`}
               >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.4 : 1.8} />
                 <span className="truncate max-w-full">{t.label}</span>
                 {active && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-5 rounded-full bg-[#E50914]" />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-5 rounded-full bg-[#FF2D8F]" />
                 )}
               </Link>
             </li>

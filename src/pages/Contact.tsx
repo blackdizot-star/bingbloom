@@ -8,5 +8,5 @@ const sections = [
   { heading: "Advertising", paragraphs: ["Email partners@bingbloom.com to advertise with us."] },
 ];
 export default function Contact() {
-  return <LegalPage title="Contact Us" description="Reach out to BingBloom for support, feedback, partnerships or press." intro="We'd love to hear from you. Whether you have a question, feedback, or a concern, we're here to help." sections={sections} cta={{ label: "Email hello.bingbloom@gmail.com", href: "mailto:hello.bingbloom@gmail.com" }} />;
+  return <LegalPage title="Contact Us" description="Reach out to MovieNoir for support, feedback, partnerships or press." intro="We'd love to hear from you. Whether you have a question, feedback, or a concern, we're here to help." sections={sections} cta={{ label: "Email hello.bingbloom@gmail.com", href: "mailto:hello.bingbloom@gmail.com" }} />;
 }

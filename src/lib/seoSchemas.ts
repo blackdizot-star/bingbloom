@@ -5,7 +5,7 @@ export const SITE_URL = "https://bingbloom.lovable.app";
 
 export const websiteSchema = () => ({
   "@type": "WebSite",
-  name: "BingBloom",
+  name: "MovieNoir",
   url: SITE_URL,
   description: "Free streaming of movies, TV, anime, live channels, music and podcasts.",
   potentialAction: {
@@ -17,7 +17,7 @@ export const websiteSchema = () => ({
 
 export const organizationSchema = () => ({
   "@type": "Organization",
-  name: "BingBloom",
+  name: "MovieNoir",
   url: SITE_URL,
   logo: `${SITE_URL}/icon-512.png`,
 });
@@ -33,7 +33,7 @@ export const SOCIAL_LINKS = {
 
 export const organizationWithSocialsSchema = () => ({
   "@type": "Organization",
-  name: "BingBloom",
+  name: "MovieNoir",
   url: SITE_URL,
   logo: `${SITE_URL}/icon-512.png`,
   sameAs: Object.values(SOCIAL_LINKS),
@@ -41,7 +41,7 @@ export const organizationWithSocialsSchema = () => ({
 
 export const softwareApplicationSchema = () => ({
   "@type": "SoftwareApplication",
-  name: "BingBloom",
+  name: "MovieNoir",
   operatingSystem: "Android",
   applicationCategory: "MultimediaApplication",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -111,5 +111,5 @@ export const articleSchema = (a: {
   description: a.description,
   image: a.image,
   datePublished: a.datePublished,
-  author: { "@type": "Organization", name: a.author || "BingBloom" },
+  author: { "@type": "Organization", name: a.author || "MovieNoir" },
 });

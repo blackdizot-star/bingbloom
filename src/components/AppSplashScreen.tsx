@@ -53,13 +53,13 @@ const AppSplashScreen = () => {
       <div className="relative z-10 flex h-full w-full flex-col items-center justify-center gap-4 px-6 text-center">
         <img
           src="/logo-compact.png"
-          alt="BingBloom"
-          className="h-16 w-16 rounded-2xl object-contain shadow-[0_0_28px_rgba(229,9,20,0.45)] animate-[bounce_1.2s_ease-in-out_infinite]"
+          alt="MovieNoir"
+          className="h-16 w-16 rounded-2xl object-contain shadow-[0_0_28px_rgba(255,45,143,0.45)] animate-[bounce_1.2s_ease-in-out_infinite]"
         />
         {showWelcome ? (
           <div className="animate-fade-in">
             <h1 className="text-3xl font-extrabold text-white tracking-tight">
-              Welcome to <span className="text-primary">BingBloom</span>
+              Welcome to <span className="text-primary">MovieNoir</span>
             </h1>
             <p className="mt-2 text-sm font-semibold tracking-[0.3em] text-white/80 uppercase">
               Discover • Stream • Bloom
@@ -67,7 +67,7 @@ const AppSplashScreen = () => {
           </div>
         ) : (
           <p className="text-xs font-semibold tracking-[0.35em] text-white/70 uppercase">
-            Loading BingBloom
+            Loading MovieNoir
           </p>
         )}
 

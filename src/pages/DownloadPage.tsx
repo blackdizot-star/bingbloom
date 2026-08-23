@@ -70,8 +70,8 @@ const DownloadPage = () => {
   return (
     <AppLayout>
       <SEO
-        title={mediaTitle ? `Download ${mediaTitle} – BingBloom` : "Download – BingBloom"}
-        description="Download movies and episodes for offline viewing on BingBloom."
+        title={mediaTitle ? `Download ${mediaTitle} – MovieNoir` : "Download – MovieNoir"}
+        description="Download movies and episodes for offline viewing on MovieNoir."
       />
       <div className="min-h-screen" style={{ background: "#0A0A0A" }}>
         <div className="max-w-[1180px] mx-auto w-full">
@@ -104,7 +104,7 @@ const DownloadPage = () => {
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
                   <div
                     className="w-14 h-14 grid place-items-center rounded-2xl"
-                    style={{ background: "#E50914", boxShadow: "0 0 28px rgba(229,9,20,0.55)" }}
+                    style={{ background: "#FF2D8F", boxShadow: "0 0 28px rgba(255,45,143,0.55)" }}
                   >
                     <Download className="w-7 h-7 text-white" />
                   </div>
@@ -122,15 +122,15 @@ const DownloadPage = () => {
                 className="mt-4 rounded-2xl p-5 border border-white/10"
                 style={{
                   background:
-                    "linear-gradient(180deg, rgba(229,9,20,0.08) 0%, #141414 35%, #0A0A0A 100%)",
+                    "linear-gradient(180deg, rgba(255,45,143,0.08) 0%, #141414 35%, #0A0A0A 100%)",
                   boxShadow:
-                    "0 0 40px rgba(229,9,20,0.12), inset 0 1px 0 rgba(255,255,255,0.05)",
+                    "0 0 40px rgba(255,45,143,0.12), inset 0 1px 0 rgba(255,255,255,0.05)",
                 }}
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div
                     className="w-11 h-11 grid place-items-center rounded-xl shrink-0"
-                    style={{ background: "#E50914", boxShadow: "0 0 24px rgba(229,9,20,0.55)" }}
+                    style={{ background: "#FF2D8F", boxShadow: "0 0 24px rgba(255,45,143,0.55)" }}
                   >
                     <Download className="w-5 h-5 text-white" />
                   </div>
@@ -141,7 +141,7 @@ const DownloadPage = () => {
                 </div>
 
                 <form onSubmit={handleSearch} className="flex gap-2 mb-3">
-                  <div className="flex-1 flex items-center gap-2 bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 focus-within:border-[#E50914]/60 transition-colors">
+                  <div className="flex-1 flex items-center gap-2 bg-black/50 border border-white/10 rounded-xl px-3 py-2.5 focus-within:border-[#FF2D8F]/60 transition-colors">
                     <Search className="w-4 h-4 text-white/50" />
                     <input
                       value={query}
@@ -153,7 +153,7 @@ const DownloadPage = () => {
                   <button
                     type="submit"
                     className="px-3 py-2.5 rounded-xl text-xs font-bold text-white inline-flex items-center gap-1.5 transition-transform active:scale-95"
-                    style={{ background: "#E50914", boxShadow: "0 0 20px rgba(229,9,20,0.4)" }}
+                    style={{ background: "#FF2D8F", boxShadow: "0 0 20px rgba(255,45,143,0.4)" }}
                   >
                     <ExternalLink className="w-3.5 h-3.5" /> Go
                   </button>
@@ -165,8 +165,8 @@ const DownloadPage = () => {
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl text-sm font-extrabold text-white transition-transform active:scale-[0.98]"
                   style={{
-                    background: "linear-gradient(180deg, #FF1A26 0%, #E50914 100%)",
-                    boxShadow: "0 0 28px rgba(229,9,20,0.55), inset 0 1px 0 rgba(255,255,255,0.2)",
+                    background: "linear-gradient(180deg, #FF6FB5 0%, #FF2D8F 100%)",
+                    boxShadow: "0 0 28px rgba(255,45,143,0.55), inset 0 1px 0 rgba(255,255,255,0.2)",
                   }}
                 >
                   <Download className="w-4 h-4" /> Download Now
@@ -180,15 +180,15 @@ const DownloadPage = () => {
 
                 <div className="grid grid-cols-3 gap-2 mt-5">
                   <div className="rounded-lg bg-white/[0.03] border border-white/10 px-2 py-2 text-center">
-                    <Zap className="w-3.5 h-3.5 mx-auto text-[#E50914] mb-1" />
+                    <Zap className="w-3.5 h-3.5 mx-auto text-[#FF2D8F] mb-1" />
                     <p className="text-[10px] font-semibold text-white">Fast</p>
                   </div>
                   <div className="rounded-lg bg-white/[0.03] border border-white/10 px-2 py-2 text-center">
-                    <ShieldCheck className="w-3.5 h-3.5 mx-auto text-[#E50914] mb-1" />
+                    <ShieldCheck className="w-3.5 h-3.5 mx-auto text-[#FF2D8F] mb-1" />
                     <p className="text-[10px] font-semibold text-white">Safe</p>
                   </div>
                   <div className="rounded-lg bg-white/[0.03] border border-white/10 px-2 py-2 text-center">
-                    <Film className="w-3.5 h-3.5 mx-auto text-[#E50914] mb-1" />
+                    <Film className="w-3.5 h-3.5 mx-auto text-[#FF2D8F] mb-1" />
                     <p className="text-[10px] font-semibold text-white">HD</p>
                   </div>
                 </div>
@@ -212,7 +212,7 @@ const DownloadPage = () => {
                           className="w-full h-full object-cover"
                         />
                       )}
-                      <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+                      <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#FF2D8F]">
                         <Download className="w-2.5 h-2.5 text-white" />
                       </span>
                     </Link>
@@ -245,12 +245,12 @@ const DownloadPage = () => {
                             className="w-full h-full object-cover"
                           />
                         )}
-                        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914] opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#FF2D8F] opacity-0 group-hover:opacity-100 transition-opacity">
                           <Download className="w-2.5 h-2.5 text-white" />
                         </span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[12px] font-semibold text-white leading-snug line-clamp-2 group-hover:text-[#E50914]">
+                        <p className="text-[12px] font-semibold text-white leading-snug line-clamp-2 group-hover:text-[#FF2D8F]">
                           {m.title || m.name}
                         </p>
                         <p className="text-[10px] text-white/50 mt-1">

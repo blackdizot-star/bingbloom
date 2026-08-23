@@ -7,12 +7,12 @@ const Blog = () => {
   return (
     <AppLayout>
       <SEO
-        title="BingBloom Blog – Streaming News & Guides"
-        description="The BingBloom blog: streaming guides, what-to-watch picks, and the latest on free movies, TV, anime and live channels."
+        title="MovieNoir Blog – Streaming News & Guides"
+        description="The MovieNoir blog: streaming guides, what-to-watch picks, and the latest on free movies, TV, anime and live channels."
         canonicalPath="/blog"
       />
       <div className="max-w-3xl mx-auto px-4 pt-6 pb-12">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">BingBloom Blog</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">MovieNoir Blog</h1>
         <p className="text-sm text-muted-foreground mb-6">Streaming guides, what-to-watch picks, and platform news.</p>
         <ul className="space-y-4">
           {blogPosts.map((p) => (

@@ -10,5 +10,5 @@ const sections = [
   { heading: "Still Need Help?", paragraphs: ["If you can't find what you're looking for, our support team is here to help. Contact us through the Contact page. We aim to respond to all inquiries within 24-48 hours."] },
 ];
 export default function Help() {
-  return <LegalPage title="Help Center" description="Find answers, troubleshoot issues, and get the most out of BingBloom." intro="Welcome to the BingBloom Help Center. Browse the most common topics or contact our team." sections={sections} cta={{ label: "Contact Us", href: "/contact" }} />;
+  return <LegalPage title="Help Center" description="Find answers, troubleshoot issues, and get the most out of MovieNoir." intro="Welcome to the MovieNoir Help Center. Browse the most common topics or contact our team." sections={sections} cta={{ label: "Contact Us", href: "/contact" }} />;
 }

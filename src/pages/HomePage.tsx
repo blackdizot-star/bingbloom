@@ -53,14 +53,14 @@ const HomePage = () => {
   return (
     <AppLayout>
       <SEO
-        title="BingBloom – Stream Movies, TV, Live & Music Free"
-        description="Stream trending movies, TV shows, anime, music and live TV channels free on BingBloom. No subscription, no sign-up."
+        title="MovieNoir – Stream Movies, TV, Live & Music Free"
+        description="Stream trending movies, TV shows, anime, music and live TV channels free on MovieNoir. No subscription, no sign-up."
         jsonLd={{
           "@graph": [
-            { "@type": "WebSite", name: "BingBloom", url: "https://bingbloom.lovable.app",
+            { "@type": "WebSite", name: "MovieNoir", url: "https://bingbloom.lovable.app",
               potentialAction: { "@type": "SearchAction", target: "https://bingbloom.lovable.app/search?q={search_term_string}", "query-input": "required name=search_term_string" } },
-            { "@type": "Organization", name: "BingBloom", url: "https://bingbloom.lovable.app", logo: "https://bingbloom.lovable.app/icon-512.png" },
-            { "@type": "SoftwareApplication", name: "BingBloom", operatingSystem: "Android", applicationCategory: "MultimediaApplication",
+            { "@type": "Organization", name: "MovieNoir", url: "https://bingbloom.lovable.app", logo: "https://bingbloom.lovable.app/icon-512.png" },
+            { "@type": "SoftwareApplication", name: "MovieNoir", operatingSystem: "Android", applicationCategory: "MultimediaApplication",
               offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
               aggregateRating: { "@type": "AggregateRating", ratingValue: "4.7", ratingCount: "152000" },
               downloadUrl: "https://bingbloom.lovable.app/install" },

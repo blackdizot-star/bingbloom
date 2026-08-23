@@ -21,9 +21,9 @@ const sections = [
     "Request deletion of your account and data",
     "Report issues and receive support",
   ]},
-  { heading: "Limitation of Liability", paragraphs: ["To the fullest extent permitted by law, BingBloom Inc. shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the service."] },
+  { heading: "Limitation of Liability", paragraphs: ["To the fullest extent permitted by law, MovieNoir Inc. shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the service."] },
   { heading: "Questions?", paragraphs: ["Contact legal@bingbloom.com."] },
 ];
 export default function LegalGuarantee() {
-  return <LegalPage title="Legal Guarantee" description="BingBloom's commitments on service quality, content, privacy and user rights." intro="BingBloom is committed to providing a reliable, legal, and transparent streaming service. Here's what we guarantee to our users." sections={sections} />;
+  return <LegalPage title="Legal Guarantee" description="MovieNoir's commitments on service quality, content, privacy and user rights." intro="MovieNoir is committed to providing a reliable, legal, and transparent streaming service. Here's what we guarantee to our users." sections={sections} />;
 }
