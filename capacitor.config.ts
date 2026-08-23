@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.bingbloom.app",
+  appId: "com.movienoir.app",
   appName: "MovieNoir",
   webDir: "dist",
   bundledWebRuntime: false,

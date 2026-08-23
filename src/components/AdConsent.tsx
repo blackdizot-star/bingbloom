@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-const AD_SCRIPT_SRC = "https://www.highperformanceformat.com/0d460b18275609106dbf608190ecb46b/invoke.js";
-const AD_CONTAINER_ID = "container-0d460b18275609106dbf608190ecb46b";
+const AD_SCRIPT_SRC = "https://www.highperformanceformat.com/abc2c7fde6d68fc96757765c351d9dfc/invoke.js";
+const AD_CONTAINER_ID = "container-abc2c7fde6d68fc96757765c351d9dfc";
 
 export default function AdConsent() {
   const [visible, setVisible] = useState(false);
