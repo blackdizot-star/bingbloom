@@ -26,8 +26,8 @@ const PodcastRow = ({ title, query }: { title: string; query: string }) => {
 const PodcastsPage = () => (
   <AppLayout>
     <SEO
-      title="Podcasts – BingBloom"
-      description="Listen to trending podcasts — true crime, comedy, business, self improvement, sports, science, culture and more on BingBloom."
+      title="Podcasts – MovieNoir"
+      description="Listen to trending podcasts — true crime, comedy, business, self improvement, sports, science, culture and more on MovieNoir."
     />
     <div className="px-5 pt-5 pb-1">
       <h1 className="text-lg font-bold text-foreground">Podcasts</h1>

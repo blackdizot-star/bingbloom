@@ -9,7 +9,7 @@ const MyListPage = () => {
 
   return (
     <AppLayout>
-      <SEO title="Watchlist – BingBloom" description="Your saved movies and shows on BingBloom — pick up where you left off." />
+      <SEO title="Watchlist – MovieNoir" description="Your saved movies and shows on MovieNoir — pick up where you left off." />
       <div className="px-6 pt-6 pb-4">
         <h1 className="text-2xl font-bold text-foreground mb-1">Watchlist</h1>
         <p className="text-sm text-muted-foreground">

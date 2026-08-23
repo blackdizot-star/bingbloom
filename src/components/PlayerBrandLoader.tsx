@@ -4,7 +4,7 @@ interface Props {
 }
 
 /**
- * Branded loader for the player. Shows a bouncing BingBloom logo while the
+ * Branded loader for the player. Shows a bouncing MovieNoir logo while the
  * stream resolves. When `variant="coming-soon"` it switches to a static logo
  * + "Coming soon" caption — used in place of the TMDB error state.
  */
@@ -17,8 +17,8 @@ const PlayerBrandLoader = ({ variant = "loading", label }: Props) => {
     >
       <img
         src="/logo-compact.png"
-        alt="BingBloom"
-        className={`h-14 w-14 rounded-xl drop-shadow-[0_0_24px_rgba(229,9,20,0.55)] ${bouncing ? "animate-bounce" : ""}`}
+        alt="MovieNoir"
+        className={`h-14 w-14 rounded-xl drop-shadow-[0_0_24px_rgba(255,45,143,0.55)] ${bouncing ? "animate-bounce" : ""}`}
       />
       <p className="text-white text-xs font-semibold tracking-wide">
         {label ?? (bouncing ? "Loading stream…" : "Coming soon")}

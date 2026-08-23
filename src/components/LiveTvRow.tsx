@@ -62,7 +62,7 @@ const LiveTvRow = () => {
             to={ch.to}
             className="group flex-shrink-0 w-[120px] sm:w-[140px] md:w-[160px]"
           >
-            <div className={`aspect-video rounded-lg overflow-hidden relative shadow-md transition-transform duration-200 group-hover:-translate-y-1 ring-1 ${ch.bing ? "ring-[#E50914]/70" : "ring-border"}`} style={{ background: ch.bing ? "linear-gradient(135deg,#1a0f10,#000)" : undefined }}>
+            <div className={`aspect-video rounded-lg overflow-hidden relative shadow-md transition-transform duration-200 group-hover:-translate-y-1 ring-1 ${ch.bing ? "ring-[#FF2D8F]/70" : "ring-border"}`} style={{ background: ch.bing ? "linear-gradient(135deg,#1a0f10,#000)" : undefined }}>
               {ch.logo ? (
                 <img
                   src={ch.logo}

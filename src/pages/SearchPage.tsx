@@ -57,7 +57,7 @@ const SkeletonRow = () => (
 const BrandedLoadingState = ({ label = "Loading…" }: { label?: string }) => (
   <div className="space-y-2 pb-4">
     <div className="flex flex-col items-center justify-center gap-2 py-4">
-      <img src="/logo-compact.png" alt="BingBloom" className="h-12 w-12 animate-pulse rounded-xl" />
+      <img src="/logo-compact.png" alt="MovieNoir" className="h-12 w-12 animate-pulse rounded-xl" />
       <p className="text-[11px] uppercase tracking-[0.25em] text-white/50 font-semibold">{label}</p>
     </div>
     {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} />)}
@@ -90,7 +90,7 @@ const ResultRow = ({ item, onClick }: { item: ResultItem; onClick: () => void })
         ) : (
           <div className="w-full h-full grid place-items-center text-white/25 text-[9px]">No art</div>
         )}
-        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#FF2D8F]">
           <Play className="w-2.5 h-2.5 text-white fill-white" />
         </span>
       </div>
@@ -128,7 +128,7 @@ const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void 
         ) : (
           <div className="w-full h-full grid place-items-center text-white/25 text-[9px]">No art</div>
         )}
-        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#E50914]">
+        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#FF2D8F]">
           <Play className="w-2.5 h-2.5 text-white fill-white" />
         </span>
         {!!item.vote_average && (
@@ -246,8 +246,8 @@ const SearchPage = () => {
   return (
     <AppLayout>
       <SEO
-        title={searchQuery ? `${searchQuery} – Search – BingBloom` : "Explore – BingBloom"}
-        description={searchQuery ? `Search results for "${searchQuery}" on BingBloom.` : "Explore movies, TV series, anime and animation on BingBloom."}
+        title={searchQuery ? `${searchQuery} – Search – MovieNoir` : "Explore – MovieNoir"}
+        description={searchQuery ? `Search results for "${searchQuery}" on MovieNoir.` : "Explore movies, TV series, anime and animation on MovieNoir."}
       />
       <div className="px-5 pt-4" style={{ background: "#000" }}>
         {/* Search bar */}
@@ -309,7 +309,7 @@ const SearchPage = () => {
         {showExplore ? (
           <>
             <div className="flex items-center gap-1.5 mb-3">
-              <Flame className="w-4 h-4 fill-[#E50914]" style={{ color: "#E50914" }} />
+              <Flame className="w-4 h-4 fill-[#FF2D8F]" style={{ color: "#FF2D8F" }} />
               <h2 className="text-white text-sm font-bold">Trending now</h2>
             </div>
             {isFetching && results.length === 0 ? (
@@ -341,7 +341,7 @@ const SearchPage = () => {
                   key={f.value}
                   onClick={() => setFilter(f.value)}
                   className={`px-3 py-1 rounded-full text-[10.5px] font-medium whitespace-nowrap transition-all ${filter === f.value ? "text-white" : "text-white/60 border border-white/10"}`}
-                  style={filter === f.value ? { background: "#E50914" } : { background: "#141414" }}
+                  style={filter === f.value ? { background: "#FF2D8F" } : { background: "#141414" }}
                 >
                   {f.label}
                 </button>

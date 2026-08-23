@@ -79,7 +79,7 @@ const SettingsPage = () => {
 
   return (
     <AppLayout>
-      <SEO title="Settings – BingBloom" description="Manage your BingBloom preferences — playback, notifications, privacy and account settings." />
+      <SEO title="Settings – MovieNoir" description="Manage your MovieNoir preferences — playback, notifications, privacy and account settings." />
       <div className="max-w-2xl mx-auto px-5 py-5">
         <div className="flex items-center gap-3 mb-6">
           <Link to="/profile" className="p-2 rounded-lg hover:bg-secondary"><ArrowLeft className="w-5 h-5 text-foreground" /></Link>
@@ -117,7 +117,7 @@ const SettingsPage = () => {
           <div className="flex items-center gap-3 p-3 rounded-xl bg-card mt-4 border border-border/30">
             <Info className="w-4 h-4 text-muted-foreground" />
             <div>
-              <p className="text-xs font-medium text-foreground">BingBloom v1.0</p>
+              <p className="text-xs font-medium text-foreground">MovieNoir v1.0</p>
               <p className="text-[10px] text-muted-foreground">Stream. Discover. Bloom. 🌸</p>
             </div>
           </div>

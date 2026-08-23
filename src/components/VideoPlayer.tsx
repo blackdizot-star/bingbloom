@@ -502,7 +502,7 @@ const VideoPlayer = ({
                   onClick={handleStart}
                   aria-label="Play"
                   className="flex items-center justify-center w-20 h-20 rounded-full text-white transition-transform hover:scale-110 shadow-2xl"
-                  style={{ background: "#E50914" }}
+                  style={{ background: "#FF2D8F" }}
                 >
                   <Play className="w-9 h-9 ml-1 fill-white" />
                 </button>
@@ -567,7 +567,7 @@ const VideoPlayer = ({
                   <button
                     onClick={() => setNextCountdown(0)}
                     className="text-[11px] px-3 py-1.5 rounded-md font-medium"
-                    style={{ background: "#E50914" }}
+                    style={{ background: "#FF2D8F" }}
                   >
                     Play now
                   </button>
@@ -580,7 +580,7 @@ const VideoPlayer = ({
                 className="absolute inset-0 flex flex-col items-center justify-center z-20"
                 style={{ background: "rgba(10,10,10,0.85)" }}
               >
-                <Loader2 className="w-10 h-10 animate-spin mb-3" style={{ color: "#E50914" }} />
+                <Loader2 className="w-10 h-10 animate-spin mb-3" style={{ color: "#FF2D8F" }} />
                 <p className="text-white text-sm font-medium">Connecting to stream...</p>
                 {retries > 0 && (
                   <p className="text-xs mt-1" style={{ color: "#A1A1A1" }}>
@@ -596,7 +596,7 @@ const VideoPlayer = ({
                 className="absolute inset-0 flex flex-col items-center justify-center z-20 gap-3 px-6 text-center"
                 style={{ background: "rgba(10,10,10,0.92)" }}
               >
-                <AlertCircle className="w-10 h-10" style={{ color: "#E50914" }} />
+                <AlertCircle className="w-10 h-10" style={{ color: "#FF2D8F" }} />
                 <p className="text-white text-sm font-medium">
                   {errorMsg || "Stream unavailable. Please try again later."}
                 </p>
@@ -604,7 +604,7 @@ const VideoPlayer = ({
                   <button
                     onClick={manualRetry}
                     className="flex items-center gap-2 text-white text-sm px-4 py-2 rounded-lg font-medium"
-                    style={{ background: "#E50914" }}
+                    style={{ background: "#FF2D8F" }}
                   >
                     <RefreshCw className="w-4 h-4" /> Retry
                   </button>
@@ -652,7 +652,7 @@ const VideoPlayer = ({
                     <div>
                       <span className="text-white/60">Retries:</span> {retries}/{MAX_RETRIES}
                     </div>
-                    {errorMsg && <div className="text-[#E50914]">Error: {errorMsg}</div>}
+                    {errorMsg && <div className="text-[#FF2D8F]">Error: {errorMsg}</div>}
                   </div>
                 </div>
               </div>
@@ -680,26 +680,26 @@ const VideoPlayer = ({
                   >
                     <div
                       className="h-full transition-all"
-                      style={{ width: `${progressPct}%`, background: "#E50914" }}
+                      style={{ width: `${progressPct}%`, background: "#FF2D8F" }}
                     />
                   </div>
                 </div>
                 <div className="px-4 pb-3 flex items-center gap-3">
-                  <button onClick={() => seekBy(-10)} className="text-white hover:text-[#E50914]">
+                  <button onClick={() => seekBy(-10)} className="text-white hover:text-[#FF2D8F]">
                     <SkipBack className="w-5 h-5" />
                   </button>
                   <button
                     onClick={togglePlay}
                     className="flex items-center justify-center w-9 h-9 rounded-full text-white"
-                    style={{ background: "#E50914" }}
+                    style={{ background: "#FF2D8F" }}
                   >
                     {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
                   </button>
-                  <button onClick={() => seekBy(10)} className="text-white hover:text-[#E50914]">
+                  <button onClick={() => seekBy(10)} className="text-white hover:text-[#FF2D8F]">
                     <SkipForward className="w-5 h-5" />
                   </button>
                   <div className="flex items-center gap-2 ml-1">
-                    <button onClick={toggleMute} className="text-white hover:text-[#E50914]">
+                    <button onClick={toggleMute} className="text-white hover:text-[#FF2D8F]">
                       {muted || volume === 0 ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                     </button>
                     <input
@@ -714,14 +714,14 @@ const VideoPlayer = ({
                         v.volume = val;
                         if (val > 0) v.muted = false;
                       }}
-                      className="w-20 accent-[#E50914] hidden sm:block"
+                      className="w-20 accent-[#FF2D8F] hidden sm:block"
                     />
                   </div>
                   <span className="text-xs ml-2 text-white">
                     {fmt(current)} / {fmt(duration)}
                   </span>
                   <div className="flex-1" />
-                  <button onClick={toggleFullscreen} className="text-white hover:text-[#E50914] p-1.5">
+                  <button onClick={toggleFullscreen} className="text-white hover:text-[#FF2D8F] p-1.5">
                     <Maximize2 className="w-5 h-5" />
                   </button>
                 </div>

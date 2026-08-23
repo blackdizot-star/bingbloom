@@ -55,7 +55,7 @@ import LegalNotices from "./pages/LegalNotices";
 import Help from "./pages/Help";
 import Jobs from "./pages/Jobs";
 import Terms from "./pages/Terms";
-import OnlyOnBingBloom from "./pages/OnlyOnBingBloom";
+import OnlyOnMovieNoir from "./pages/OnlyOnMovieNoir";
 import Redeem from "./pages/Redeem";
 import SpeedTest from "./pages/SpeedTest";
 import AdChoices from "./pages/AdChoices";
@@ -96,7 +96,7 @@ const App = () => {
       try {
         await LocalNotifications.createChannel({
           id: "bingbloom-updates",
-          name: "BingBloom updates",
+          name: "MovieNoir updates",
           importance: 5,
           visibility: 1,
         });
@@ -107,8 +107,8 @@ const App = () => {
             notifications: [
               {
                 id: Date.now(),
-                title: "BingBloom update ready",
-                body: "Your app now uses the BingBloom brand everywhere and is ready to open.",
+                title: "MovieNoir update ready",
+                body: "Your app now uses the MovieNoir brand everywhere and is ready to open.",
                 schedule: { at: new Date(Date.now() + 1000) },
                 extra: { source: "native-update" },
               },
@@ -197,7 +197,7 @@ const App = () => {
           <Route path="/help" element={<Help />} />
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/terms" element={<Terms />} />
-          <Route path="/only-on-bingbloom" element={<OnlyOnBingBloom />} />
+          <Route path="/only-on-bingbloom" element={<OnlyOnMovieNoir />} />
           <Route path="/redeem" element={<Redeem />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/speed-test" element={<SpeedTest />} />

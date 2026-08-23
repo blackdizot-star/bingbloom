@@ -150,7 +150,7 @@ const GlobeVisual = () => (
       <rect width="100" height="60" fill="url(#dots)" opacity="0.15" />
       {WORLD_MARKERS.map((m, i) => (
         <g key={i}>
-          <circle cx={m.x} cy={m.y} r="0.9" fill="#E50914">
+          <circle cx={m.x} cy={m.y} r="0.9" fill="#FF2D8F">
             <animate attributeName="r" values="0.6;1.6;0.6" dur="2.4s" begin={`${i * 0.15}s`} repeatCount="indefinite" />
             <animate attributeName="opacity" values="1;0.2;1" dur="2.4s" begin={`${i * 0.15}s`} repeatCount="indefinite" />
           </circle>
@@ -231,8 +231,8 @@ const LiveTVPage = () => {
   return (
     <AppLayout>
       <SEO
-        title={activeChannel ? `${activeChannel.name} – Live TV – BingBloom` : "Live TV – BingBloom"}
-        description="Watch global live TV channels — news, sports, entertainment and more — free on BingBloom."
+        title={activeChannel ? `${activeChannel.name} – Live TV – MovieNoir` : "Live TV – MovieNoir"}
+        description="Watch global live TV channels — news, sports, entertainment and more — free on MovieNoir."
       />
       <div className="min-h-[calc(100vh-3.5rem)]" style={{ background: "#0A0A0A" }}>
         <div className="max-w-[1400px] mx-auto w-full px-3 md:px-4 pt-3 pb-8">
@@ -247,7 +247,7 @@ const LiveTVPage = () => {
                 <ChevronLeft className="w-5 h-5" />
               </button>
             )}
-            <Radio className="w-4 h-4" style={{ color: "#E50914" }} />
+            <Radio className="w-4 h-4" style={{ color: "#FF2D8F" }} />
             <h1 className="text-lg font-bold text-white">Live TV</h1>
             <span className="ml-1 text-[10px] text-white/45">{numbered.length} channels</span>
           </div>
@@ -260,7 +260,7 @@ const LiveTVPage = () => {
                   <div className="flex items-center gap-2 px-1 py-2">
                     <span
                       className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase animate-pulse text-white"
-                      style={{ background: "#E50914" }}
+                      style={{ background: "#FF2D8F" }}
                     >
                       Live
                     </span>
@@ -319,7 +319,7 @@ const LiveTVPage = () => {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search channels…"
-                    className="w-full pl-9 pr-3 py-2 rounded-lg text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#E50914]/60 border border-white/5"
+                    className="w-full pl-9 pr-3 py-2 rounded-lg text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#FF2D8F]/60 border border-white/5"
                     style={{ background: "#1F1F1F" }}
                   />
                 </div>
@@ -338,9 +338,9 @@ const LiveTVPage = () => {
                               active ? "text-white" : "text-white/70 hover:text-white"
                             }`}
                             style={{
-                              background: active ? "#E50914" : "#1F1F1F",
+                              background: active ? "#FF2D8F" : "#1F1F1F",
                               border: active
-                                ? "1px solid #E50914"
+                                ? "1px solid #FF2D8F"
                                 : "1px solid rgba(255,255,255,0.05)",
                             }}
                           >
@@ -390,7 +390,7 @@ const LiveTVPage = () => {
                           }}
                           className={`group w-full flex items-center gap-2.5 p-2 rounded-lg text-left cursor-pointer transition ${
                             isActive
-                              ? "bg-[#E50914]/15 border border-[#E50914]/40"
+                              ? "bg-[#FF2D8F]/15 border border-[#FF2D8F]/40"
                               : "hover:bg-white/[0.05] border border-white/[0.06]"
                           }`}
                           style={{ background: isActive ? undefined : "#141414" }}
@@ -414,7 +414,7 @@ const LiveTVPage = () => {
                             <div className="flex items-center gap-1.5">
                               <span
                                 className="px-1 py-[1px] rounded text-[8px] font-bold uppercase tracking-wider text-white animate-pulse"
-                                style={{ background: "#E50914" }}
+                                style={{ background: "#FF2D8F" }}
                               >
                                 Live
                               </span>

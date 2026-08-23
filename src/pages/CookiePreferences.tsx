@@ -11,5 +11,5 @@ const sections = [
   { heading: "More Information", paragraphs: ["For more details, please see our Privacy Policy."] },
 ];
 export default function CookiePreferences() {
-  return <LegalPage title="Cookie Preferences" description="Manage your cookie preferences on BingBloom." intro="Manage your cookie preferences. Cookies help us provide, protect, and improve our service." sections={sections} />;
+  return <LegalPage title="Cookie Preferences" description="Manage your cookie preferences on MovieNoir." intro="Manage your cookie preferences. Cookies help us provide, protect, and improve our service." sections={sections} />;
 }

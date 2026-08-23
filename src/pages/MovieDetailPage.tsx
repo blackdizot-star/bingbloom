@@ -72,8 +72,8 @@ const MovieDetailPage = () => {
   return (
     <AppLayout>
       <SEO
-        title={`${data.title}${year ? ` (${year})` : ""} | Watch Free on BingBloom`}
-        description={(data.overview || `Watch ${data.title} streaming free on BingBloom. Cast, reviews, trailers and more.`).slice(0, 160)}
+        title={`${data.title}${year ? ` (${year})` : ""} | Watch Free on MovieNoir`}
+        description={(data.overview || `Watch ${data.title} streaming free on MovieNoir. Cast, reviews, trailers and more.`).slice(0, 160)}
         type="video.movie"
         image={img(data.backdrop_path, "w780") || undefined}
         jsonLd={movieSchema({
@@ -130,7 +130,7 @@ const MovieDetailPage = () => {
                 <Link
                   to={`/watch/movie/${data.id}`}
                   className="flex items-center gap-2 font-bold px-7 py-3 rounded-lg text-sm transition-transform hover:scale-105 shadow-xl"
-                  style={{ background: "#E50914", color: "#fff" }}
+                  style={{ background: "#FF2D8F", color: "#fff" }}
                 >
                   <Play className="w-4 h-4 fill-current" /> Watch Now
                 </Link>

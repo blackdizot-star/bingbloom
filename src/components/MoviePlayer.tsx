@@ -312,7 +312,7 @@ const MoviePlayer = ({
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
             sandbox={sandboxAttr}
             referrerPolicy="no-referrer"
-            title="BingBloom Player"
+            title="MovieNoir Player"
             style={{ border: 0 }}
           />
         )}
@@ -325,8 +325,8 @@ const MoviePlayer = ({
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 px-6 text-center bg-black">
             <img
               src="/logo-compact.png"
-              alt="BingBloom"
-              className="h-14 w-14 rounded-xl drop-shadow-[0_0_24px_rgba(229,9,20,0.55)]"
+              alt="MovieNoir"
+              className="h-14 w-14 rounded-xl drop-shadow-[0_0_24px_rgba(255,45,143,0.55)]"
             />
             <p className="text-white text-sm font-semibold tracking-wide">Coming soon</p>
             <p className="text-white/55 text-[10.5px] max-w-xs leading-relaxed">
@@ -367,13 +367,13 @@ const MoviePlayer = ({
                   background: active
                     ? isFast
                       ? "rgba(34,197,94,0.25)"
-                      : "rgba(229,9,20,0.25)"
+                      : "rgba(255,45,143,0.25)"
                     : "rgba(127,127,127,0.12)",
                   border: `1px solid ${
                     active
                       ? isFast
                         ? "rgba(34,197,94,0.6)"
-                        : "rgba(229,9,20,0.6)"
+                        : "rgba(255,45,143,0.6)"
                       : "rgba(127,127,127,0.2)"
                   }`,
                 }}
@@ -436,13 +436,13 @@ const UpNextCard = ({
   return (
     <div
       className="absolute bottom-3 right-3 z-30 flex items-center gap-2 rounded-lg p-2 pointer-events-auto max-w-[260px]"
-      style={{ background: "rgba(10,10,10,0.92)", border: "1px solid rgba(229,9,20,0.5)", backdropFilter: "blur(8px)" }}
+      style={{ background: "rgba(10,10,10,0.92)", border: "1px solid rgba(255,45,143,0.5)", backdropFilter: "blur(8px)" }}
     >
       {item.poster && (
         <img src={item.poster} alt="" className="w-10 h-14 rounded object-cover flex-shrink-0" />
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-[9px] font-bold uppercase tracking-wider text-[#E50914]">Up Next in {n}s</p>
+        <p className="text-[9px] font-bold uppercase tracking-wider text-[#FF2D8F]">Up Next in {n}s</p>
         <p className="text-[11px] font-semibold text-white truncate">{item.title}</p>
         {item.subtitle && <p className="text-[9px] text-white/50 truncate">{item.subtitle}</p>}
         <div className="flex gap-1 mt-1">

@@ -50,7 +50,7 @@ const InAppBrowserSheet = ({ open, onOpenChange, url, title }: Props) => {
           <a
             href={url} target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10.5px] font-semibold text-white"
-            style={{ background: "#E50914" }}
+            style={{ background: "#FF2D8F" }}
           >
             Open <ExternalLink className="w-3 h-3" />
           </a>
@@ -58,7 +58,7 @@ const InAppBrowserSheet = ({ open, onOpenChange, url, title }: Props) => {
         <div className="flex-1 relative bg-[#0a0a0a]">
           {!loaded && !blocked && (
             <div className="absolute inset-0 grid place-items-center">
-              <Loader2 className="w-6 h-6 animate-spin text-[#E50914]" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#FF2D8F]" />
             </div>
           )}
           <iframe

@@ -24,15 +24,15 @@ const WhatsAppIcon = () => (
 const socials = [
   { name: "TikTok", handle: "@bing_bloom", url: "https://www.tiktok.com/@bing_bloom", Icon: TikTokIcon, bg: "linear-gradient(135deg,#25F4EE 0%,#000 50%,#FE2C55 100%)" },
   { name: "Instagram", handle: "@bingbloom.co", url: "https://instagram.com/bingbloom.co", Icon: InstagramIcon, bg: "linear-gradient(135deg,#F58529 0%,#DD2A7B 40%,#8134AF 70%,#515BD4 100%)" },
-  { name: "WhatsApp", handle: "BingBloom channel", url: "https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n", Icon: WhatsAppIcon, bg: "linear-gradient(135deg,#25D366 0%,#128C7E 100%)" },
+  { name: "WhatsApp", handle: "MovieNoir channel", url: "https://whatsapp.com/channel/0029VbD2CdHEwEjtJ5Utbo2n", Icon: WhatsAppIcon, bg: "linear-gradient(135deg,#25D366 0%,#128C7E 100%)" },
 ];
 
 const FollowUsPage = () => {
   return (
     <AppLayout>
-      <SEO title="Follow BingBloom – Official Social Channels" description="Follow BingBloom on TikTok, Instagram and WhatsApp for new releases, drops and behind-the-scenes." />
+      <SEO title="Follow MovieNoir – Official Social Channels" description="Follow MovieNoir on TikTok, Instagram and WhatsApp for new releases, drops and behind-the-scenes." />
       <div className="px-5 pt-6 pb-12 max-w-3xl mx-auto">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">Follow BingBloom</h1>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">Follow MovieNoir</h1>
         <p className="text-xs text-muted-foreground mt-1 mb-6">
           Official channels — new releases, features and community updates.
         </p>
@@ -60,7 +60,7 @@ const FollowUsPage = () => {
           ))}
         </div>
 
-        <p className="text-[10px] text-muted-foreground mt-6 text-center">© BingBloom Studios — Stream. Discover. Bloom.</p>
+        <p className="text-[10px] text-muted-foreground mt-6 text-center">© MovieNoir Studios — Stream. Discover. Bloom.</p>
       </div>
     </AppLayout>
   );

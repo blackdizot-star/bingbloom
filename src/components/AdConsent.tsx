@@ -68,12 +68,12 @@ export default function AdConsent() {
               <div className="flex items-center gap-3 mb-3">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/15 text-primary text-lg">🎬</span>
                 <div>
-                  <p className="font-semibold text-base">How BingBloom Stays Free</p>
+                  <p className="font-semibold text-base">How MovieNoir Stays Free</p>
                   <p className="text-[13px] text-muted-foreground mt-1">Tap the sponsor message and keep the app free for everyone.</p>
                 </div>
               </div>
               <p className="text-xs leading-6 text-slate-300">
-                BingBloom is completely free because of our sponsors. When you see a sponsored message, click it — it helps keep the app free for everyone.
+                MovieNoir is completely free because of our sponsors. When you see a sponsored message, click it — it helps keep the app free for everyone.
               </p>
             </div>
 

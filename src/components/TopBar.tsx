@@ -72,11 +72,11 @@ const TopBar = () => {
           <Link to="/home" className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
             <img
               src={"/logo-compact.png"}
-              alt="BingBloom"
+              alt="MovieNoir"
               className="h-7 w-7 md:h-8 md:w-8"
-              style={{ filter: "drop-shadow(0 0 8px rgba(229,9,20,0.55))" }}
+              style={{ filter: "drop-shadow(0 0 8px rgba(255,45,143,0.55))" }}
             />
-            <span className="hidden sm:inline text-base font-extrabold text-gradient-bb tracking-tight">BingBloom</span>
+            <span className="hidden sm:inline text-base font-extrabold text-gradient-bb tracking-tight">MovieNoir</span>
           </Link>
 
           {/* Desktop horizontal nav — centered */}
@@ -124,8 +124,8 @@ const TopBar = () => {
               href="https://bingbloomdownload.lovable.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="md:hidden inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-[0_2px_8px_rgba(229,9,20,0.45)]"
-              aria-label="Install BingBloom app"
+              className="md:hidden inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-[0_2px_8px_rgba(255,45,143,0.45)]"
+              aria-label="Install MovieNoir app"
             >
               <Download className="h-3 w-3" /> Install
             </a>
@@ -133,8 +133,8 @@ const TopBar = () => {
               href="https://bingbloomdownload.lovable.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground shadow-[0_2px_10px_rgba(229,9,20,0.45)] hover:brightness-110"
-              aria-label="Install BingBloom app on desktop"
+              className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground shadow-[0_2px_10px_rgba(255,45,143,0.45)] hover:brightness-110"
+              aria-label="Install MovieNoir app on desktop"
             >
               <Download className="h-3.5 w-3.5" /> Install App
             </a>
@@ -182,8 +182,8 @@ const TopBar = () => {
           <aside className="fixed top-0 left-0 bottom-0 z-[70] w-[82%] max-w-[300px] bg-card shadow-2xl flex flex-col animate-slide-in-right" style={{ animation: "slide-in-right 0.3s ease-out reverse" }}>
             <div className="flex items-center justify-between px-4 h-14 border-b border-border">
               <Link to="/home" onClick={() => setDrawerOpen(false)} className="flex items-center gap-2">
-                <img src={"/logo-compact.png"} alt="" className="w-8 h-8" style={{ filter: "drop-shadow(0 0 6px rgba(229,9,20,0.6))" }} />
-                <span className="text-base font-extrabold text-gradient-bb">BingBloom</span>
+                <img src={"/logo-compact.png"} alt="" className="w-8 h-8" style={{ filter: "drop-shadow(0 0 6px rgba(255,45,143,0.6))" }} />
+                <span className="text-base font-extrabold text-gradient-bb">MovieNoir</span>
               </Link>
               <button
                 onClick={() => setDrawerOpen(false)}

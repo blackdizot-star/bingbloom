@@ -85,7 +85,7 @@ const TmdbContinueRow = () => {
                 </div>
                 {typeof it.progress === "number" && (
                   <div className="absolute bottom-0 inset-x-0 h-1 bg-black/40">
-                    <div className="h-full" style={{ width: `${it.progress}%`, background: "#E50914" }} />
+                    <div className="h-full" style={{ width: `${it.progress}%`, background: "#FF2D8F" }} />
                   </div>
                 )}
               </div>

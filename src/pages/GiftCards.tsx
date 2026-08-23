@@ -14,9 +14,9 @@ const sections = [
   { heading: "Terms & Conditions", bullets: [
     "Gift cards are non-refundable",
     "Gift cards have no cash value",
-    "Gift cards can be applied to any BingBloom account",
+    "Gift cards can be applied to any MovieNoir account",
   ]},
 ];
 export default function GiftCards() {
-  return <LegalPage title="Buy Gift Cards" description="Give the gift of entertainment with BingBloom gift cards." intro="Choose your amount — $5, $10, $25, $50 or a custom amount — and send the gift of BingBloom instantly." sections={sections} cta={{ label: "Contact sales", href: "/contact" }} />;
+  return <LegalPage title="Buy Gift Cards" description="Give the gift of entertainment with MovieNoir gift cards." intro="Choose your amount — $5, $10, $25, $50 or a custom amount — and send the gift of MovieNoir instantly." sections={sections} cta={{ label: "Contact sales", href: "/contact" }} />;
 }

@@ -28,7 +28,7 @@ const CategoryChips = () => {
               to={c.to}
               className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold whitespace-nowrap transition ${
                 active
-                  ? "bg-primary text-primary-foreground shadow-[0_0_14px_rgba(229,9,20,0.45)]"
+                  ? "bg-primary text-primary-foreground shadow-[0_0_14px_rgba(255,45,143,0.45)]"
                   : "bg-secondary/70 text-foreground/75 hover:bg-secondary"
               }`}
             >

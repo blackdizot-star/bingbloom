@@ -33,12 +33,12 @@ const MaintenanceNotice = () => {
             We're back — thanks for your patience
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            BingBloom was going through its annual maintenance. Everything is back
+            MovieNoir was going through its annual maintenance. Everything is back
             up and running smoothly. We sincerely apologise for any inconvenience
             caused today and appreciate your patience.
           </DialogDescription>
           <Button onClick={() => setOpen(false)} className="w-full mt-2" size="lg">
-            Continue to BingBloom
+            Continue to MovieNoir
           </Button>
         </div>
       </DialogContent>

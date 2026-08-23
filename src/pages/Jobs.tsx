@@ -1,6 +1,6 @@
 import LegalPage from "@/components/LegalPage";
 const sections = [
-  { heading: "Why BingBloom?", bullets: [
+  { heading: "Why MovieNoir?", bullets: [
     "Innovation: we're reimagining what free streaming can be",
     "Accessibility: entertainment should be for everyone",
     "Community: we listen to our users and build what they want",
@@ -14,9 +14,9 @@ const sections = [
     { title: "Customer Experience", bullets: ["Support Specialist", "User Feedback Analyst"] },
   ]},
   { heading: "How to Apply", paragraphs: ["Send your resume and a brief introduction to jobs@bingbloom.com. Include the position title in the subject line."] },
-  { heading: "Remote Work", paragraphs: ["BingBloom is a remote-first company with team members across the globe."] },
+  { heading: "Remote Work", paragraphs: ["MovieNoir is a remote-first company with team members across the globe."] },
   { heading: "Diversity and Inclusion", paragraphs: ["We welcome applicants from all backgrounds, regardless of race, color, religion, gender, sexual orientation, national origin, age, disability, or veteran status."] },
 ];
 export default function Jobs() {
-  return <LegalPage title="Jobs at BingBloom" description="Open roles across engineering, content, product, design, marketing and support." intro="We're building a platform that brings free entertainment to everyone. Join us in our mission to make quality streaming accessible worldwide." sections={sections} />;
+  return <LegalPage title="Jobs at MovieNoir" description="Open roles across engineering, content, product, design, marketing and support." intro="We're building a platform that brings free entertainment to everyone. Join us in our mission to make quality streaming accessible worldwide." sections={sections} />;
 }

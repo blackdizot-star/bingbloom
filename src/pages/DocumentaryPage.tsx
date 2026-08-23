@@ -15,8 +15,8 @@ const DocumentaryPage = () => {
   return (
     <AppLayout>
       <SEO
-        title="Documentaries – BingBloom"
-        description="Real stories, real people. Explore the world with trending and top-rated documentaries and docuseries streaming on BingBloom."
+        title="Documentaries – MovieNoir"
+        description="Real stories, real people. Explore the world with trending and top-rated documentaries and docuseries streaming on MovieNoir."
       />
       <div className="px-[4%] pt-6 pb-4">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Documentary</h1>

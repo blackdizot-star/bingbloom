@@ -47,8 +47,8 @@ const TvWatchPage = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#0A0A0A" }}>
       <SEO
-        title={data ? `${data.name} S${seasonNum}E${episodeNum} – BingBloom` : "Watch TV – BingBloom"}
-        description={data?.overview?.slice(0, 160) || "Stream TV episodes in HD on BingBloom."}
+        title={data ? `${data.name} S${seasonNum}E${episodeNum} – MovieNoir` : "Watch TV – MovieNoir"}
+        description={data?.overview?.slice(0, 160) || "Stream TV episodes in HD on MovieNoir."}
         type="video.episode"
       />
       <div className="flex-1 max-w-[1180px] mx-auto w-full">
@@ -135,7 +135,7 @@ const TvWatchPage = () => {
                               )}
                               <span className="absolute top-1 left-1 text-[9px] font-extrabold text-white">E{ep.episode_number}</span>
                               {isPlaying && (
-                                <span className="absolute bottom-1 right-1 grid place-items-center w-4 h-4 rounded-full bg-[#E50914]">
+                                <span className="absolute bottom-1 right-1 grid place-items-center w-4 h-4 rounded-full bg-[#FF2D8F]">
                                   <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                                 </span>
                               )}
@@ -218,7 +218,7 @@ const TvWatchPage = () => {
                               ref={isPlaying ? activeEpRef : undefined}
                               key={ep.id}
                               to={`/watch/tv/${data!.id}/${activeSeason}/${ep.episode_number}`}
-                              className={`flex gap-2 p-1.5 rounded-lg group ${isPlaying ? "bg-[#E50914]/15 border border-[#E50914]/40" : "hover:bg-white/5 border border-transparent"}`}
+                              className={`flex gap-2 p-1.5 rounded-lg group ${isPlaying ? "bg-[#FF2D8F]/15 border border-[#FF2D8F]/40" : "hover:bg-white/5 border border-transparent"}`}
                             >
                               <div className="relative w-[140px] aspect-video rounded-md overflow-hidden bg-white/5 shrink-0">
                                 {ep.still_path && (
@@ -226,13 +226,13 @@ const TvWatchPage = () => {
                                 )}
                                 <span className="absolute top-1 left-1 text-[9px] font-extrabold text-white bg-black/60 px-1 rounded">E{ep.episode_number}</span>
                                 {isPlaying && (
-                                  <span className="absolute bottom-1 right-1 grid place-items-center w-4 h-4 rounded-full bg-[#E50914]">
+                                  <span className="absolute bottom-1 right-1 grid place-items-center w-4 h-4 rounded-full bg-[#FF2D8F]">
                                     <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
                                   </span>
                                 )}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className={`text-[12px] font-semibold leading-snug line-clamp-2 ${isPlaying ? "text-[#E50914]" : "text-white group-hover:text-[#E50914]"}`}>
+                                <p className={`text-[12px] font-semibold leading-snug line-clamp-2 ${isPlaying ? "text-[#FF2D8F]" : "text-white group-hover:text-[#FF2D8F]"}`}>
                                   {ep.name || `Episode ${ep.episode_number}`}
                                 </p>
                                 <p className="text-[10px] text-white/50 mt-0.5">
