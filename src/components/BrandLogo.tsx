@@ -22,8 +22,9 @@ const BrandLogo = ({ size = 56, withWordmark = true, wordmarkSize = "md", classN
       />
       {withWordmark && (
         <p className={`${wm} font-extrabold tracking-tight mt-1.5 leading-none`}>
-          <span className="text-white">Bing</span>
-          <span style={{ color: "#FF2D8F" }}>Bloom</span>
+          <span className="text-white">Movie</span>
+          <span style={{ color: "#FF2D8F" }}>Noir</span>
+
         </p>
       )}
     </div>
