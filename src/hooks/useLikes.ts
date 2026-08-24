@@ -8,7 +8,7 @@ export function useLikeCount(videoId: string | undefined) {
 
   const fetchCount = useCallback(async () => {
     if (!videoId) return;
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("likes")
       .select("count")
       .eq("video_id", videoId)

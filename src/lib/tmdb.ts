@@ -1,5 +1,7 @@
-// Centralized TMDB API client. Routes through the `tmdb-proxy` edge function
-// so the TMDB_API_KEY stays server-side. Returns normalized shapes.
+// Centralized TMDB API client. Reads the bundled local TMDB cache first, then
+// falls back to the `tmdb-proxy` edge function. Returns normalized shapes.
+import { localTmdb, getCatalog } from "@/lib/localData";
+
 
 const PROJECT_REF = import.meta.env.VITE_SUPABASE_PROJECT_ID as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -47,6 +49,10 @@ const normalize = (raw: any, fallbackType?: "movie" | "tv"): TmdbItem => ({
 });
 
 export async function tmdb<T = any>(path: string, params: Record<string, string | number> = {}): Promise<T> {
+  // Local-first: bundled TMDB cache (no Supabase call needed).
+  const cached = await localTmdb<T>(path, params);
+  if (cached) return cached;
+
   const normalized = path.startsWith("/") ? path : `/${path}`;
   const search = new URLSearchParams(
     Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
@@ -61,8 +67,35 @@ export async function tmdb<T = any>(path: string, params: Record<string, string 
 }
 
 export async function fetchList(path: string, fallbackType?: "movie" | "tv"): Promise<TmdbItem[]> {
-  const data = await tmdb<TmdbList>(path);
-  return (data.results || []).map(r => normalize(r, fallbackType));
+  try {
+    const data = await tmdb<TmdbList>(path);
+    const list = (data.results || []).map(r => normalize(r, fallbackType));
+    if (list.length) return list;
+  } catch {
+    /* fall through to the bundled catalog */
+  }
+  return localCatalogList(path, fallbackType);
+}
+
+/** Offline/no-cache fallback: derive a list from the bundled catalog. */
+async function localCatalogList(path: string, fallbackType?: "movie" | "tv"): Promise<TmdbItem[]> {
+  const catalog = await getCatalog();
+  const genreMatch = /with_genres=(\d+)/.exec(path);
+  const type: "movie" | "tv" | undefined =
+    fallbackType || (path.includes("/tv") ? "tv" : path.includes("/movie") ? "movie" : undefined);
+  let list = catalog.filter(c => (type ? c.media_type === type : true));
+  if (genreMatch) {
+    const g = Number(genreMatch[1]);
+    list = list.filter(c => c.genre_ids?.includes(g));
+  }
+  const sorted = list
+    .slice()
+    .sort((a, b) => (path.includes("top_rated") || path.includes("vote_average")
+      ? b.vote_average - a.vote_average
+      : String(b.release_date || b.first_air_date || "").localeCompare(
+          String(a.release_date || a.first_air_date || ""),
+        )));
+  return sorted.slice(0, 20).map(c => normalize(c, type));
 }
 
 // Endpoint shortcuts

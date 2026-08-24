@@ -10,6 +10,7 @@ import {
   movieboxProxyUrl,
   type MovieboxDownload,
 } from "@/lib/moviebox";
+import { getLocalStreams } from "@/lib/localData";
 
 // Single source: MovieBox (the first download source) is used directly as the
 // stream URL for the video player.
@@ -56,6 +57,10 @@ const MoviePlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
+  const [isLocal, setIsLocal] = useState(false);
+
+  // Bundled stream links are already playable; MovieBox links need the proxy.
+  const srcFor = useCallback((u: string) => (isLocal ? u : movieboxProxyUrl(u)), [isLocal]);
 
   useEffect(() => {
     let active = true;
@@ -65,15 +70,36 @@ const MoviePlayer = ({
     };
   }, [type, tmdbId]);
 
-  // Resolve the MovieBox MP4 and stream it directly.
+  // Resolve the stream: bundled stream links first, MovieBox resolver as backup.
   useEffect(() => {
-    if (!title) return;
     let active = true;
     setLoading(true);
     setError(false);
     setEnded(false);
     setStreamUrl("");
     (async () => {
+      const local = await getLocalStreams(tmdbId, type, season, episode);
+      if (!active) return;
+      setIsLocal(local.length > 0);
+      if (local.length) {
+        const list: MovieboxDownload[] = local.map((s) => ({
+          url: s.u,
+          resolution: s.r,
+        })) as MovieboxDownload[];
+        setQualities(list);
+        setTracks(
+          local[0].s ? [{ lang: "en", url: local[0].s }] : [],
+        );
+        setStreamUrl(local[0].u);
+        setLoading(false);
+        return;
+      }
+
+      if (!title) {
+        setError(true);
+        setLoading(false);
+        return;
+      }
       const res = await resolveMovieboxDownloads({
         title,
         year,
@@ -96,19 +122,19 @@ const MoviePlayer = ({
     return () => {
       active = false;
     };
-  }, [title, year, type, season, episode, attempt]);
+  }, [tmdbId, title, year, type, season, episode, attempt]);
 
   const pickQuality = useCallback((d: MovieboxDownload) => {
     const v = videoRef.current;
     const t = v?.currentTime || 0;
-    setStreamUrl(movieboxProxyUrl(d.url));
+    setStreamUrl(srcFor(d.url));
     requestAnimationFrame(() => {
       if (videoRef.current) {
         videoRef.current.currentTime = t;
         videoRef.current.play().catch(() => {});
       }
     });
-  }, []);
+  }, [srcFor]);
 
   const toggleFullscreen = async () => {
     const el = containerRef.current;
@@ -228,7 +254,7 @@ const MoviePlayer = ({
         </span>
         <div className="flex gap-1">
           {qualities.slice(0, 4).map((q) => {
-            const active = streamUrl === movieboxProxyUrl(q.url);
+            const active = streamUrl === srcFor(q.url);
             return (
               <button
                 key={q.url}

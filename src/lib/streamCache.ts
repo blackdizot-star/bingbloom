@@ -22,7 +22,7 @@ export async function getCachedStream(
   episode?: number,
 ): Promise<StreamSource | null> {
   try {
-    const q = supabase
+    const q = (supabase as any)
       .from("stream_sources")
       .select("*")
       .eq("tmdb_id", tmdbId)
