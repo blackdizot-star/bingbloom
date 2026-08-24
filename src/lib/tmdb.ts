@@ -1,5 +1,7 @@
-// Centralized TMDB API client. Routes through the `tmdb-proxy` edge function
-// so the TMDB_API_KEY stays server-side. Returns normalized shapes.
+// Centralized TMDB API client. Reads the bundled local TMDB cache first, then
+// falls back to the `tmdb-proxy` edge function. Returns normalized shapes.
+import { localTmdb, getCatalog } from "@/lib/localData";
+
 
 const PROJECT_REF = import.meta.env.VITE_SUPABASE_PROJECT_ID as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
