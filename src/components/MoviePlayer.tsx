@@ -10,6 +10,7 @@ import {
   movieboxProxyUrl,
   type MovieboxDownload,
 } from "@/lib/moviebox";
+import { getLocalStreams } from "@/lib/localData";
 
 // Single source: MovieBox (the first download source) is used directly as the
 // stream URL for the video player.
