@@ -47,6 +47,10 @@ const normalize = (raw: any, fallbackType?: "movie" | "tv"): TmdbItem => ({
 });
 
 export async function tmdb<T = any>(path: string, params: Record<string, string | number> = {}): Promise<T> {
+  // Local-first: bundled TMDB cache (no Supabase call needed).
+  const cached = await localTmdb<T>(path, params);
+  if (cached) return cached;
+
   const normalized = path.startsWith("/") ? path : `/${path}`;
   const search = new URLSearchParams(
     Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
