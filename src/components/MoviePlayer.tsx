@@ -57,6 +57,10 @@ const MoviePlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
+  const [isLocal, setIsLocal] = useState(false);
+
+  // Bundled stream links are already playable; MovieBox links need the proxy.
+  const srcFor = useCallback((u: string) => (isLocal ? u : movieboxProxyUrl(u)), [isLocal]);
 
   useEffect(() => {
     let active = true;
@@ -76,6 +80,7 @@ const MoviePlayer = ({
     (async () => {
       const local = await getLocalStreams(tmdbId, type, season, episode);
       if (!active) return;
+      setIsLocal(local.length > 0);
       if (local.length) {
         const list: MovieboxDownload[] = local.map((s) => ({
           url: s.u,
@@ -122,14 +127,14 @@ const MoviePlayer = ({
   const pickQuality = useCallback((d: MovieboxDownload) => {
     const v = videoRef.current;
     const t = v?.currentTime || 0;
-    setStreamUrl(movieboxProxyUrl(d.url));
+    setStreamUrl(srcFor(d.url));
     requestAnimationFrame(() => {
       if (videoRef.current) {
         videoRef.current.currentTime = t;
         videoRef.current.play().catch(() => {});
       }
     });
-  }, []);
+  }, [srcFor]);
 
   const toggleFullscreen = async () => {
     const el = containerRef.current;
@@ -249,7 +254,7 @@ const MoviePlayer = ({
         </span>
         <div className="flex gap-1">
           {qualities.slice(0, 4).map((q) => {
-            const active = streamUrl === movieboxProxyUrl(q.url);
+            const active = streamUrl === srcFor(q.url);
             return (
               <button
                 key={q.url}
