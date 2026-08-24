@@ -83,9 +83,9 @@ const MoviePlayer = ({
         })) as MovieboxDownload[];
         setQualities(list);
         setTracks(
-          local[0].s ? [{ lang: "en", url: movieboxProxyUrl(local[0].s) }] : [],
+          local[0].s ? [{ lang: "en", url: local[0].s }] : [],
         );
-        setStreamUrl(movieboxProxyUrl(local[0].u));
+        setStreamUrl(local[0].u);
         setLoading(false);
         return;
       }
