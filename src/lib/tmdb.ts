@@ -67,8 +67,35 @@ export async function tmdb<T = any>(path: string, params: Record<string, string 
 }
 
 export async function fetchList(path: string, fallbackType?: "movie" | "tv"): Promise<TmdbItem[]> {
-  const data = await tmdb<TmdbList>(path);
-  return (data.results || []).map(r => normalize(r, fallbackType));
+  try {
+    const data = await tmdb<TmdbList>(path);
+    const list = (data.results || []).map(r => normalize(r, fallbackType));
+    if (list.length) return list;
+  } catch {
+    /* fall through to the bundled catalog */
+  }
+  return localCatalogList(path, fallbackType);
+}
+
+/** Offline/no-cache fallback: derive a list from the bundled catalog. */
+async function localCatalogList(path: string, fallbackType?: "movie" | "tv"): Promise<TmdbItem[]> {
+  const catalog = await getCatalog();
+  const genreMatch = /with_genres=(\d+)/.exec(path);
+  const type: "movie" | "tv" | undefined =
+    fallbackType || (path.includes("/tv") ? "tv" : path.includes("/movie") ? "movie" : undefined);
+  let list = catalog.filter(c => (type ? c.media_type === type : true));
+  if (genreMatch) {
+    const g = Number(genreMatch[1]);
+    list = list.filter(c => c.genre_ids?.includes(g));
+  }
+  const sorted = list
+    .slice()
+    .sort((a, b) => (path.includes("top_rated") || path.includes("vote_average")
+      ? b.vote_average - a.vote_average
+      : String(b.release_date || b.first_air_date || "").localeCompare(
+          String(a.release_date || a.first_air_date || ""),
+        )));
+  return sorted.slice(0, 20).map(c => normalize(c, type));
 }
 
 // Endpoint shortcuts
