@@ -65,15 +65,35 @@ const MoviePlayer = ({
     };
   }, [type, tmdbId]);
 
-  // Resolve the MovieBox MP4 and stream it directly.
+  // Resolve the stream: bundled stream links first, MovieBox resolver as backup.
   useEffect(() => {
-    if (!title) return;
     let active = true;
     setLoading(true);
     setError(false);
     setEnded(false);
     setStreamUrl("");
     (async () => {
+      const local = await getLocalStreams(tmdbId, type, season, episode);
+      if (!active) return;
+      if (local.length) {
+        const list: MovieboxDownload[] = local.map((s) => ({
+          url: s.u,
+          resolution: s.r,
+        })) as MovieboxDownload[];
+        setQualities(list);
+        setTracks(
+          local[0].s ? [{ lang: "en", url: movieboxProxyUrl(local[0].s) }] : [],
+        );
+        setStreamUrl(movieboxProxyUrl(local[0].u));
+        setLoading(false);
+        return;
+      }
+
+      if (!title) {
+        setError(true);
+        setLoading(false);
+        return;
+      }
       const res = await resolveMovieboxDownloads({
         title,
         year,
@@ -96,7 +116,7 @@ const MoviePlayer = ({
     return () => {
       active = false;
     };
-  }, [title, year, type, season, episode, attempt]);
+  }, [tmdbId, title, year, type, season, episode, attempt]);
 
   const pickQuality = useCallback((d: MovieboxDownload) => {
     const v = videoRef.current;
