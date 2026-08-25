@@ -7,6 +7,10 @@ const PROJECT_REF = import.meta.env.VITE_SUPABASE_PROJECT_ID as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 const PROXY_BASE = `https://${PROJECT_REF}.supabase.co/functions/v1/tmdb-proxy`;
 
+/** Official TMDB v3 API key — direct reads, no backend needed. */
+export const TMDB_API_KEY = "166a2e4d2ced5762795a715ff393d39a";
+const TMDB_BASE = "https://api.themoviedb.org/3";
+
 export const TMDB_IMG = "https://image.tmdb.org/t/p";
 
 export const img = (path: string | null | undefined, size: "w200" | "w300" | "w500" | "w780" | "original" = "w500") =>
