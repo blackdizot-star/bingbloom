@@ -56,8 +56,8 @@ const DownloadSourceSheet = ({
   poster,
   backdrop,
 }: Props) => {
-  const [step, setStep] = useState<Step>("choose");
-  const [source, setSource] = useState<Source>("fast");
+  const [step, setStep] = useState<Step>("redirect");
+  const [source, setSource] = useState<Source>("external");
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [resolvedTitle, setResolvedTitle] = useState(title);
@@ -104,7 +104,7 @@ const DownloadSourceSheet = ({
   // Reset to chooser whenever sheet (re)opens.
   useEffect(() => {
     if (open) {
-      setStep("choose");
+      setStep("redirect");
       setErrorMsg("");
       setDownloads([]);
       setResolvedTitle(title);
@@ -159,53 +159,6 @@ const DownloadSourceSheet = ({
   return (
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="max-w-sm bg-[#0f0f10] border-white/10 text-white p-0 overflow-hidden">
-        {/* ---- Choose source ---- */}
-        {step === "choose" && (
-          <div className="p-4">
-            <DialogHeader>
-              <DialogTitle className="text-sm font-bold">Choose download source</DialogTitle>
-              <DialogDescription className="text-[11px] text-white/55">
-                {title}
-                {isSeries ? ` · ${episodeLabel}` : year ? ` · ${year}` : ""}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-3 space-y-2">
-              <button
-                onClick={() => void resolve("fast")}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-left transition"
-              >
-                <span className="w-9 h-9 grid place-items-center rounded-lg bg-amber-400/15 text-amber-400">
-                  <Zap className="w-4 h-4" />
-                </span>
-                <span className="flex-1">
-                  <span className="block text-[12.5px] font-bold text-white">Fast Download</span>
-                  <span className="block text-[10.5px] text-white/55">
-                    Save in-app for offline viewing
-                  </span>
-                </span>
-                <ChevronRight className="w-4 h-4 text-white/40" />
-              </button>
-              <button
-                onClick={() => void resolve("external")}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-left transition"
-              >
-                <span className="w-9 h-9 grid place-items-center rounded-lg bg-sky-400/15 text-sky-400">
-                  <ExternalLink className="w-4 h-4" />
-                </span>
-                <span className="flex-1">
-                  <span className="block text-[12.5px] font-bold text-white">
-                    External Downloader
-                  </span>
-                  <span className="block text-[10.5px] text-white/55">
-                    Open the file in your browser or download manager
-                  </span>
-                </span>
-                <ChevronRight className="w-4 h-4 text-white/40" />
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* ---- Resolving ---- */}
         {step === "loading" && (
           <div className="p-8 flex flex-col items-center justify-center text-center">
@@ -238,7 +191,7 @@ const DownloadSourceSheet = ({
             </div>
             <div className="mt-4 flex gap-2">
               <button
-                onClick={() => setStep("choose")}
+                onClick={() => close(false)}
                 className="flex-1 px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/10 text-white hover:bg-white/15"
               >
                 Back
@@ -300,7 +253,7 @@ const DownloadSourceSheet = ({
               ))}
             </div>
             <button
-              onClick={() => setStep("choose")}
+              onClick={() => close(false)}
               className="mt-3 w-full px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/5 text-white/70 hover:bg-white/10"
             >
               ← Change source
@@ -322,7 +275,7 @@ const DownloadSourceSheet = ({
             </DialogHeader>
             <div className="mt-4 flex gap-2">
               <button
-                onClick={() => setStep("choose")}
+                onClick={() => close(false)}
                 className="flex-1 px-3 py-2 rounded-lg text-[11px] font-semibold bg-white/10 text-white hover:bg-white/15"
               >
                 Back
