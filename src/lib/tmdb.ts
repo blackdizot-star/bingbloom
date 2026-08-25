@@ -62,6 +62,17 @@ export async function tmdb<T = any>(path: string, params: Record<string, string 
     Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),
   );
   const qs = search.toString();
+
+  // Direct TMDB read with the official API key.
+  try {
+    const direct = new URLSearchParams(search);
+    direct.set("api_key", TMDB_API_KEY);
+    const res = await fetch(`${TMDB_BASE}${normalized}?${direct.toString()}`);
+    if (res.ok) return res.json();
+  } catch {
+    /* fall through to the proxy */
+  }
+
   const url = `${PROXY_BASE}${normalized}${qs ? `?${qs}` : ""}`;
   const res = await fetch(url, {
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
