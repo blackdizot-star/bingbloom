@@ -534,7 +534,7 @@ const VideoPlayer = ({
               />
             )}
 
-            {/* Iframe fallback — strict sandbox blocks top-nav popups/redirects */}
+            {/* Iframe fallback */}
             {!showStart && streamKind === "embed" && status === "ready" && (
               <iframe
                 key={streamUrl}
@@ -544,7 +544,6 @@ const VideoPlayer = ({
                 allowFullScreen
                 referrerPolicy="origin"
                 title="Player"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
                 style={{ border: "none" }}
               />
             )}
