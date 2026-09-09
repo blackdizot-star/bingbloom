@@ -37,7 +37,7 @@ const AppLayout = ({ children, hideNav, hideFooter }: AppLayoutProps) => {
   return (
     <div className="min-h-screen bg-bingbloom-app">
       <TopBar />
-      <div className="pt-12 md:pt-14" />
+      <div className="pt-16 md:pt-24" />
       <main className="pb-16 md:pb-0 max-w-[1600px] mx-auto">
         {children}
         {showEndAd && (

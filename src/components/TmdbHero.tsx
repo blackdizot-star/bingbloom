@@ -81,15 +81,15 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
         >
           <Link
             to={`/watch/movie/${item.id}`}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 md:px-6 py-2 md:py-2.5 text-xs md:text-sm font-semibold text-primary-foreground transition hover:brightness-110 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-full bg-white px-5 md:px-7 py-2.5 md:py-3 text-xs md:text-sm font-bold text-black transition hover:bg-white/90 active:scale-[0.98]"
           >
-            <Play className="w-3.5 h-3.5 fill-current" /> Watch
+            <Play className="w-4 h-4 fill-current" /> Watch now
           </Link>
           <Link
             to={`/movie/${item.id}`}
-            className="inline-flex items-center gap-2 rounded-full bg-surface-2 px-4 md:px-6 py-2 md:py-2.5 text-xs md:text-sm font-semibold text-foreground transition hover:bg-surface"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 md:px-7 py-2.5 md:py-3 text-xs md:text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
           >
-            <Info className="w-3.5 h-3.5" /> Info
+            <Info className="w-4 h-4" /> More info
           </Link>
         </div>
       </div>

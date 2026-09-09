@@ -5,6 +5,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
+import PreRollAd from "@/components/PreRollAd";
 
 export type ServerId = "vidsrc" | "111movies" | "smashy" | "videasy";
 
@@ -80,6 +81,11 @@ const MoviePlayer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
+  const [adDone, setAdDone] = useState(false);
+
+  useEffect(() => {
+    setAdDone(false);
+  }, [tmdbId, type, season, episode]);
 
   const src = embedUrl(server, tmdbId, type, season, episode);
 
@@ -174,19 +180,23 @@ const MoviePlayer = ({
         tabIndex={-1}
         className="relative w-full aspect-video overflow-hidden bb-player-shell outline-none bg-black"
       >
-        <iframe
-          key={`${src}-${attempt}`}
-          src={src}
-          title={title || "Player"}
-          className="absolute inset-0 w-full h-full border-0"
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-          allowFullScreen
-          referrerPolicy="origin"
-          onLoad={() => setLoading(false)}
-          onError={() => setError(true)}
-        />
+        {adDone && (
+          <iframe
+            key={`${src}-${attempt}`}
+            src={src}
+            title={title || "Player"}
+            className="absolute inset-0 w-full h-full border-0"
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            allowFullScreen
+            referrerPolicy="origin"
+            onLoad={() => setLoading(false)}
+            onError={() => setError(true)}
+          />
+        )}
 
-        {loading && !error && <PlayerBrandLoader variant="loading" label="Loading stream…" />}
+        {!adDone && <PreRollAd onFinish={() => setAdDone(true)} />}
+
+        {adDone && loading && !error && <PlayerBrandLoader variant="loading" label="Loading stream…" />}
 
         {error && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 px-6 text-center bg-black">
