@@ -52,13 +52,13 @@ const TopBar = () => {
 
   const isHome = location.pathname === "/home" || location.pathname === "/";
   const bgClass = scrolled || !isHome
-    ? "bg-background/95 backdrop-blur-md border-b border-border/60"
-    : "bg-gradient-to-b from-background/90 to-transparent";
+    ? "bg-black/70 backdrop-blur-2xl border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.55)]"
+    : "bg-black/35 backdrop-blur-xl border border-white/[0.07]";
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-40 transition-colors duration-300 ${bgClass}`}>
-        <div className="flex items-center gap-2 md:gap-3 px-2 md:px-6 h-12 md:h-14 max-w-[1600px] mx-auto">
+      <header className="fixed top-0 left-0 right-0 z-40 px-2 pt-2 md:px-6 md:pt-4">
+        <div className={`flex items-center gap-2 md:gap-3 px-2 md:px-4 h-12 md:h-16 max-w-[1600px] mx-auto rounded-2xl md:rounded-[28px] transition-all duration-300 ${bgClass}`}>
           {/* Hamburger on the LEFT (mobile) */}
           <button
             onClick={() => setDrawerOpen(true)}
