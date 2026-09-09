@@ -86,14 +86,14 @@ const TopBar = () => {
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-semibold whitespace-nowrap transition-colors ${
+                  `flex items-center gap-2 px-3.5 py-2 rounded-full text-[14px] font-semibold whitespace-nowrap transition-colors ${
                     isActive
-                      ? "text-foreground bg-secondary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                      ? "text-white bg-white/15"
+                      : "text-white/65 hover:text-white hover:bg-white/[0.08]"
                   }`
                 }
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-[18px] h-[18px]" />
                 {label}
               </NavLink>
             ))}
