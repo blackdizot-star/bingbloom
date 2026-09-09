@@ -5,6 +5,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
+import PreRollAd from "@/components/PreRollAd";
 
 export type ServerId = "vidsrc" | "111movies" | "smashy" | "videasy";
 
@@ -80,6 +81,11 @@ const MoviePlayer = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
+  const [adDone, setAdDone] = useState(false);
+
+  useEffect(() => {
+    setAdDone(false);
+  }, [tmdbId, type, season, episode]);
 
   const src = embedUrl(server, tmdbId, type, season, episode);
 
