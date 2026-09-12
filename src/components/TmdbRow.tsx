@@ -16,19 +16,19 @@ const TmdbRow = ({ title, items, isLoading, type, viewAll, ranked }: TmdbRowProp
   if (!isLoading && (!items || items.length === 0)) return null;
 
   return (
-    <section className="mb-5 md:mb-7">
-      <div className="flex items-center justify-between px-[4%] mb-2 md:mb-3">
-        <h2 className="text-sm md:text-lg font-bold text-foreground">{title}</h2>
+    <section className="mb-8 md:mb-14">
+      <div className="flex items-center justify-between px-[4%] mb-4 md:mb-7">
+        <h2 className="font-display text-2xl md:text-4xl text-foreground">{title}</h2>
         {viewAll && (
-          <Link to={viewAll} className="flex items-center gap-0.5 text-[10px] md:text-xs text-primary font-semibold hover:underline">
-            All <ChevronRight className="w-3 h-3" />
+          <Link to={viewAll} className="flex items-center gap-1 text-[10px] md:text-xs uppercase text-muted-foreground font-semibold hover:text-foreground">
+            View all <ChevronRight className="w-3 h-3" />
           </Link>
         )}
       </div>
-      <div className="flex gap-2 md:gap-2.5 px-[4%] overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory">
+      <div className={`flex px-[4%] overflow-x-auto scrollbar-hide pb-5 snap-x snap-mandatory ${ranked ? "gap-4 md:gap-8" : "gap-3 md:gap-5"}`}>
         {isLoading
           ? Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex-shrink-0 w-[96px] sm:w-[120px] md:w-[140px] aspect-[2/3] rounded-md bg-card animate-pulse" />
+              <div key={i} className="flex-shrink-0 w-[108px] sm:w-[132px] md:w-[168px] aspect-[2/3] bg-card animate-pulse" />
             ))
           : items!.slice(0, 20).map((item, idx) => (
               <TmdbCard
