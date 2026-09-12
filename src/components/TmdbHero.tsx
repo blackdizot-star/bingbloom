@@ -30,7 +30,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   }, [index, slides.length]);
 
   if (isLoading || slides.length === 0) {
-    return <div className="relative w-full h-[42vh] sm:h-[55vh] md:h-[72vh] bg-gradient-to-br from-card to-background animate-pulse" />;
+    return <div className="relative w-full h-[68vh] min-h-[520px] md:h-[82vh] bg-card animate-pulse" />;
   }
 
   const item = slides[index];
@@ -40,7 +40,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   const showButtons = phase === "buttons";
 
   return (
-    <div className="relative w-full h-[42vh] sm:h-[55vh] md:h-[72vh] overflow-hidden">
+    <div className="relative w-full h-[68vh] min-h-[520px] md:h-[82vh] md:min-h-[650px] overflow-hidden">
       <img
         key={item.id}
         src={backdrop}
@@ -50,16 +50,16 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
         fetchPriority="high"
         decoding="async"
         style={{ transitionDuration: phase === "out" ? `${FADE_OUT}ms` : "1800ms" }}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity ease-out scale-105 ${fadeImg}`}
+         className={`absolute inset-0 w-full h-full object-cover grayscale-[25%] transition-opacity ease-out scale-105 ${fadeImg}`}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/55 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
 
-      <div className={`absolute bottom-8 md:bottom-20 left-0 right-0 px-[5%] max-w-3xl transition-opacity duration-500 ${phase === "out" ? "opacity-0" : "opacity-100"}`}>
-        <span className="text-[10px] md:text-xs font-semibold uppercase tracking-widest text-primary">
-          #{index + 1} Spotlight
+      <div className={`absolute bottom-12 md:bottom-24 left-0 right-0 px-[5%] max-w-4xl transition-opacity duration-500 ${phase === "out" ? "opacity-0" : "opacity-100"}`}>
+        <span className="inline-flex border border-border bg-card/60 px-3 py-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.25em] text-foreground backdrop-blur-xl">
+          Featured premiere · #{index + 1}
         </span>
-        <h1 key={`t-${item.id}`} className="mt-1.5 text-2xl md:text-5xl font-extrabold text-foreground leading-tight drop-shadow-2xl animate-fade-in">
+        <h1 key={`t-${item.id}`} className="mt-4 font-display text-5xl sm:text-6xl md:text-8xl text-foreground leading-[0.9] drop-shadow-2xl animate-fade-in">
           {item.title}
         </h1>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] md:text-sm text-foreground/90">
@@ -81,13 +81,13 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
         >
           <Link
             to={`/watch/movie/${item.id}`}
-            className="inline-flex items-center gap-2 rounded-full bg-white px-5 md:px-7 py-2.5 md:py-3 text-xs md:text-sm font-bold text-black transition hover:bg-white/90 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-sm bg-foreground px-6 md:px-9 py-3 text-xs md:text-sm font-bold text-background transition hover:opacity-90 active:scale-[0.98]"
           >
             <Play className="w-4 h-4 fill-current" /> Watch now
           </Link>
           <Link
             to={`/movie/${item.id}`}
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 md:px-7 py-2.5 md:py-3 text-xs md:text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/20"
+            className="inline-flex items-center gap-2 rounded-sm border border-border bg-card/70 px-6 md:px-9 py-3 text-xs md:text-sm font-semibold text-foreground backdrop-blur-md transition hover:bg-secondary"
           >
             <Info className="w-4 h-4" /> More info
           </Link>

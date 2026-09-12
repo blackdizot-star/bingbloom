@@ -13,7 +13,7 @@ const BottomNav = () => {
   const { pathname } = useLocation();
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 md:hidden border-t border-white/[0.06] bg-black/85 backdrop-blur-xl"
+      className="fixed inset-x-3 bottom-3 z-40 md:hidden rounded-2xl border border-border bg-card/90 shadow-2xl backdrop-blur-xl"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex items-stretch justify-between px-2 py-1">
@@ -25,7 +25,7 @@ const BottomNav = () => {
               <Link
                 to={t.to}
                 className={`flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-1.5 text-[10.5px] font-medium transition-colors duration-200 ${
-                  active ? "text-[#FF2D8F] bg-[#FF2D8F]/10" : "text-white/55 hover:text-white/80"
+                   active ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="h-[21px] w-[21px]" strokeWidth={active ? 2.2 : 1.7} />
