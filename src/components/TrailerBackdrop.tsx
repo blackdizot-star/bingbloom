@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { getStreamData } from "@/lib/piped";
+import { videoAdEmbedUrl, videoAdFor } from "@/lib/videoAds";
 
 interface Props {
   videoKey?: string | null;
   poster?: string | null;
   alt?: string;
+  adSeed?: string;
 }
 
 /** Muted, looping trailer that plays behind the detail-page hero. Falls back to the backdrop image. */
-const TrailerBackdrop = ({ videoKey, poster, alt }: Props) => {
+const TrailerBackdrop = ({ videoKey, poster, alt, adSeed }: Props) => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,6 +48,16 @@ const TrailerBackdrop = ({ videoKey, poster, alt }: Props) => {
           loop
           playsInline
           className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+      {!videoUrl && adSeed && (
+        <iframe
+          src={videoAdEmbedUrl(videoAdFor(adSeed), true)}
+          title={`${alt || "Title"} background video`}
+          className="pointer-events-none absolute inset-0 h-full w-full scale-125 border-0"
+          allow="autoplay; encrypted-media"
+          tabIndex={-1}
+          aria-hidden="true"
         />
       )}
     </>
