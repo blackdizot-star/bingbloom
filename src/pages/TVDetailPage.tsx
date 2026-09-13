@@ -8,6 +8,7 @@ import DownloadButton from "@/components/DownloadButton";
 import { useTvDetail, useTvSeason, useTvSimilar, useTvRecommendations, useTrendingTv, usePopularTv, useTopRatedTv } from "@/hooks/useTmdb";
 import { img } from "@/lib/tmdb";
 import InlineAdRow from "@/components/InlineAdRow";
+import TrailerBackdrop from "@/components/TrailerBackdrop";
 
 const TVDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -88,7 +89,7 @@ const TVDetailPage = () => {
       />
       <div className="relative">
         <div className="relative w-full h-[55vh] md:h-[70vh]">
-          {backdrop && <img src={backdrop} alt={data.name} className="absolute inset-0 w-full h-full object-cover" />}
+          <TrailerBackdrop videoKey={trailer?.key} poster={backdrop} alt={data.name} adSeed={`tv-${data.id}`} />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-transparent to-background/40" />
           <Link to="/home" className="absolute top-4 left-4 z-30 p-2 bg-black/50 rounded-full hover:bg-black/80 transition-colors backdrop-blur-md">

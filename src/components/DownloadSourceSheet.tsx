@@ -23,6 +23,8 @@ import {
   type MovieboxDownload,
 } from "@/lib/moviebox";
 import { startDownload } from "@/lib/offlineDownloads";
+import VideoAdGate from "@/components/VideoAdGate";
+import InAppBrowserSheet from "@/components/InAppBrowserSheet";
 
 type Source = "fast" | "external";
 type Step = "choose" | "loading" | "list" | "error" | "redirect";
@@ -61,6 +63,8 @@ const DownloadSourceSheet = ({
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [resolvedTitle, setResolvedTitle] = useState(title);
+  const [adPending, setAdPending] = useState(false);
+  const [browserOpen, setBrowserOpen] = useState(false);
 
   const isSeries = type === "tv";
   const episodeLabel = isSeries ? `S${season ?? 1} · E${episode ?? 1}` : year || "Movie";
@@ -95,10 +99,13 @@ const DownloadSourceSheet = ({
 
   // Open external downloader with title pre-filled (title only — no season/episode).
   const continueToExternal = () => {
-    const url = `${EXTERNAL_DOWNLOADER_URL}?q=${encodeURIComponent(title)}&title=${encodeURIComponent(title)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
-    toast.success("Opening external downloader…");
+    setAdPending(true);
+  };
+
+  const openExternalAfterAd = () => {
+    setAdPending(false);
     close(false);
+    setBrowserOpen(true);
   };
 
   // Reset to chooser whenever sheet (re)opens.
@@ -156,7 +163,10 @@ const DownloadSourceSheet = ({
   const onPick = (d: MovieboxDownload) =>
     source === "fast" ? startFastDownload(d) : startExternalDownload(d);
 
+  const externalUrl = `${EXTERNAL_DOWNLOADER_URL}?q=${encodeURIComponent(title)}&title=${encodeURIComponent(title)}`;
+
   return (
+    <>
     <Dialog open={open} onOpenChange={close}>
       <DialogContent className="max-w-sm bg-[#0f0f10] border-white/10 text-white p-0 overflow-hidden">
         {/* ---- Resolving ---- */}
@@ -292,6 +302,14 @@ const DownloadSourceSheet = ({
         )}
       </DialogContent>
     </Dialog>
+    {adPending && <VideoAdGate seed={`download-${itemId}`} onFinish={openExternalAfterAd} />}
+    <InAppBrowserSheet
+      open={browserOpen}
+      onOpenChange={setBrowserOpen}
+      url={externalUrl}
+      title={`Download ${title}`}
+    />
+    </>
   );
 };
 

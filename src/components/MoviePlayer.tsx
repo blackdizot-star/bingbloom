@@ -194,7 +194,7 @@ const MoviePlayer = ({
           />
         )}
 
-        {!adDone && <PreRollAd onFinish={() => setAdDone(true)} />}
+        {!adDone && <PreRollAd seed={`${type}-${tmdbId}-${season}-${episode}`} onFinish={() => setAdDone(true)} />}
 
         {adDone && loading && !error && <PlayerBrandLoader variant="loading" label="Loading stream…" />}
 

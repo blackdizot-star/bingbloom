@@ -1,9 +1,9 @@
-import { Home, Film, Flame, Drama, Bookmark } from "lucide-react";
+import { Home, Film, Grid2X2, Drama, Bookmark } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const tabs = [
   { to: "/home", icon: Home, label: "Home", match: (p: string) => p === "/" || p === "/home" },
-  { to: "/search", icon: Flame, label: "Explore", match: (p: string) => p.startsWith("/search") },
+  { to: "/search", icon: Grid2X2, label: "Explore", match: (p: string) => p.startsWith("/search") },
   { to: "/movies", icon: Film, label: "Movies", match: (p: string) => p.startsWith("/movies") || p.startsWith("/tv") },
   { to: "/anime", icon: Drama, label: "Anime", match: (p: string) => p.startsWith("/anime") },
   { to: "/my-list", icon: Bookmark, label: "Watchlist", match: (p: string) => p.startsWith("/my-list") || p.startsWith("/my-downloads") },

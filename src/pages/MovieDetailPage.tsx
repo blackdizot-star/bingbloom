@@ -90,7 +90,7 @@ const MovieDetailPage = () => {
       />
       <div className="relative">
         <div className="relative w-full h-[55vh] md:h-[70vh] overflow-hidden">
-          <TrailerBackdrop videoKey={trailer?.key} poster={backdrop} alt={data.title} />
+          <TrailerBackdrop videoKey={trailer?.key} poster={backdrop} alt={data.title} adSeed={`movie-${data.id}`} />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-transparent to-background/40" />
           <Link to="/home" className="absolute top-4 left-4 z-30 p-2 bg-black/50 rounded-full hover:bg-black/80 transition-colors backdrop-blur-md">

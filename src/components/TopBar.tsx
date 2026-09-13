@@ -121,7 +121,7 @@ const TopBar = () => {
           {/* Right cluster — mobile: install, search, profile, settings (rightmost) */}
           <div className="flex items-center gap-1 flex-shrink-0">
             <a
-              href="https://bingbloomdownload.lovable.app"
+               href="https://movienoir.lovable.app/install"
               target="_blank"
               rel="noopener noreferrer"
               className="md:hidden inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-primary-foreground shadow-[0_2px_8px_rgba(255,45,143,0.45)]"
@@ -130,7 +130,7 @@ const TopBar = () => {
               <Download className="h-3 w-3" /> Install
             </a>
             <a
-              href="https://bingbloomdownload.lovable.app"
+               href="https://movienoir.lovable.app/install"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground shadow-[0_2px_10px_rgba(255,45,143,0.45)] hover:brightness-110"
