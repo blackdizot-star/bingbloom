@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">BingBloom</string>
-    <string name="title_activity_main">BingBloom</string>
+    <string name="app_name">MovieNoir</string>
+    <string name="title_activity_main">MovieNoir</string>
     <string name="package_name">com.movienoir.app</string>
     <string name="custom_url_scheme">com.movienoir.app</string>
 </resources>
