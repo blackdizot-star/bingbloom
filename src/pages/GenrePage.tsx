@@ -32,11 +32,11 @@ const GenrePage = () => {
     queryFn: async () => {
       let url: string;
       if (genre === "trending") {
-        url = `${TMDB_BASE}/trending/movie/week?api_key=${TMDB_KEY}`;
+        url = `${TMDB_PROXY}/trending/movie/week`;
       } else if (genre === "new-releases") {
-        url = `${TMDB_BASE}/movie/now_playing?api_key=${TMDB_KEY}`;
+        url = `${TMDB_PROXY}/movie/now_playing`;
       } else {
-        url = `${TMDB_BASE}/discover/movie?api_key=${TMDB_KEY}&with_genres=${info.id}&sort_by=popularity.desc`;
+        url = `${TMDB_PROXY}/discover/movie?with_genres=${info.id}&sort_by=popularity.desc`;
       }
       const res = await fetch(url);
       const data = await res.json();
@@ -51,7 +51,7 @@ const GenrePage = () => {
         backdrop: m.backdrop_path ? `${TMDB_IMG}/w780${m.backdrop_path}` : "",
       }));
     },
-    enabled: !!TMDB_KEY,
+    enabled: !!genre,
   });
 
   return (
