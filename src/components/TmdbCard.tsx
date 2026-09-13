@@ -12,6 +12,7 @@ interface TmdbCardProps {
 
 /** NowAnime/MovieBox-style compact poster card. */
 const TmdbCard = ({ item, type, width, fill, rank }: TmdbCardProps) => {
+  const ranked = rank !== undefined;
   const mediaType = type || item.media_type || (item.first_air_date ? "tv" : "movie");
   const to = `/${mediaType}/${item.id}`;
   const year = (item.release_date || item.first_air_date || "").slice(0, 4);
