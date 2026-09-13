@@ -4,9 +4,10 @@ import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import type { NormalizedVideo } from "@/hooks/useKenyaContent";
 
-const TMDB_BASE = "https://api.themoviedb.org/3";
+// Route TMDB calls through the tmdb-proxy edge function so the API key
+// stays server-side and is never shipped in the client bundle.
+const TMDB_PROXY = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tmdb-proxy`;
 const TMDB_IMG = "https://image.tmdb.org/t/p";
-const TMDB_KEY = import.meta.env.VITE_TMDB_API_KEY || "";
 
 const GENRE_MAP: Record<string, { name: string; id: number }> = {
   action: { name: "Action", id: 28 },
