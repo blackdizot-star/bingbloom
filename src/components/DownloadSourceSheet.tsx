@@ -23,7 +23,6 @@ import {
   type MovieboxDownload,
 } from "@/lib/moviebox";
 import { startDownload } from "@/lib/offlineDownloads";
-import VideoAdGate from "@/components/VideoAdGate";
 import InAppBrowserSheet from "@/components/InAppBrowserSheet";
 
 type Source = "fast" | "external";
@@ -63,7 +62,6 @@ const DownloadSourceSheet = ({
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [resolvedTitle, setResolvedTitle] = useState(title);
-  const [adPending, setAdPending] = useState(false);
   const [browserOpen, setBrowserOpen] = useState(false);
 
   const isSeries = type === "tv";
@@ -99,11 +97,6 @@ const DownloadSourceSheet = ({
 
   // Open external downloader with title pre-filled (title only — no season/episode).
   const continueToExternal = () => {
-    setAdPending(true);
-  };
-
-  const openExternalAfterAd = () => {
-    setAdPending(false);
     close(false);
     setBrowserOpen(true);
   };
@@ -302,7 +295,7 @@ const DownloadSourceSheet = ({
         )}
       </DialogContent>
     </Dialog>
-    {adPending && <VideoAdGate seed={`download-${itemId}`} onFinish={openExternalAfterAd} />}
+    
     <InAppBrowserSheet
       open={browserOpen}
       onOpenChange={setBrowserOpen}
