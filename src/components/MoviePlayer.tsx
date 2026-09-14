@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { RefreshCw, Expand, WifiOff, CloudDownload } from "lucide-react";
+import { RefreshCw, Expand, WifiOff, CloudDownload, Bookmark, BookmarkCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isDownloaded } from "@/lib/offlineDownloads";
 import DownloadButton from "@/components/DownloadButton";
 import PlayerBrandLoader from "@/components/PlayerBrandLoader";
 import PreRollAd from "@/components/PreRollAd";
+import { isInMyList, toggleMyList } from "@/hooks/useMyList";
 
 export type ServerId = "vidsrc" | "111movies" | "smashy" | "videasy";
 
@@ -82,9 +83,12 @@ const MoviePlayer = ({
   const online = useOnlineStatus();
   const [savedOffline, setSavedOffline] = useState(false);
   const [adDone, setAdDone] = useState(false);
+  const watchlistId = `${type}-${tmdbId}`;
+  const [inWatchlist, setInWatchlist] = useState(() => isInMyList(watchlistId));
 
   useEffect(() => {
     setAdDone(false);
+    setInWatchlist(isInMyList(`${type}-${tmdbId}`));
   }, [tmdbId, type, season, episode]);
 
   const src = embedUrl(server, tmdbId, type, season, episode);
@@ -92,6 +96,19 @@ const MoviePlayer = ({
   const pickServer = (id: ServerId) => {
     setInternalServer(id);
     onServerChange?.(id);
+  };
+
+  const toggleWatchlist = () => {
+    if (!title) return;
+    const added = toggleMyList({
+      id: watchlistId,
+      title,
+      thumbnail: poster || backdrop || "",
+      channel: year || (type === "tv" ? "TV Show" : "Movie"),
+      views: "",
+      duration: "",
+    });
+    setInWatchlist(added);
   };
 
   useEffect(() => {
@@ -215,42 +232,44 @@ const MoviePlayer = ({
         )}
       </div>
 
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-background border-t border-border/60 flex-wrap">
-        <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
-          Source
-        </span>
-        <div className="flex gap-1 flex-wrap">
-          {PLAYER_SERVERS.map((s) => {
-            const active = s.id === server;
-            return (
-              <button
-                key={s.id}
-                onClick={() => pickServer(s.id)}
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold transition ${
-                  active
-                    ? "bg-primary/25 border border-primary/60 text-foreground"
-                    : "bg-foreground/10 border border-border text-foreground/80"
-                }`}
-              >
-                {s.label}
-              </button>
-            );
-          })}
-        </div>
+      <div className="flex items-center gap-1.5 border-t border-border/60 bg-background px-3 py-2">
+        <label htmlFor={`source-${tmdbId}`} className="sr-only">Stream source</label>
+        <select
+          id={`source-${tmdbId}`}
+          value={server}
+          onChange={(event) => pickServer(event.target.value as ServerId)}
+          className="h-8 min-w-0 flex-1 rounded-md border border-border bg-card px-2 text-xs font-semibold text-foreground outline-none focus:ring-1 focus:ring-primary sm:max-w-40"
+          aria-label="Stream source"
+        >
+          {PLAYER_SERVERS.map((source) => (
+            <option key={source.id} value={source.id}>{source.label}</option>
+          ))}
+        </select>
 
-        <div className="flex items-center gap-1.5 ml-auto">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
           {title && (
-            <DownloadButton
-              size="sm"
-              type={type}
-              tmdbId={tmdbId}
-              title={title}
-              year={year}
-              poster={poster}
-              backdrop={backdrop}
-              season={type === "tv" ? season : undefined}
-              episode={type === "tv" ? episode : undefined}
-            />
+            <>
+              <button
+                type="button"
+                onClick={toggleWatchlist}
+                title={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+                aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+                className="grid h-8 w-8 place-items-center rounded-md border border-border/60 text-foreground hover:bg-foreground/10"
+              >
+                {inWatchlist ? <BookmarkCheck className="h-4 w-4 text-primary" /> : <Bookmark className="h-4 w-4" />}
+              </button>
+              <DownloadButton
+                size="icon"
+                type={type}
+                tmdbId={tmdbId}
+                title={title}
+                year={year}
+                poster={poster}
+                backdrop={backdrop}
+                season={type === "tv" ? season : undefined}
+                episode={type === "tv" ? episode : undefined}
+              />
+            </>
           )}
           <button
             onClick={toggleFullscreen}

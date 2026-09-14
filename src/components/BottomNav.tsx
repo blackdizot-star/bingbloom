@@ -13,10 +13,10 @@ const BottomNav = () => {
   const { pathname } = useLocation();
   return (
     <nav
-      className="fixed inset-x-3 bottom-3 z-40 md:hidden rounded-2xl border border-border bg-card/90 shadow-2xl backdrop-blur-xl"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 shadow-2xl backdrop-blur-xl md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto flex items-stretch justify-between px-2 py-1">
+      <ul className="mx-auto flex max-w-lg items-stretch justify-between px-2 py-1">
         {tabs.map((t) => {
           const active = t.match(pathname);
           const Icon = t.icon;
@@ -24,7 +24,7 @@ const BottomNav = () => {
             <li key={t.to} className="flex-1 min-w-0">
               <Link
                 to={t.to}
-                className={`flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-2xl px-1 py-1.5 text-[10.5px] font-medium transition-colors duration-200 ${
+                className={`flex min-h-[52px] flex-col items-center justify-center gap-1 rounded-md px-1 py-1.5 text-[10.5px] font-medium transition-colors duration-200 ${
                    active ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
