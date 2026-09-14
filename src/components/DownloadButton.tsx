@@ -41,10 +41,11 @@ const DownloadButton = ({ type, tmdbId, title, year, season, episode, poster, ba
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSourceOpen(true); }}
-          className="w-6 h-6 grid place-items-center rounded-full bg-black/70 hover:bg-[#FF2D8F] transition-colors"
-          aria-label="Download episode"
+          className="grid h-8 w-8 place-items-center rounded-md border border-border/60 bg-card text-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
+          aria-label="Download"
+          title="Download"
         >
-          <Download className="w-3 h-3 text-white" strokeWidth={2.5} />
+          <Download className="h-4 w-4" strokeWidth={2.5} />
         </button>
         {sheet}
       </>
