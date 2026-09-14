@@ -97,11 +97,6 @@ const DownloadSourceSheet = ({
 
   // Open external downloader with title pre-filled (title only — no season/episode).
   const continueToExternal = () => {
-    openExternalAfterAd();
-  };
-
-  const openExternalAfterAd = () => {
-    setAdPending(false);
     close(false);
     setBrowserOpen(true);
   };
