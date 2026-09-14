@@ -99,7 +99,7 @@ const DownloadSourceSheet = ({
 
   // Open external downloader with title pre-filled (title only — no season/episode).
   const continueToExternal = () => {
-    setAdPending(true);
+    openExternalAfterAd();
   };
 
   const openExternalAfterAd = () => {
@@ -302,7 +302,7 @@ const DownloadSourceSheet = ({
         )}
       </DialogContent>
     </Dialog>
-    {adPending && <VideoAdGate seed={`download-${itemId}`} onFinish={openExternalAfterAd} />}
+    
     <InAppBrowserSheet
       open={browserOpen}
       onOpenChange={setBrowserOpen}

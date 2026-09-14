@@ -1,25 +1,18 @@
-export const VIDEO_AD_IDS = [
-  "AK8s3iqL99c",
-  "qbVq3I_fjSE",
-  "YzVYyDehMUY",
-  "qk3T58Pai18",
-  "twd6fz0pfGA",
-] as const;
+export const VIDEO_AD_ID = "qbVq3I_fjSE";
 
-export const videoAdFor = (seed: string | number) => {
-  const value = String(seed);
-  const hash = Array.from(value).reduce((total, character) => total + character.charCodeAt(0), 0);
-  return VIDEO_AD_IDS[hash % VIDEO_AD_IDS.length];
-};
+export const VIDEO_AD_IDS = [VIDEO_AD_ID] as const;
 
-export const videoAdEmbedUrl = (videoId: string, loop = false) => {
+export const videoAdFor = (_seed?: string | number) => VIDEO_AD_ID;
+
+export const videoAdEmbedUrl = (videoId: string = VIDEO_AD_ID, loop = false) => {
   const params = new URLSearchParams({
     autoplay: "1",
-    mute: "1",
+    mute: "0",
     controls: "0",
     playsinline: "1",
     rel: "0",
     modestbranding: "1",
+    enablejsapi: "1",
   });
   if (loop) {
     params.set("loop", "1");
