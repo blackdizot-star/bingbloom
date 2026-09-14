@@ -12,7 +12,9 @@ export const videoAdEmbedUrl = (videoId: string = VIDEO_AD_ID, loop = false) => 
     playsinline: "1",
     rel: "0",
     modestbranding: "1",
-    enablejsapi: "1",
+    disablekb: "1",
+    fs: "0",
+    iv_load_policy: "3",
   });
   if (loop) {
     params.set("loop", "1");
