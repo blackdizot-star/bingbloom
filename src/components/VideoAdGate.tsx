@@ -32,7 +32,8 @@ const VideoAdGate = ({ onFinish, seed, variant = "modal" }: Props) => {
           src={videoAdEmbedUrl(videoId)}
           title="Advertisement"
           className="absolute inset-0 h-full w-full border-0"
-          allow="autoplay; encrypted-media; picture-in-picture"
+          allow="autoplay; unmuted-autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
         />
         <span className="absolute left-3 top-3 rounded-md bg-background/80 px-2 py-1 text-[10px] font-semibold uppercase text-foreground">
           Ad

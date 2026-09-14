@@ -23,7 +23,6 @@ import {
   type MovieboxDownload,
 } from "@/lib/moviebox";
 import { startDownload } from "@/lib/offlineDownloads";
-import VideoAdGate from "@/components/VideoAdGate";
 import InAppBrowserSheet from "@/components/InAppBrowserSheet";
 
 type Source = "fast" | "external";
@@ -63,7 +62,6 @@ const DownloadSourceSheet = ({
   const [downloads, setDownloads] = useState<MovieboxDownload[]>([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [resolvedTitle, setResolvedTitle] = useState(title);
-  const [adPending, setAdPending] = useState(false);
   const [browserOpen, setBrowserOpen] = useState(false);
 
   const isSeries = type === "tv";
