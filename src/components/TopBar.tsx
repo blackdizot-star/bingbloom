@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate, NavLink } from "react-router-dom";
-import { Search, X, Menu, Home, Film, Tv, Clapperboard, Radio, Palette, Camera, User, Mic2, Bookmark, Heart, Settings, Shield, Download } from "lucide-react";
+import { Search, X, Menu, Home, Film, Tv, Clapperboard, Radio, User, Bookmark, Heart, Settings, Shield, Download } from "lucide-react";
 import { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
 
@@ -8,10 +8,7 @@ const primaryNav = [
   { to: "/movies", label: "Movies", icon: Film },
   { to: "/tv", label: "TV Shows", icon: Tv },
   { to: "/anime", label: "Anime", icon: Clapperboard },
-  { to: "/animation", label: "Animation", icon: Palette },
-  { to: "/documentary", label: "Documentary", icon: Camera },
-  { to: "/live-tv", label: "Live TV", icon: Radio },
-  { to: "/podcasts", label: "Podcasts", icon: Mic2 },
+  { to: "https://opencasttv.lovable.app", label: "Live TV", icon: Radio, external: true },
 ];
 
 const drawerExtras = [
@@ -81,22 +78,25 @@ const TopBar = () => {
 
           {/* Desktop horizontal nav — centered */}
           <nav className="hidden md:flex items-center gap-0.5 mx-auto overflow-x-auto scrollbar-hide">
-            {primaryNav.map(({ to, label, icon: Icon }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 px-3.5 py-2 rounded-full text-[14px] font-semibold whitespace-nowrap transition-colors ${
-                    isActive
-                      ? "text-white bg-white/15"
-                      : "text-white/65 hover:text-white hover:bg-white/[0.08]"
-                  }`
-                }
-              >
-                <Icon className="w-[18px] h-[18px]" />
-                {label}
-              </NavLink>
-            ))}
+            {primaryNav.map(({ to, label, icon: Icon, external }) => {
+              const classes = "flex items-center gap-2 px-3.5 py-2 rounded-full text-[14px] font-semibold whitespace-nowrap transition-colors text-white/65 hover:text-white hover:bg-white/[0.08]";
+              if (external) {
+                return (
+                  <a key={to} href={to} target="_blank" rel="noopener noreferrer" className={classes}>
+                    <Icon className="w-[18px] h-[18px]" /> {label}
+                  </a>
+                );
+              }
+              return (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) => `${classes} ${isActive ? "text-white bg-white/15" : ""}`}
+                >
+                  <Icon className="w-[18px] h-[18px]" /> {label}
+                </NavLink>
+              );
+            })}
           </nav>
 
           {/* Desktop search input */}
@@ -194,8 +194,22 @@ const TopBar = () => {
               </button>
             </div>
             <nav className="flex-1 overflow-y-auto p-2.5 flex flex-col gap-0.5">
-              {primaryNav.map(({ to, label, icon: Icon }) => {
+              {primaryNav.map(({ to, label, icon: Icon, external }) => {
                 const active = location.pathname === to;
+                if (external) {
+                  return (
+                    <a
+                      key={to}
+                      href={to}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setDrawerOpen(false)}
+                      className="flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-foreground/80 hover:bg-secondary"
+                    >
+                      <Icon className="w-[18px] h-[18px]" /> {label}
+                    </a>
+                  );
+                }
                 return (
                   <Link
                     key={to}

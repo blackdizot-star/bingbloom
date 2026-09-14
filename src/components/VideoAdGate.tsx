@@ -31,9 +31,9 @@ const VideoAdGate = ({ onFinish, seed, variant = "modal" }: Props) => {
         <iframe
           src={videoAdEmbedUrl(videoId)}
           title="Advertisement"
-          className="absolute inset-0 h-full w-full border-0"
-          allow="autoplay; unmuted-autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
+          className="pointer-events-none absolute -inset-[7%] h-[114%] w-[114%] border-0"
+          allow="autoplay; unmuted-autoplay; encrypted-media"
+          tabIndex={-1}
         />
         <span className="absolute left-3 top-3 rounded-md bg-background/80 px-2 py-1 text-[10px] font-semibold uppercase text-foreground">
           Ad
