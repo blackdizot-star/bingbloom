@@ -4,6 +4,8 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import MoviePlayer, { ServerId } from "@/components/MoviePlayer";
 import SEO from "@/components/SEO";
 import InlineAdRow from "@/components/InlineAdRow";
+import NativeAd from "@/components/NativeAd";
+import ResponsiveScriptAd from "@/components/ResponsiveScriptAd";
 
 
 import TmdbRow from "@/components/TmdbRow";
@@ -62,6 +64,7 @@ const MovieWatchPage = () => {
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-6 lg:px-4 lg:pt-3">
           <div className="min-w-0">
             <div className="w-full md:max-w-2xl md:mx-auto lg:max-w-[820px] lg:mx-0">
+              <ResponsiveScriptAd className="border-b border-border/40" />
               <MoviePlayer
                 tmdbId={tmdbId || ""}
                 type="movie"
@@ -85,6 +88,8 @@ const MovieWatchPage = () => {
                     {year}{data.runtime ? ` · ${data.runtime} min` : ""}
                   </p>
                 </div>
+
+                <NativeAd compact height={110} desktopHeight={160} className="!px-0 !my-3" />
 
                 {/* Mobile/tablet: horizontal suggestions. Desktop shows list in sidebar. */}
                 <section className="mt-4 lg:hidden">

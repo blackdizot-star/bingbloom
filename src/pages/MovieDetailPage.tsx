@@ -10,6 +10,8 @@ import { useMovieDetail, useMovieSimilar, useMovieRecommendations, useTrendingMo
 import { img } from "@/lib/tmdb";
 import DownloadButton from "@/components/DownloadButton";
 import InlineAdRow from "@/components/InlineAdRow";
+import NativeAd from "@/components/NativeAd";
+import ResponsiveScriptAd from "@/components/ResponsiveScriptAd";
 import { movieSchema } from "@/lib/seoSchemas";
 
 const MovieDetailPage = () => {
@@ -88,6 +90,7 @@ const MovieDetailPage = () => {
           actors: actorNames,
         })}
       />
+      <ResponsiveScriptAd className="border-b border-border/40 bg-background" />
       <div className="relative">
         <div className="relative w-full h-[55vh] md:h-[70vh] overflow-hidden">
           <TrailerBackdrop videoKey={trailer?.key} poster={backdrop} alt={data.title} adSeed={`movie-${data.id}`} />
@@ -127,6 +130,7 @@ const MovieDetailPage = () => {
                 ))}
               </div>
               <p className="text-xs md:text-sm text-foreground/80 leading-relaxed mb-5 max-w-3xl">{data.overview}</p>
+              <NativeAd compact height={110} desktopHeight={160} className="!px-0 !my-3 max-w-2xl" />
               <div className="flex flex-wrap gap-3">
                 <Link
                   to={`/watch/movie/${data.id}`}
