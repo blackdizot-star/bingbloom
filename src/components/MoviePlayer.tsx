@@ -8,13 +8,25 @@ import PlayerBrandLoader from "@/components/PlayerBrandLoader";
 import PreRollAd from "@/components/PreRollAd";
 import { isInMyList, toggleMyList } from "@/hooks/useMyList";
 
-export type ServerId = "vidsrc" | "111movies" | "smashy" | "videasy";
+export type ServerId =
+  | "vidbolt"
+  | "cinesrc"
+  | "vidcore"
+  | "vidnest"
+  | "vidlink"
+  | "vidsrcme"
+  | "vidgod"
+  | "filmu";
 
-export const PLAYER_SERVERS: { id: ServerId; label: string }[] = [
-  { id: "vidsrc", label: "VidSrc" },
-  { id: "111movies", label: "111Movies" },
-  { id: "smashy", label: "Smashy" },
-  { id: "videasy", label: "Videasy" },
+export const PLAYER_SERVERS: { id: ServerId; label: string; origin: string }[] = [
+  { id: "vidbolt", label: "VidBolt", origin: "https://vidbolt.xyz" },
+  { id: "cinesrc", label: "Nova", origin: "https://cinesrc.st" },
+  { id: "vidcore", label: "Crimson", origin: "https://vidcore.io" },
+  { id: "vidnest", label: "Helix", origin: "https://vidnest.fun" },
+  { id: "vidlink", label: "Astra", origin: "https://vidlink.pro" },
+  { id: "vidsrcme", label: "Ironclad", origin: "https://vidsrcme.ru" },
+  { id: "vidgod", label: "Vale", origin: "https://vidgod.site" },
+  { id: "filmu", label: "Lumen", origin: "https://embed.filmu.in" },
 ];
 
 const embedUrl = (
@@ -24,26 +36,11 @@ const embedUrl = (
   season: number,
   episode: number,
 ): string => {
-  const isTv = type === "tv";
-  switch (server) {
-    case "111movies":
-      return isTv
-        ? `https://111movies.com/tv/${tmdbId}/${season}/${episode}`
-        : `https://111movies.com/movie/${tmdbId}`;
-    case "smashy":
-      return isTv
-        ? `https://player.smashy.stream/tv/${tmdbId}?s=${season}&e=${episode}`
-        : `https://player.smashy.stream/movie/${tmdbId}`;
-    case "videasy":
-      return isTv
-        ? `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}`
-        : `https://player.videasy.net/movie/${tmdbId}`;
-    case "vidsrc":
-    default:
-      return isTv
-        ? `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`
-        : `https://vidsrc.to/embed/movie/${tmdbId}`;
-  }
+  const origin =
+    PLAYER_SERVERS.find((s) => s.id === server)?.origin || PLAYER_SERVERS[0].origin;
+  return type === "tv"
+    ? `${origin}/tv/${tmdbId}/${season}/${episode}`
+    : `${origin}/movie/${tmdbId}`;
 };
 
 interface Props {
@@ -77,7 +74,7 @@ const MoviePlayer = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  const [internalServer, setInternalServer] = useState<ServerId>("vidsrc");
+  const [internalServer, setInternalServer] = useState<ServerId>("vidbolt");
   const server = serverId ?? internalServer;
   const containerRef = useRef<HTMLDivElement>(null);
   const online = useOnlineStatus();

@@ -63,7 +63,7 @@ const BingTvChannel = () => {
               key={current.id}
               tmdbId={String(current.id)}
               type="movie"
-              serverId="vidsrc"
+              serverId="vidbolt"
               onServerChange={() => {}}
               title={current.title}
               year={(current.release_date || "").slice(0, 4)}
