@@ -17,7 +17,7 @@ const TvWatchPage = () => {
   const seasonNum = Number(season || 1);
   const episodeNum = Number(episode || 1);
   const [activeSeason, setActiveSeason] = useState<number>(seasonNum);
-  const [server, setServer] = useState<ServerId>("vidsrc");
+  const [server, setServer] = useState<ServerId>("vidbolt");
   useEffect(() => setActiveSeason(seasonNum), [seasonNum]);
   const seasonQuery = useTvSeason(tmdbId, activeSeason);
   const seasons = (data?.seasons || []).filter((s: any) => s.season_number > 0);
