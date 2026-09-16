@@ -149,7 +149,7 @@ const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void 
 
 const SearchPage = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const initialQ = searchParams.get("q") || "";
   const [query, setQuery] = useState(initialQ);
   const [searchQuery, setSearchQuery] = useState(initialQ);
@@ -218,8 +218,9 @@ const SearchPage = () => {
   );
 
   const handleSearch = (q: string) => {
-    setSearchQuery(q.trim());
-    setSearchParams(q.trim() ? { q: q.trim() } : {});
+    const nextQuery = q.trim();
+    setSearchQuery(nextQuery);
+    navigate(nextQuery ? `/search?q=${encodeURIComponent(nextQuery)}` : "/search", { replace: true });
     setSuggestOpen(false);
   };
 
