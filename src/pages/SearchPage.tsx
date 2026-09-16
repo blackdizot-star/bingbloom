@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 
-import InlineAdRow from "@/components/InlineAdRow";
 import NativeAd from "@/components/NativeAd";
 import ResponsiveScriptAd from "@/components/ResponsiveScriptAd";
 
@@ -270,7 +269,6 @@ const SearchPage = () => {
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSuggestOpen(true); }}
               onFocus={() => setSuggestOpen(true)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch(query)}
               placeholder="Search movies, shows, genres..."
               className="flex-1 bg-transparent text-white text-xs placeholder:text-white/50 outline-none"
             />
