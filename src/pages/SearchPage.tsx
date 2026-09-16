@@ -270,6 +270,11 @@ const SearchPage = () => {
               value={query}
               onChange={(e) => { setQuery(e.target.value); setSuggestOpen(true); }}
               onFocus={() => setSuggestOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter") return;
+                event.preventDefault();
+                handleSearch(event.currentTarget.value);
+              }}
               placeholder="Search movies, shows, genres..."
               className="flex-1 bg-transparent text-white text-xs placeholder:text-white/50 outline-none"
             />
