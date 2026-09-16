@@ -6,6 +6,8 @@ import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 
 import InlineAdRow from "@/components/InlineAdRow";
+import NativeAd from "@/components/NativeAd";
+import ResponsiveScriptAd from "@/components/ResponsiveScriptAd";
 
 import {
   searchMovies,
@@ -119,8 +121,7 @@ const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void 
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-xl overflow-hidden hover:scale-[1.02] transition-transform"
-      style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.06)" }}
+      className="min-w-0 overflow-hidden rounded-md border border-border bg-card text-left transition-transform hover:scale-[1.02]"
     >
       <div className="relative w-full aspect-[2/3] bg-black">
         {poster ? (
@@ -128,8 +129,8 @@ const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void 
         ) : (
           <div className="w-full h-full grid place-items-center text-white/25 text-[9px]">No art</div>
         )}
-        <span className="absolute bottom-1 right-1 grid place-items-center w-5 h-5 rounded-full bg-[#FF2D8F]">
-          <Play className="w-2.5 h-2.5 text-white fill-white" />
+        <span className="absolute bottom-1 right-1 grid h-4 w-4 place-items-center rounded-full bg-primary sm:h-5 sm:w-5">
+          <Play className="h-2 w-2 fill-primary-foreground text-primary-foreground sm:h-2.5 sm:w-2.5" />
         </span>
         {!!item.vote_average && (
           <span className="absolute top-1 left-1 flex items-center gap-0.5 px-1 py-0.5 rounded bg-black/70 text-[9px] font-semibold text-amber-400">
@@ -137,9 +138,9 @@ const ExploreCard = ({ item, onClick }: { item: ResultItem; onClick: () => void 
           </span>
         )}
       </div>
-      <div className="p-1.5">
-        <h3 className="text-[11px] font-bold text-white line-clamp-1 leading-tight">{title}</h3>
-        <p className="text-[9.5px] text-white/55 mt-0.5 line-clamp-1">
+      <div className="p-1 sm:p-1.5">
+        <h3 className="line-clamp-1 text-[8px] font-bold leading-tight text-foreground sm:text-[11px]">{title}</h3>
+        <p className="mt-0.5 line-clamp-1 text-[7px] text-muted-foreground sm:text-[9.5px]">
           {item._type === "tv" ? "Series" : "Movie"}{date ? ` · ${date.slice(0, 4)}` : ""}
         </p>
       </div>
@@ -223,6 +224,12 @@ const SearchPage = () => {
     setSuggestOpen(false);
   };
 
+  useEffect(() => {
+    const urlQuery = searchParams.get("q") || "";
+    setQuery(urlQuery);
+    setSearchQuery(urlQuery);
+  }, [searchParams]);
+
   const openItem = (item: ResultItem) =>
     navigate(item._type === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`);
 
@@ -249,13 +256,14 @@ const SearchPage = () => {
         title={searchQuery ? `${searchQuery} – Search – MovieNoir` : "Explore – MovieNoir"}
         description={searchQuery ? `Search results for "${searchQuery}" on MovieNoir.` : "Explore movies, TV series, anime and animation on MovieNoir."}
       />
-      <div className="px-5 pt-4" style={{ background: "#000" }}>
+      <ResponsiveScriptAd className="border-b border-border/40 bg-background" />
+      <div className="bg-background px-3 pt-3 sm:px-5 sm:pt-4">
         {/* Search bar */}
         <div ref={wrapRef} className="relative flex items-center gap-2 mb-4">
           <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-white/5">
             <ArrowLeft className="w-4 h-4 text-white" />
           </button>
-          <div className="flex-1 flex items-center gap-2 rounded-full px-3 py-2" style={{ background: "#141414", border: "1px solid rgba(255,255,255,0.08)" }}>
+          <form className="flex flex-1 items-center gap-2 rounded-full border border-border bg-card px-3 py-2" onSubmit={(event) => { event.preventDefault(); handleSearch(query); }}>
             <Search className="w-3.5 h-3.5 text-white/50" />
             <input
               type="text"
@@ -271,7 +279,10 @@ const SearchPage = () => {
                 clear
               </button>
             )}
-          </div>
+            <button type="submit" aria-label="Search" className="grid h-6 w-6 flex-shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+              <Search className="h-3 w-3" />
+            </button>
+          </form>
 
           {/* YouTube-style live suggestions */}
           {suggestOpen && liveSuggest.length > 0 && (
@@ -316,14 +327,14 @@ const SearchPage = () => {
               <BrandedLoadingState label="Loading trending" />
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-2 pb-4">
+                <div className="grid grid-cols-4 gap-1.5 pb-4 sm:grid-cols-4 sm:gap-2 md:grid-cols-5 lg:grid-cols-6">
                   {(results as ResultItem[]).slice(0, 24).map((m, i) => (
                     <div key={`sg-${m._type}-${m.id}`} className="contents">
                       <ExploreCard item={m} onClick={() => openItem(m)} />
-                      {(i === 5 || i === 11 || i === 17) && (
-                        <div className="col-span-3 -mx-5 my-1">
+                      {(i + 1) % 8 === 0 && i < 23 && (
+                        <div className="col-span-4 -mx-3 my-1 sm:-mx-5 md:col-span-5 lg:col-span-6">
                           <SponsoredLabel />
-                          <InlineAdRow count={4} />
+                          <NativeAd compact height={110} desktopHeight={160} />
                         </div>
                       )}
                     </div>
@@ -375,14 +386,14 @@ const SearchPage = () => {
                 <p className="text-[10px] text-white/50 mb-2">
                   {filtered.length} result{filtered.length === 1 ? "" : "s"} for "{searchQuery}"
                 </p>
-                <div className="space-y-2 pb-4">
+                <div className="grid grid-cols-4 gap-1.5 pb-4 sm:grid-cols-4 sm:gap-2 md:grid-cols-5 lg:grid-cols-6">
                   {filtered.map((item, i) => (
-                    <div key={`${item._type}-${item.id}`}>
-                      <ResultRow item={item} onClick={() => openItem(item)} />
-                      {(i + 1) % 6 === 0 && i < filtered.length - 1 && (
-                        <div className="-mx-5 my-2">
+                    <div key={`${item._type}-${item.id}`} className="contents">
+                      <ExploreCard item={item} onClick={() => openItem(item)} />
+                      {(i + 1) % 8 === 0 && i < filtered.length - 1 && (
+                        <div className="col-span-4 -mx-3 my-1 sm:-mx-5 md:col-span-5 lg:col-span-6">
                           <SponsoredLabel />
-                          <InlineAdRow count={4} />
+                          <NativeAd compact height={110} desktopHeight={160} />
                         </div>
                       )}
                     </div>

@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
+import ResponsiveScriptAd from "@/components/ResponsiveScriptAd";
 
 const AnimePage = () => {
   return (
@@ -10,6 +11,7 @@ const AnimePage = () => {
         description="Continue to NowAnime for anime streaming."
         noindex
       />
+      <ResponsiveScriptAd className="border-b border-border/40 bg-background" />
       <main className="grid min-h-[70vh] place-items-center px-5 py-24">
         <div className="w-full max-w-sm rounded-md border border-border bg-card p-6 text-center shadow-2xl">
           <img src="/logo-compact.png" alt="MovieNoir" className="mx-auto h-12 w-12" />

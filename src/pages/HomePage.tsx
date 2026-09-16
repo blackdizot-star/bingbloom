@@ -6,6 +6,7 @@ import TmdbContinueRow from "@/components/TmdbContinueRow";
 import LiveTvRow from "@/components/LiveTvRow";
 import CategoryChips from "@/components/CategoryChips";
 import InlineAdRow from "@/components/InlineAdRow";
+import ResponsiveScriptAd from "@/components/ResponsiveScriptAd";
 import {
   useTrendingMovies,
   useTrendingTv,
@@ -67,6 +68,8 @@ const HomePage = () => {
           ],
         }}
       />
+
+      <ResponsiveScriptAd className="border-b border-border/40 bg-background" />
 
       <TmdbHero item={heroItem} type="movie" isLoading={trendingMovies.isLoading} />
 

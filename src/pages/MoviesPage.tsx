@@ -2,6 +2,7 @@ import AppLayout from "@/components/AppLayout";
 import SEO from "@/components/SEO";
 import TmdbRow from "@/components/TmdbRow";
 import InlineAdRow from "@/components/InlineAdRow";
+import ResponsiveScriptAd from "@/components/ResponsiveScriptAd";
 import {
   useTrendingMovies,
   usePopularMovies,
@@ -43,6 +44,7 @@ const MoviesPage = () => {
           url: "https://bingbloom.lovable.app/movies",
         }}
       />
+      <ResponsiveScriptAd className="border-b border-border/40 bg-background" />
       <div className="px-[4%] pt-6 pb-4">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">Movies</h1>
         <p className="text-sm text-muted-foreground mt-1">Discover trending, top-rated and upcoming films</p>

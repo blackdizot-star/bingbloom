@@ -30,7 +30,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   }, [index, slides.length]);
 
   if (isLoading || slides.length === 0) {
-    return <div className="relative w-full h-[68vh] min-h-[520px] md:h-[82vh] bg-card animate-pulse" />;
+    return <div className="relative h-[390px] w-full bg-card animate-pulse sm:h-[460px] md:h-[82vh] md:min-h-[650px]" />;
   }
 
   const item = slides[index];
@@ -40,7 +40,7 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
   const showButtons = phase === "buttons";
 
   return (
-    <div className="relative w-full h-[68vh] min-h-[520px] md:h-[82vh] md:min-h-[650px] overflow-hidden">
+    <div className="relative h-[390px] w-full overflow-hidden sm:h-[460px] md:h-[82vh] md:min-h-[650px]">
       <img
         key={item.id}
         src={backdrop}
@@ -55,14 +55,14 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/55 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
 
-      <div className={`absolute bottom-12 md:bottom-24 left-0 right-0 px-[5%] max-w-4xl transition-opacity duration-500 ${phase === "out" ? "opacity-0" : "opacity-100"}`}>
-        <span className="inline-flex border border-border bg-card/60 px-3 py-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.25em] text-foreground backdrop-blur-xl">
+      <div className={`absolute bottom-9 md:bottom-24 left-0 right-0 px-[5%] max-w-4xl transition-opacity duration-500 ${phase === "out" ? "opacity-0" : "opacity-100"}`}>
+        <span className="inline-flex border border-border bg-card/60 px-2 py-0.5 text-[7px] md:px-3 md:py-1 md:text-[10px] font-semibold uppercase tracking-[0.25em] text-foreground backdrop-blur-xl">
           Featured premiere · #{index + 1}
         </span>
-        <h1 key={`t-${item.id}`} className="mt-4 font-display text-5xl sm:text-6xl md:text-8xl text-foreground leading-[0.9] drop-shadow-2xl animate-fade-in">
+        <h1 key={`t-${item.id}`} className="mt-2 font-display text-3xl sm:text-4xl md:mt-4 md:text-8xl text-foreground leading-[0.95] drop-shadow-2xl animate-fade-in">
           {item.title}
         </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] md:text-sm text-foreground/90">
+        <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[8px] md:mt-2 md:gap-1.5 md:text-sm text-foreground/90">
           {item.vote_average > 0 && (
             <span className="inline-flex items-center gap-1 rounded-sm bg-surface-2 px-2 py-0.5 font-semibold">
               <Star className="w-3 h-3 text-primary fill-primary" /> {item.vote_average.toFixed(1)}
@@ -81,13 +81,13 @@ const TmdbHero = ({ isLoading }: TmdbHeroProps) => {
         >
           <Link
             to={`/watch/movie/${item.id}`}
-            className="inline-flex items-center gap-2 rounded-sm bg-foreground px-6 md:px-9 py-3 text-xs md:text-sm font-bold text-background transition hover:opacity-90 active:scale-[0.98]"
+            className="inline-flex h-9 items-center gap-1.5 rounded-sm bg-foreground px-4 text-[10px] font-bold text-background transition hover:opacity-90 active:scale-[0.98] md:h-auto md:gap-2 md:px-9 md:py-3 md:text-sm"
           >
             <Play className="w-4 h-4 fill-current" /> Watch now
           </Link>
           <Link
             to={`/movie/${item.id}`}
-            className="inline-flex items-center gap-2 rounded-sm border border-border bg-card/70 px-6 md:px-9 py-3 text-xs md:text-sm font-semibold text-foreground backdrop-blur-md transition hover:bg-secondary"
+            className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-border bg-card/70 px-4 text-[10px] font-semibold text-foreground backdrop-blur-md transition hover:bg-secondary md:h-auto md:gap-2 md:px-9 md:py-3 md:text-sm"
           >
             <Info className="w-4 h-4" /> More info
           </Link>
